@@ -20,8 +20,8 @@ export const CodexStudio: React.FC = () => {
   const [activeTab, setActiveTab] = useState<StudioTab>('player');
 
   // Selectors State
-  const [playerForm, setPlayerForm] = useState<number>(1);
-  const [playerRarity, setPlayerRarity] = useState<number>(1);
+  const [playerForm, setPlayerForm] = useState<number>(12); // Defaults to Flower to inspect immediately
+  const [playerRarity, setPlayerRarity] = useState<number>(12); // Defaults to Mythic
 
   const [enemyForm, setEnemyForm] = useState<number>(1);
   const [enemyRarity, setEnemyRarity] = useState<number>(1);
@@ -118,6 +118,7 @@ export const CodexStudio: React.FC = () => {
   // Helper data getters
   const selectedPlayerForm = FORMS_DATA[playerForm - 1]!;
   const selectedPlayerRarity = RARITIES_DATA[playerRarity - 1]!;
+  const playerCombinedMult = selectedPlayerForm.multiplier * selectedPlayerRarity.multiplier;
 
   const selectedEnemyForm = FORMS_DATA[enemyForm - 1]!;
   const selectedEnemyRarity = RARITIES_DATA[enemyRarity - 1]!;
@@ -169,7 +170,7 @@ export const CodexStudio: React.FC = () => {
             }`}
           >
             <Skull className="w-4 h-4" />
-            <span>Inimigos</span>
+            <span>Inimigos (Fixos)</span>
           </button>
 
           <button
@@ -235,13 +236,13 @@ export const CodexStudio: React.FC = () => {
               className="w-full h-full object-contain"
             />
             <div className="absolute top-3 left-4 font-mono text-[10px] px-2.5 py-1 rounded bg-black/75 border border-white/10 text-slate-300 backdrop-blur-sm">
-              RENDER 16:9 // 60 FPS VETORIAL
+              RENDER 16:9 // CONTORNO PRECISO // 60 FPS
             </div>
           </div>
 
           {/* Quick Download Button */}
           <div className="mt-4 flex items-center justify-between font-mono text-xs text-slate-400">
-            <span>Resolução oficial de exportação: 1920 × 1080 PNG</span>
+            <span>Render vetorial nítido oficial em 1920 × 1080 PNG</span>
             <button
               onClick={handleDownload}
               className="px-4 py-2 rounded-xl bg-cyber-darker hover:bg-cyber-cardBorder text-cyber-cyan border border-cyber-cyan/40 hover:border-cyber-cyan flex items-center gap-2 transition-all"
@@ -255,7 +256,7 @@ export const CodexStudio: React.FC = () => {
         {/* Right: Selectors & Full Explanatory Legend (5 Cols) */}
         <div className="lg:col-span-5 bg-cyber-darker rounded-2xl p-6 border border-cyber-cardBorder flex flex-col justify-between">
           
-          {/* TAB 1: PLAYER (FORMA + RARIDADE) */}
+          {/* TAB 1: PLAYER (FORMA + RARIDADE COM BÔNUS REAIS) */}
           {activeTab === 'player' && (
             <div>
               <div className="mb-6 space-y-4">
@@ -278,7 +279,7 @@ export const CodexStudio: React.FC = () => {
 
                 <div>
                   <label className="block text-xs font-mono text-cyber-cyan font-bold uppercase mb-1.5">
-                    2. Escolha a Raridade ({RARITIES_DATA.length} Raridades):
+                    2. Escolha a Raridade do Casco ({RARITIES_DATA.length} Raridades):
                   </label>
                   <select
                     value={playerRarity}
@@ -294,14 +295,14 @@ export const CodexStudio: React.FC = () => {
                 </div>
               </div>
 
-              {/* Complete Explanatory Legend */}
+              {/* Complete Explanatory Legend with Real In-Game Bonuses */}
               <div className="pt-4 border-t border-cyber-cardBorder/60">
                 <div className="flex items-center justify-between mb-3">
                   <span
                     className="font-mono text-xs font-bold px-2.5 py-1 rounded"
                     style={{ backgroundColor: `${selectedPlayerRarity.color}22`, color: selectedPlayerRarity.color }}
                   >
-                    {selectedPlayerRarity.namePt.toUpperCase()} // MULTIPLIER {selectedPlayerRarity.multiplier}x
+                    {selectedPlayerRarity.namePt.toUpperCase()} // PODER TOTAL: {playerCombinedMult.toFixed(2)}x
                   </span>
                   <span className="font-mono text-xs text-slate-400">
                     Forma #{selectedPlayerForm.index} ({selectedPlayerForm.sides} Lados)
@@ -318,21 +319,33 @@ export const CodexStudio: React.FC = () => {
 
                 <div className="space-y-2 font-mono text-xs">
                   <div className="flex justify-between p-2 rounded bg-cyber-card border border-cyber-cardBorder/40">
-                    <span className="text-slate-400">Blindagem Efetiva:</span>
+                    <span className="text-slate-400">Multiplicador de Atributos:</span>
                     <span className="text-cyber-cyan font-bold">
-                      {Math.round(1000 * selectedPlayerForm.multiplier * selectedPlayerRarity.multiplier)} HP
+                      {playerCombinedMult.toFixed(2)}x Global
                     </span>
                   </div>
                   <div className="flex justify-between p-2 rounded bg-cyber-card border border-cyber-cardBorder/40">
-                    <span className="text-slate-400">Potência da Chama de Plasma:</span>
-                    <span className="font-bold" style={{ color: selectedPlayerRarity.flameColor }}>
-                      {Math.round(400 * selectedPlayerRarity.multiplier)} kN (Escape Traseiro)
+                    <span className="text-slate-400">Bônus de Estrutura Máxima (HP):</span>
+                    <span className="text-emerald-400 font-bold">
+                      +{Math.round((playerCombinedMult - 1) * 100)}% de Vida
                     </span>
                   </div>
                   <div className="flex justify-between p-2 rounded bg-cyber-card border border-cyber-cardBorder/40">
-                    <span className="text-slate-400">Fragmentos Orbitais:</span>
-                    <span className="text-white font-bold">
-                      {selectedPlayerRarity.index} Orbes de Ressonância
+                    <span className="text-slate-400">Bônus de Dano de Todas as Armas:</span>
+                    <span className="text-cyber-neonAmber font-bold">
+                      +{Math.round((playerCombinedMult - 1) * 100)}% de Dano
+                    </span>
+                  </div>
+                  <div className="flex justify-between p-2 rounded bg-cyber-card border border-cyber-cardBorder/40">
+                    <span className="text-slate-400">Bônus de Eficiência de Escudo:</span>
+                    <span className="text-purple-300 font-bold">
+                      +{Math.round((playerCombinedMult - 1) * 60)}% Absorção
+                    </span>
+                  </div>
+                  <div className="flex justify-between p-2 rounded bg-cyber-card border border-cyber-cardBorder/40">
+                    <span className="text-slate-400">Multiplicador de Pontuação (Score):</span>
+                    <span className="text-cyber-neonPink font-bold">
+                      {selectedPlayerRarity.multiplier.toFixed(2)}x Pontos
                     </span>
                   </div>
                 </div>
@@ -340,7 +353,7 @@ export const CodexStudio: React.FC = () => {
             </div>
           )}
 
-          {/* TAB 2: INIMIGO (FORMA + RARIDADE) */}
+          {/* TAB 2: INIMIGO (FORMA + RARIDADE - FIXO, SEM GIRAR) */}
           {activeTab === 'enemy' && (
             <div>
               <div className="mb-6 space-y-4">
@@ -385,7 +398,7 @@ export const CodexStudio: React.FC = () => {
                   className="font-mono text-xs font-bold px-2.5 py-1 rounded inline-block mb-2"
                   style={{ backgroundColor: `${selectedEnemyRarity.color}22`, color: selectedEnemyRarity.color }}
                 >
-                  AMEAÇA {selectedEnemyRarity.namePt.toUpperCase()} // SENSOR EM CRUZ
+                  AMEAÇA {selectedEnemyRarity.namePt.toUpperCase()} // ORIENTAÇÃO FIXA
                 </span>
 
                 <h4 className="font-orbitron font-bold text-xl text-white mb-2">
@@ -393,24 +406,24 @@ export const CodexStudio: React.FC = () => {
                 </h4>
 
                 <p className="font-outfit text-xs text-slate-300 leading-relaxed mb-4">
-                  Inimigo autônomo com sensor central de mira em cruz laser. Movimenta-se em patrulha senoidal sobre as plataformas e dispara salvas direcionadas ao chassi do jogador.
+                  Inimigo autônomo com sensor central de mira em cruz laser. Movimenta-se em patrulha senoidal sobre as plataformas com orientação frontal fixa e dispara salvas direcionadas ao chassi do jogador.
                 </p>
 
                 <div className="space-y-2 font-mono text-xs">
                   <div className="flex justify-between p-2 rounded bg-cyber-card border border-cyber-cardBorder/40">
                     <span className="text-slate-400">Vida Base:</span>
                     <span className="text-cyber-neonPink font-bold">
-                      {Math.round(250 * selectedEnemyForm.multiplier * selectedEnemyRarity.multiplier)} HP
+                      {Math.round(25 * selectedEnemyForm.multiplier * selectedEnemyRarity.multiplier)} HP
                     </span>
                   </div>
                   <div className="flex justify-between p-2 rounded bg-cyber-card border border-cyber-cardBorder/40">
                     <span className="text-slate-400">Dano de Contato:</span>
                     <span className="text-white font-bold">
-                      {Math.round(45 * selectedEnemyRarity.multiplier)} Dano Cinético
+                      {Math.round(15 * selectedEnemyRarity.multiplier)} Dano Cinético
                     </span>
                   </div>
                   <div className="flex justify-between p-2 rounded bg-cyber-card border border-cyber-cardBorder/40">
-                    <span className="text-slate-400">Recompensa ao Abater:</span>
+                    <span className="text-slate-400">Drop de Fragmentos ao Abater:</span>
                     <span className="text-cyber-neonAmber font-bold">
                       +{Math.round(50 * selectedEnemyRarity.multiplier)} Evolution Points
                     </span>
@@ -420,7 +433,7 @@ export const CodexStudio: React.FC = () => {
             </div>
           )}
 
-          {/* TAB 3: BOSS DE ONDA (FORMA + RARIDADE) */}
+          {/* TAB 3: BOSS DE ONDA */}
           {activeTab === 'wave_boss' && (
             <div>
               <div className="mb-6 space-y-4">
@@ -480,7 +493,7 @@ export const CodexStudio: React.FC = () => {
                   <div className="flex justify-between p-2 rounded bg-cyber-card border border-cyber-cardBorder/40">
                     <span className="text-slate-400">Vida do Chefe:</span>
                     <span className="text-cyber-neonAmber font-bold">
-                      {Math.round(8000 * selectedWaveBossForm.multiplier * selectedWaveBossRarity.multiplier)} HP
+                      {Math.round(4500 * selectedWaveBossForm.multiplier * selectedWaveBossRarity.multiplier)} HP
                     </span>
                   </div>
                   <div className="flex justify-between p-2 rounded bg-cyber-card border border-cyber-cardBorder/40">
@@ -496,7 +509,7 @@ export const CodexStudio: React.FC = () => {
             </div>
           )}
 
-          {/* TAB 4: BOSS DE ARENA (12 SUPER BOSSES + RARIDADE) */}
+          {/* TAB 4: BOSS DE ARENA */}
           {activeTab === 'arena_boss' && (
             <div>
               <div className="mb-6 space-y-4">
@@ -564,14 +577,14 @@ export const CodexStudio: React.FC = () => {
                   </div>
                   <div className="flex justify-between p-2 rounded bg-cyber-card border border-cyber-cardBorder/40">
                     <span className="text-slate-400">Padrão de Ataque:</span>
-                    <span className="text-white font-bold">Hexágono Laser + 6 Satélites</span>
+                    <span className="text-white font-bold">Hexágono Laser + Satélites</span>
                   </div>
                 </div>
               </div>
             </div>
           )}
 
-          {/* TAB 5: DRONE (16 DRONES DA FORJA SUPREMA) */}
+          {/* TAB 5: DRONE */}
           {activeTab === 'drone' && (
             <div>
               <div className="mb-6">
