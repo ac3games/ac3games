@@ -1,18 +1,136 @@
 /**
  * AC3games Procedural Vector Render Engine
- * Directly ported from Geometry Platforms source code:
- * - GeometryGenerator.ts: exact outer chassis contour with ZERO internal crossing lines
- * - RenderSystem.ts: stern plasma flame, enemy crosshair sensors, boss armor plates
- * - hq-scene.ts: 16 drones from Forja de Armas Supremas
+ * Directly copied from Geometry Platforms:
+ * - catalog-scene.ts: lines 4359-4529 (drawVectorShape) & lines 474-510 (formsData)
+ * - GeometryGenerator.ts: pure outer lobed contours
  */
 
-export interface FormInfo {
-  index: number;
+export interface CatalogFormData {
+  key: string;
   name: string;
   sides: number;
-  multiplier: number;
-  desc: string;
+  mult: number;
+  isSpecial?: boolean;
+  specialType?: 'star' | 'flower';
+  bonus: string;
+  behavior: string;
+  lore: string;
 }
+
+export const CATALOG_FORMS: CatalogFormData[] = [
+  {
+    key: 'triangle',
+    name: 'TRIÂNGULO',
+    sides: 3,
+    mult: 1.0,
+    bonus: '+5% Velocidade & Aceleração da Nave',
+    behavior: 'Corredor: Avança horizontalmente em direção ao jogador e troca de pista rapidamente.',
+    lore: 'A estrutura geométrica mais básica. Leve, ágil, porém altamente instável em níveis subatômicos.'
+  },
+  {
+    key: 'square',
+    name: 'QUADRADO',
+    sides: 4,
+    mult: 1.2,
+    bonus: '+15% HP Máximo (Blindagem Pesada da Estrutura)',
+    behavior: 'Tanque: HP elevadíssimo, movimento lento, atua como absorvedor de projéteis.',
+    lore: 'Um constructo robusto de quatro lados projetado para reforço estrutural e escudo balístico pesado.'
+  },
+  {
+    key: 'pentagon',
+    name: 'PENTÁGONO',
+    sides: 5,
+    mult: 1.4,
+    bonus: '+10% Dano de Projéteis e Módulos',
+    behavior: 'Atirador de Distância: Move-se horizontalmente mantendo distância e dispara projéteis.',
+    lore: 'Configurado para concentração localizada de energia, permitindo descargas em alta frequência.'
+  },
+  {
+    key: 'hexagon',
+    name: 'HEXÁGONO',
+    sides: 6,
+    mult: 1.6,
+    bonus: '+5% Cadência de Tiro Primária',
+    behavior: 'Divisor: Perseguidor médio. Divide-se em 2 pequenos hexágonos ao ser destruído.',
+    lore: 'Uma matriz hexagonal avançada que cinde sua estrutura celular ao sofrer dano cinético terminal.'
+  },
+  {
+    key: 'heptagon',
+    name: 'HEPTÁGONO',
+    sides: 7,
+    mult: 1.9,
+    bonus: '+8% Dano de Módulos Táticos Ativos',
+    behavior: 'Investidor: Carrega periodicamente em arrancadas de alta velocidade direto contra o jogador.',
+    lore: 'Um polígono primo assimétrico que utiliza liberação de inércia para investir abruptamente.'
+  },
+  {
+    key: 'octagon',
+    name: 'OCTÓGONO',
+    sides: 8,
+    mult: 2.2,
+    bonus: '+15% Resistência a Colisão Física',
+    behavior: 'Kamikaze Explosivo: Investe contra o jogador; explode ao contato ou morte (dano em área).',
+    lore: 'Um elemento pesado altamente instável que detona uma explosão termodinâmica ao ser violado.'
+  },
+  {
+    key: 'trefoil',
+    name: 'TRIFÓLIO',
+    sides: 9,
+    mult: 2.6,
+    bonus: '+10% Redução de Recarga Ativa',
+    behavior: 'Teleportador: IA perseguidora. Teleporta horizontalmente ao ser alvejado por tiros.',
+    lore: 'Capaz de alterar coordenadas dimensionais, saltando no espaço ao ser mirado.'
+  },
+  {
+    key: '4-star',
+    name: 'ESTRELA 4P',
+    sides: 10,
+    mult: 3.0,
+    bonus: '+10% Regeneração da Estrutura',
+    behavior: 'Sifonador de Nanites: Drena energia ao tocar a nave e regenera estruturas de outros constructos.',
+    lore: 'Um constructo parasitário com nanites de sifão que desconstroem matéria do alvo para alimentar aliados próximos.'
+  },
+  {
+    key: '5-star',
+    name: 'ESTRELA 5P',
+    sides: 11,
+    mult: 3.5,
+    bonus: '+5% Ganho de Experiência na Partida',
+    behavior: 'Atirador Congelante: Dispara estilhaços de subzero que reduzem a velocidade da nave em 50%.',
+    lore: 'Utiliza campos de subzero para projetar estilhaços gélidos, podando a mobilidade do piloto.'
+  },
+  {
+    key: '6-star',
+    name: 'ESTRELA 6P',
+    sides: 12,
+    mult: 4.0,
+    bonus: '+10% Recuperação de Energia Quântica (EN)',
+    behavior: 'Protetor: Emite campo gravitacional que desacelera a velocidade da nave em 40%.',
+    lore: 'Emite um campo de distorção microgravitacional que impõe arrasto cinético aos arredores.'
+  },
+  {
+    key: 'quatrefoil',
+    name: 'QUATREFÓLIO',
+    sides: 10,
+    mult: 5.0,
+    isSpecial: true,
+    specialType: 'star',
+    bonus: '+15% Taxa de Drop de Moedas & Créditos',
+    behavior: 'Invocador: IA perseguidora. Invoca periodicamente sub-entidades Triângulos.',
+    lore: 'Um constructo estelar celestial que manifesta subentidades geométricas menores.'
+  },
+  {
+    key: 'flower',
+    name: 'FLOR (SUPER BOSS)',
+    sides: 12,
+    mult: 6.0,
+    isSpecial: true,
+    specialType: 'flower',
+    bonus: '+20% Escudo de Força Passivo',
+    behavior: 'Boss Épico (Wave & Arena): Possui Escudo Ciano (Barra Branca sobre HP), Estado de Fúria com Núcleo Vermelho Pulsante, Disparos Espirais/Anéis Radiais e combate em 2 Fases.',
+    lore: 'Super Entidade Geométrica Suprema. Em Bosses de Wave normais, possui barra de integridade sobre a cabeça e 10s para entrar em Fúria. Em Bosses Épicos de Arena (Wave 5, 70, 135...), utiliza a Barra do HUD Superior, escudo defensivo branco/ciano, padrões balísticos de alta velocidade e concede 1 Relíquia de Arena Exclusiva ao ser derrotado.'
+  }
+];
 
 export interface RarityInfo {
   index: number;
@@ -23,21 +141,6 @@ export interface RarityInfo {
   multiplier: number;
   flameColor: string;
 }
-
-export const FORMS_DATA: FormInfo[] = [
-  { index: 1, name: 'Triângulo (Triangle)', sides: 3, multiplier: 1.0, desc: 'Chassi primário com 3 vértices balanceados para velocidade e penetração linear.' },
-  { index: 2, name: 'Quadrado (Square)', sides: 4, multiplier: 1.1, desc: 'Casco angular com estabilizadores quadráticos de alta blindagem balística.' },
-  { index: 3, name: 'Pentágono (Pentagon)', sides: 5, multiplier: 1.2, desc: 'Geometria pentagonal com distribuição harmônica de energia e escudos.' },
-  { index: 4, name: 'Hexágono (Hexagon)', sides: 6, multiplier: 1.3, desc: 'Configuração colmeia ultra-resistente contra impactos gravitacionais.' },
-  { index: 5, name: 'Heptágono (Heptagon)', sides: 7, multiplier: 1.4, desc: 'Perfil assimétrico de 7 faces com capacitores de deflexão de plasma.' },
-  { index: 6, name: 'Octógono (Octagon)', sides: 8, multiplier: 1.5, desc: 'Fortaleza octogonal compacta para combates em corredores estreitos.' },
-  { index: 7, name: 'Trevo (Trefoil)', sides: 9, multiplier: 1.6, desc: 'Curvatura tri-lobular bio-sintética com vórtice central de energia.' },
-  { index: 8, name: 'Estrela-4 (4-Star)', sides: 10, multiplier: 1.7, desc: 'Estrutura estelar com 4 pontas colimadoras de feixes concentrados.' },
-  { index: 9, name: 'Estrela-5 (5-Star)', sides: 11, multiplier: 1.8, desc: 'Chassi bélico de 5 pontas cortantes com aceleração iônica tripla.' },
-  { index: 10, name: 'Estrela-6 (6-Star)', sides: 12, multiplier: 1.9, desc: 'Simetria hexagonal estelar estendida de suprema precisão tática.' },
-  { index: 11, name: 'Quatrefoil (4-Lóbulos)', sides: 11, multiplier: 2.1, desc: 'Orbe quad-lobular sagrada com ressonância magnética de longo alcance.' },
-  { index: 12, name: 'Flor Primordial (Flower)', sides: 12, multiplier: 2.3, desc: 'Apotheosis floral primordial com 8 pétalas bio-geométricas regenerativas.' }
-];
 
 export const RARITIES_DATA: RarityInfo[] = [
   { index: 1, name: 'Common', namePt: 'Comum', color: '#ffffff', hex: 0xffffff, multiplier: 1.0, flameColor: '#ff0055' },
@@ -133,118 +236,184 @@ export const ARENA_BOSSES_DATA = [
 ];
 
 /**
- * Direct Geometric generator from GeometryGenerator.ts
- * Generates pure closed perimeter contour with ZERO internal crossing lines.
+ * Direct port of catalog-scene.ts:drawVectorShape (lines 4359-4529)
+ * Used to render in-game bestiary enemies, complete with central hostile target reticle core!
  */
-function generateLobedContour(
-  count: number,
-  rOuter: number,
-  distRatio: number,
-  lobeRatio: number,
-  stepsPerLobe: number = 24
-): { x: number; y: number }[] {
-  const points: { x: number; y: number }[] = [];
-  const dist = rOuter * distRatio;
-  const lobeR = rOuter * lobeRatio;
-  const alpha = Math.PI / count;
+export function drawInGameCatalogShape(
+  ctx: CanvasRenderingContext2D,
+  cx: number,
+  cy: number,
+  r: number,
+  form: CatalogFormData,
+  color: string = '#00f0ff',
+  isPlayer: boolean = false
+) {
+  const sides = form.sides;
+  const isSpecial = form.isSpecial;
+  const specialType = form.specialType;
 
-  const D = 2 * dist * Math.sin(alpha);
-  const h = Math.sqrt(Math.max(0, lobeR * lobeR - (D / 2) * (D / 2)));
-  const c0x = dist, c0y = 0;
-  const c1x = dist * Math.cos(2 * alpha), c1y = dist * Math.sin(2 * alpha);
-  const midX = (c0x + c1x) / 2;
-  const midY = (c0y + c1y) / 2;
-  const rMid = Math.sqrt(midX * midX + midY * midY);
-  const pOuterX = midX + (midX / rMid) * h;
-  const pOuterY = midY + (midY / rMid) * h;
+  const isFlower = isSpecial && specialType === 'flower';
+  const isTrefoil = !isSpecial && sides === 9;
+  const is4Star = !isSpecial && sides === 10;
+  const is5Star = !isSpecial && sides === 11;
+  const is6Star = !isSpecial && sides === 12;
+  const isQuatrefoil = isSpecial && specialType === 'star';
 
-  // Outer valley angle relative to the lobe center (pure outer contour, ZERO internal crossing lines)
-  const span = Math.atan2(pOuterY - c0y, pOuterX - c0x);
+  // Helper: draw continuous lobed shape (Trefoil, Quatrefoil, Pure Flower without internal lines)
+  const drawContinuousLobedShape = (count: number, distRatio: number, lobeRatio: number) => {
+    const dist = r * distRatio;
+    const lobeR = r * lobeRatio;
+    const d = 2 * dist * Math.sin(Math.PI / count);
+    const halfAngle = Math.acos((d / 2) / lobeR);
+    const span = halfAngle + (Math.PI / 2 - Math.PI / count);
+    const stepsPerLobe = 24;
 
-  for (let i = 0; i < count; i++) {
-    const a = (i * 2 * Math.PI) / count - Math.PI / 2;
-    const lx = dist * Math.cos(a);
-    const ly = dist * Math.sin(a);
+    ctx.beginPath();
+    for (let i = 0; i < count; i++) {
+      const a = (i * 2 * Math.PI) / count - Math.PI / 2;
+      const lx = cx + dist * Math.cos(a);
+      const ly = cy + dist * Math.sin(a);
 
-    for (let s = 0; s <= stepsPerLobe; s++) {
-      const frac = s / stepsPerLobe;
-      const phi = -span + 2 * span * frac;
-      points.push({
-        x: lx + lobeR * Math.cos(a + phi),
-        y: ly + lobeR * Math.sin(a + phi)
-      });
+      for (let s = 0; s <= stepsPerLobe; s++) {
+        const frac = s / stepsPerLobe;
+        const phi = -span + 2 * span * frac;
+        const px = lx + lobeR * Math.cos(a + phi);
+        const py = ly + lobeR * Math.sin(a + phi);
+        if (i === 0 && s === 0) {
+          ctx.moveTo(px, py);
+        } else {
+          ctx.lineTo(px, py);
+        }
+      }
     }
-  }
-  return points;
-}
+    ctx.closePath();
+  };
 
-/**
- * Returns clean 2D outer contour points for any form index (1-12)
- */
-export function getFormContourPoints(formIndex: number, radius: number): { x: number; y: number }[] {
-  const pts: { x: number; y: number }[] = [];
+  // Helper: draw clean polygon with exact side count
+  const drawPolygonPath = (numSides: number) => {
+    ctx.beginPath();
+    for (let i = 0; i < numSides; i++) {
+      const angle = (i * 2 * Math.PI) / numSides - Math.PI / 2;
+      const px = cx + r * Math.cos(angle);
+      const py = cy + r * Math.sin(angle);
+      if (i === 0) ctx.moveTo(px, py);
+      else ctx.lineTo(px, py);
+    }
+    ctx.closePath();
+  };
 
-  if (formIndex === 1) {
-    // Equilateral Triangle (flat base, point pointing up)
-    const r = radius;
-    const side = Math.sqrt(3) * r;
-    const h = (Math.sqrt(3) / 2) * side;
-    pts.push(
-      { x: 0, y: -h / 2 },
-      { x: side / 2, y: h / 2 },
-      { x: -side / 2, y: h / 2 }
-    );
-  } else if (formIndex >= 2 && formIndex <= 6) {
-    // Regular Polygons 4 to 8 with flat bottom
-    const sides = formIndex + 2;
+  // Helper: draw sharp star with N points
+  const drawStarPath = (pts: number, innerRatio: number) => {
+    ctx.beginPath();
+    for (let i = 0; i < pts * 2; i++) {
+      const angle = (i * Math.PI) / pts - Math.PI / 2;
+      const rad = i % 2 === 0 ? r : r * innerRatio;
+      const px = cx + rad * Math.cos(angle);
+      const py = cy + rad * Math.sin(angle);
+      if (i === 0) ctx.moveTo(px, py);
+      else ctx.lineTo(px, py);
+    }
+    ctx.closePath();
+  };
+
+  const executeShapePath = () => {
+    if (isFlower) {
+      drawContinuousLobedShape(8, 0.60, 0.35);
+    } else if (isTrefoil) {
+      drawContinuousLobedShape(3, 0.44, 0.50);
+    } else if (isQuatrefoil) {
+      drawContinuousLobedShape(4, 0.50, 0.44);
+    } else if (is4Star) {
+      drawStarPath(4, 0.38);
+    } else if (is5Star) {
+      drawStarPath(5, 0.44);
+    } else if (is6Star) {
+      drawStarPath(6, 0.52);
+    } else {
+      drawPolygonPath(sides);
+    }
+  };
+
+  // 1. Subtle Outer Glow
+  ctx.strokeStyle = `${color}40`;
+  ctx.lineWidth = 4.0;
+  executeShapePath();
+  ctx.stroke();
+
+  // 2. Crisp Solid Hull Fill (Dark Navy high-contrast)
+  ctx.fillStyle = '#060614';
+  executeShapePath();
+  ctx.fill();
+
+  // 3. Crisp Core Outline (thickness = 2.0px)
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 2.0;
+  executeShapePath();
+  ctx.stroke();
+
+  // 4. Internal Bevel Facet Lines (only for regular polygons 3 to 8, as in catalog-scene.ts lines 4494-4499)
+  if (!isPlayer && !isFlower && !isTrefoil && !isQuatrefoil && !is4Star && !is5Star && !is6Star) {
+    ctx.strokeStyle = `${color}40`;
+    ctx.lineWidth = 1.0;
     for (let i = 0; i < sides; i++) {
-      const angle = (2 * Math.PI * i) / sides + Math.PI / 2 - Math.PI / sides;
-      pts.push({
-        x: radius * Math.cos(angle),
-        y: radius * Math.sin(angle)
-      });
+      const angle = (i * 2 * Math.PI) / sides - Math.PI / 2;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(cx + r * Math.cos(angle), cy + r * Math.sin(angle));
+      ctx.stroke();
     }
-  } else if (formIndex === 7) {
-    // Trefoil (3 lobes outer contour)
-    return generateLobedContour(3, radius, 0.44, 0.50, 24);
-  } else if (formIndex === 8) {
-    // 4-Star
-    for (let i = 0; i < 8; i++) {
-      const angle = (Math.PI * i) / 4 - Math.PI / 2;
-      const r = i % 2 === 0 ? radius : radius * 0.42;
-      pts.push({ x: r * Math.cos(angle), y: r * Math.sin(angle) });
-    }
-  } else if (formIndex === 9) {
-    // 5-Star
-    for (let i = 0; i < 10; i++) {
-      const angle = (Math.PI * i) / 5 - Math.PI / 2;
-      const r = i % 2 === 0 ? radius : radius * 0.45;
-      pts.push({ x: r * Math.cos(angle), y: r * Math.sin(angle) });
-    }
-  } else if (formIndex === 10) {
-    // 6-Star
-    for (let i = 0; i < 12; i++) {
-      const angle = (Math.PI * i) / 6 - Math.PI / 2;
-      const r = i % 2 === 0 ? radius : radius * 0.50;
-      pts.push({ x: r * Math.cos(angle), y: r * Math.sin(angle) });
-    }
-  } else if (formIndex === 11) {
-    // Quatrefoil (4 lobes outer contour)
-    return generateLobedContour(4, radius, 0.50, 0.44, 24);
-  } else if (formIndex === 12) {
-    // Flower (8 petals outer contour with zero internal lines)
-    return generateLobedContour(8, radius, 0.60, 0.35, 18);
   }
 
-  return pts;
+  // 5. Central Hostile Target Reticle Core (for Enemies/Bestiary, exactly as catalog-scene.ts lines 4512-4529)
+  if (!isPlayer) {
+    const coreR = r * 0.32;
+
+    // Dark circle base
+    ctx.fillStyle = '#06060c';
+    ctx.beginPath();
+    ctx.arc(cx, cy, coreR, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Reticle cyan circle
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    ctx.arc(cx, cy, coreR, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Pupil
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(cx, cy, coreR * 0.45, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Pure white center dot
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(cx, cy, coreR * 0.22, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 4 Crosshair lines extending across the circle
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.moveTo(cx - coreR * 1.35, cy);
+    ctx.lineTo(cx - coreR * 0.45, cy);
+    ctx.moveTo(cx + coreR * 0.45, cy);
+    ctx.lineTo(cx + coreR * 1.35, cy);
+    ctx.moveTo(cx, cy - coreR * 1.35);
+    ctx.lineTo(cx, cy - coreR * 0.45);
+    ctx.moveTo(cx, cy + coreR * 0.45);
+    ctx.lineTo(cx, cy + coreR * 1.35);
+    ctx.stroke();
+  }
 }
 
+// Export alias for compatibility
+export const FORMS_DATA = CATALOG_FORMS;
+
 /**
- * 1. PLAYER COMBINATION RENDERER
- * - Pure outer contour (NO internal lines!)
- * - NO floating dots/shards around the shape!
- * - Thin, crisp lines (2.0px)
- * - Plasma thruster flame at the stern
+ * 1. PLAYER RENDERER (Clean Hull + Stern Plasma Flame, ZERO internal lines)
  */
 export function renderStudioPlayer(
   ctx: CanvasRenderingContext2D,
@@ -257,16 +426,17 @@ export function renderStudioPlayer(
   ctx.save();
   ctx.clearRect(0, 0, width, height);
 
-  ctx.fillStyle = '#04020c';
+  ctx.fillStyle = '#060312';
   ctx.fillRect(0, 0, width, height);
 
   const cx = width / 2;
   const cy = height / 2;
   const s = Math.min(width, height) / 100;
+  const form = CATALOG_FORMS[formIdx - 1] || CATALOG_FORMS[0]!;
   const rarity = RARITIES_DATA[rarityIdx - 1] || RARITIES_DATA[0]!;
-  const radius = 28 * s;
+  const radius = 32 * s;
 
-  // 1. Stern Plasma Thruster Flame (behind the hull)
+  // Stern Plasma Flame
   const flameLen = (14 + Math.sin(time * 16) * 4) * s;
   const flameY = cy + radius * 0.65;
   ctx.fillStyle = rarity.flameColor;
@@ -285,35 +455,14 @@ export function renderStudioPlayer(
   ctx.closePath();
   ctx.fill();
 
-  // 2. Pure Closed Chassis Contour (ZERO internal lines!)
-  const pts = getFormContourPoints(formIdx, radius);
-  if (pts.length > 0) {
-    ctx.beginPath();
-    ctx.moveTo(cx + pts[0]!.x, cy + pts[0]!.y);
-    for (let i = 1; i < pts.length; i++) {
-      ctx.lineTo(cx + pts[i]!.x, cy + pts[i]!.y);
-    }
-    ctx.closePath();
-
-    // Dark high-contrast solid hull fill
-    ctx.fillStyle = '#080d1a';
-    ctx.fill();
-
-    // Crisp, thin outline matching rarity color (thickness = 2.0px)
-    ctx.strokeStyle = rarity.color;
-    ctx.lineWidth = 2.0;
-    ctx.lineJoin = 'round';
-    ctx.stroke();
-  }
+  // Draw pure player shape (isPlayer = true -> no reticle, clean contour)
+  drawInGameCatalogShape(ctx, cx, cy, radius, form, rarity.color, true);
 
   ctx.restore();
 }
 
 /**
- * 2. ENEMY COMBINATION RENDERER
- * - FIXED orientation (NO rotation/spinning!)
- * - Pure outer contour with thin crisp lines
- * - Crosshair target sensor in center
+ * 2. ENEMY RENDERER (Copied 100% from in-game catalog-scene.ts)
  */
 export function renderStudioEnemy(
   ctx: CanvasRenderingContext2D,
@@ -326,61 +475,25 @@ export function renderStudioEnemy(
   ctx.save();
   ctx.clearRect(0, 0, width, height);
 
-  ctx.fillStyle = '#06020e';
+  // Background matching in-game card
+  ctx.fillStyle = '#060312';
   ctx.fillRect(0, 0, width, height);
 
   const cx = width / 2;
   const cy = height / 2;
   const s = Math.min(width, height) / 100;
+  const form = CATALOG_FORMS[formIdx - 1] || CATALOG_FORMS[0]!;
   const rarity = RARITIES_DATA[rarityIdx - 1] || RARITIES_DATA[0]!;
-  const radius = 26 * s;
+  const radius = 34 * s;
 
-  // Pure Closed Chassis Contour (Fixed, no rotation)
-  const pts = getFormContourPoints(formIdx, radius);
-  if (pts.length > 0) {
-    ctx.beginPath();
-    ctx.moveTo(cx + pts[0]!.x, cy + pts[0]!.y);
-    for (let i = 1; i < pts.length; i++) {
-      ctx.lineTo(cx + pts[i]!.x, cy + pts[i]!.y);
-    }
-    ctx.closePath();
-
-    ctx.fillStyle = '#1c0718';
-    ctx.fill();
-
-    ctx.strokeStyle = rarity.color;
-    ctx.lineWidth = 2.0;
-    ctx.lineJoin = 'round';
-    ctx.stroke();
-  }
-
-  // Crosshair Sensor (Enemy characteristic)
-  ctx.strokeStyle = '#ff0055';
-  ctx.lineWidth = 1.8;
-  ctx.beginPath();
-  ctx.arc(cx, cy, 7 * s, 0, Math.PI * 2);
-  ctx.stroke();
-
-  ctx.beginPath();
-  ctx.moveTo(cx - 11 * s, cy);
-  ctx.lineTo(cx + 11 * s, cy);
-  ctx.moveTo(cx, cy - 11 * s);
-  ctx.lineTo(cx, cy + 11 * s);
-  ctx.stroke();
-
-  ctx.fillStyle = '#ffffff';
-  ctx.beginPath();
-  ctx.arc(cx, cy, 2 * s, 0, Math.PI * 2);
-  ctx.fill();
+  // Draw enemy shape with target reticle core (fixed, no spinning)
+  drawInGameCatalogShape(ctx, cx, cy, radius, form, rarity.color, false);
 
   ctx.restore();
 }
 
 /**
- * 3. WAVE BOSS COMBINATION RENDERER
- * - Armor plates around outer contour
- * - Enrage spikes
- * - Crisp thin lines
+ * 3. WAVE BOSS RENDERER
  */
 export function renderStudioWaveBoss(
   ctx: CanvasRenderingContext2D,
@@ -399,11 +512,11 @@ export function renderStudioWaveBoss(
   const cx = width / 2;
   const cy = height / 2;
   const s = Math.min(width, height) / 100;
-  const form = FORMS_DATA[formIdx - 1] || FORMS_DATA[0]!;
+  const form = CATALOG_FORMS[formIdx - 1] || CATALOG_FORMS[0]!;
   const rarity = RARITIES_DATA[rarityIdx - 1] || RARITIES_DATA[0]!;
-  const radius = 28 * s;
+  const radius = 34 * s;
 
-  // Armor Plates (Fixed on perimeter)
+  // Armor Plates
   for (let p = 0; p < form.sides; p++) {
     const pa = (p * 2 * Math.PI) / form.sides - Math.PI / 2;
     const px = cx + Math.cos(pa) * (radius * 1.35);
@@ -415,7 +528,7 @@ export function renderStudioWaveBoss(
     ctx.strokeRect(px - 3.5 * s, py - 3.5 * s, 7 * s, 7 * s);
   }
 
-  // Enrage Spikes (Fixed radiating lines)
+  // Enrage Spikes
   ctx.strokeStyle = '#ff005577';
   ctx.lineWidth = 1.5;
   for (let sp = 0; sp < 12; sp++) {
@@ -427,38 +540,13 @@ export function renderStudioWaveBoss(
     ctx.stroke();
   }
 
-  // Pure Contour Hull
-  const pts = getFormContourPoints(formIdx, radius);
-  if (pts.length > 0) {
-    ctx.beginPath();
-    ctx.moveTo(cx + pts[0]!.x, cy + pts[0]!.y);
-    for (let i = 1; i < pts.length; i++) {
-      ctx.lineTo(cx + pts[i]!.x, cy + pts[i]!.y);
-    }
-    ctx.closePath();
-
-    ctx.fillStyle = '#2b0615';
-    ctx.fill();
-
-    ctx.strokeStyle = rarity.color;
-    ctx.lineWidth = 2.2;
-    ctx.stroke();
-  }
-
-  // Core Turret
-  ctx.fillStyle = '#ff0055';
-  ctx.beginPath();
-  ctx.arc(cx, cy, 7 * s, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.strokeStyle = '#ffffff';
-  ctx.lineWidth = 1.5;
-  ctx.stroke();
+  drawInGameCatalogShape(ctx, cx, cy, radius, form, rarity.color, false);
 
   ctx.restore();
 }
 
 /**
- * 4. ARENA BOSS COMBINATION RENDERER
+ * 4. ARENA BOSS RENDERER
  */
 export function renderStudioArenaBoss(
   ctx: CanvasRenderingContext2D,
@@ -479,9 +567,9 @@ export function renderStudioArenaBoss(
   const s = Math.min(width, height) / 100;
   const boss = ARENA_BOSSES_DATA[bossIdx - 1] || ARENA_BOSSES_DATA[0]!;
   const rarity = RARITIES_DATA[rarityIdx - 1] || RARITIES_DATA[0]!;
-  const radius = 30 * s;
+  const radius = 35 * s;
 
-  // Outer Hexagon
+  // Outer Hexagon Arena
   ctx.strokeStyle = `${boss.coreColor}33`;
   ctx.lineWidth = 1.5;
   ctx.beginPath();
@@ -495,43 +583,15 @@ export function renderStudioArenaBoss(
   ctx.closePath();
   ctx.stroke();
 
-  // Pure Contour Hull
-  const pts = getFormContourPoints(boss.sides === 11 ? 11 : (boss.sides === 12 ? 12 : boss.sides), radius);
-  if (pts.length > 0) {
-    ctx.beginPath();
-    ctx.moveTo(cx + pts[0]!.x, cy + pts[0]!.y);
-    for (let i = 1; i < pts.length; i++) {
-      ctx.lineTo(cx + pts[i]!.x, cy + pts[i]!.y);
-    }
-    ctx.closePath();
-
-    ctx.fillStyle = '#1c052e';
-    ctx.fill();
-
-    ctx.strokeStyle = rarity.color;
-    ctx.lineWidth = 2.2;
-    ctx.stroke();
-  }
-
-  // Core Eye
-  ctx.fillStyle = boss.coreColor;
-  ctx.beginPath();
-  ctx.arc(cx, cy, 9 * s, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.strokeStyle = '#ffffff';
-  ctx.lineWidth = 1.8;
-  ctx.stroke();
-
-  ctx.fillStyle = '#ffffff';
-  ctx.beginPath();
-  ctx.arc(cx, cy, 3 * s, 0, Math.PI * 2);
-  ctx.fill();
+  // Find matching catalog form
+  const matchedForm = CATALOG_FORMS.find(f => f.sides === boss.sides) || CATALOG_FORMS[11]!;
+  drawInGameCatalogShape(ctx, cx, cy, radius, matchedForm, rarity.color, false);
 
   ctx.restore();
 }
 
 /**
- * 5. DRONE FROM ULTIMATE WEAPON FORGE RENDERER
+ * 5. DRONES
  */
 export function renderStudioDrone(
   ctx: CanvasRenderingContext2D,
@@ -908,6 +968,377 @@ export function renderProceduralAsset(
     renderStudioClassMunition(ctx, 'fighter', width, height, time);
   } else if (type === 'proj_photon_lance') {
     renderStudioClassMunition(ctx, 'paladin', width, height, time);
+  }
+
+  ctx.restore();
+}
+
+/**
+ * 7. CYBER HUD EXPRESSIONS (Directly from CyberHUDExpressions.ts)
+ */
+export interface CyberExpression {
+  id: string;
+  nameEn: string;
+  namePt: string;
+  descPt: string;
+  synergyPt: string;
+  color: string;
+  lore: string;
+}
+
+export const CYBER_EXPRESSIONS: CyberExpression[] = [
+  {
+    id: 'Happy',
+    nameEn: 'HAPPY',
+    namePt: 'FELIZ',
+    descPt: '+25% XP & +20% Créditos',
+    synergyPt: 'Evolução Acelerada',
+    color: '#00f0ff',
+    lore: "A matriz neuro-computacional 'FELIZ' modula a resposta tática dos geradores do chassi, convertendo telemetria afetiva em amplificação direta de combate e foco de miras."
+  },
+  {
+    id: 'Excited',
+    nameEn: 'EXCITED',
+    namePt: 'EMOCIONADO',
+    descPt: '+20% Cadência & +10% Crit Chance',
+    synergyPt: 'Artilheiro / Disparo Contínuo',
+    color: '#ffd700',
+    lore: 'Sobrecarga de resposta adrenérgica quântica que eleva a cadência balística dos canhões e estabiliza a dispersão de tiros.'
+  },
+  {
+    id: 'Joyful',
+    nameEn: 'JOYFUL',
+    namePt: 'ALEGRE',
+    descPt: '+35% EN Regen & -10% Custo EN',
+    synergyPt: 'Disruptor Tático / Spammer',
+    color: '#00ffaa',
+    lore: 'Sintonia harmônica com geradores de energia quântica, permitindo fluxo contínuo de ativações modulares com menor dissipação.'
+  },
+  {
+    id: 'Angry',
+    nameEn: 'ANGRY',
+    namePt: 'IRADO',
+    descPt: '+25% Dano (HP < 50%) & +2% Sifão de Estrutura',
+    synergyPt: 'Vanguarda Berserker',
+    color: '#ff0055',
+    lore: 'Protocolo de emergência com agressividade reativa que canaliza estresse estrutural em impacto destrutivo massivo.'
+  },
+  {
+    id: 'Stern',
+    nameEn: 'STERN',
+    namePt: 'SEVERO',
+    descPt: '+3 em Todos os Sistemas Globais',
+    synergyPt: 'Build Híbrida Equilibrada',
+    color: '#38bdf8',
+    lore: 'Foco absoluto e calibração estrita que amplificam uniformemente os 6 atributos nucleares do operador.'
+  },
+  {
+    id: 'Surprised',
+    nameEn: 'SURPRISED',
+    namePt: 'SURPRESO',
+    descPt: '-20% Cooldown Módulos & +20% Ativação',
+    synergyPt: 'Burst de Sistemas Quânticos',
+    color: '#00f0ff',
+    lore: 'Tempo de resposta reflexo hiperacelerado que antecipa o ciclo de ignição dos barramentos táticos.'
+  },
+  {
+    id: 'Defeated',
+    nameEn: 'DEFEATED',
+    namePt: 'DERROTADO',
+    descPt: '+20% Estrutura Máx & +15% Blindagem Reativa',
+    synergyPt: 'Baluarte Aegis de Contato',
+    color: '#ef4444',
+    lore: 'Blindagem reativa de condensação extrema projetada para resistir aos impactos mais devastadores em momentos críticos.'
+  },
+  {
+    id: 'Crying',
+    nameEn: 'CRYING',
+    namePt: 'CHORANDO',
+    descPt: '+3.0 Estrutura/s Regen & +10% Defesa Escudo',
+    synergyPt: 'Regeneração de Estrutura & Escudo',
+    color: '#38bdf8',
+    lore: 'Cascata contínua de nanites regenerativos que reconstroem placas avariadas enquanto reforçam o envelope de escudo.'
+  },
+  {
+    id: 'Bored',
+    nameEn: 'BORED',
+    namePt: 'TEDIADO',
+    descPt: '+12% Evasão & -30% Cooldown Troca Pista',
+    synergyPt: 'Evasão & Alta Mobilidade',
+    color: '#94a3b8',
+    lore: 'Manobras defensivas automatizadas de ultra-baixa latência permitindo trocas bruscas de rota no campo de batalha.'
+  },
+  {
+    id: 'Static',
+    nameEn: 'STATIC',
+    namePt: 'ESTÁTICO',
+    descPt: '+25% Vel. Projétil & +1 Perfuração',
+    synergyPt: 'Balística Hipersônica',
+    color: '#e879f9',
+    lore: 'Campos magnéticos colimados que aceleram projéteis a velocidades hipersônicas conferindo penetração direta de blindagens.'
+  },
+  {
+    id: 'Thirsty',
+    nameEn: 'THIRSTY',
+    namePt: 'SEDENTO',
+    descPt: '+4% Sifão de Estrutura & +15% Dano DoT',
+    synergyPt: 'Vampirismo & Corrosão DoT',
+    color: '#f43f5e',
+    lore: 'Drenagem ativa de plasma residual que converte danos contínuos infligidos em recomposição molecular do casco.'
+  },
+  {
+    id: 'Devoted',
+    nameEn: 'DEVOTED',
+    namePt: 'DEVOTO',
+    descPt: '+25% Blindagem Reativa & +15% Estrutura Máx',
+    synergyPt: 'Fortaleza Inviolável',
+    color: '#c084fc',
+    lore: 'Fé inabalável em sistemas de defesa passivos que blindam o núcleo contra forças hostis esmagadoras.'
+  },
+  {
+    id: 'Charmed',
+    nameEn: 'CHARMED',
+    namePt: 'ENCANTADO',
+    descPt: '+25% Dano de Sistemas & +20 EN/s Regen',
+    synergyPt: 'Amplificador Arcano Quântico',
+    color: '#38bdf8',
+    lore: 'Ressonância cristalina que energiza módulos táteis e mantém reservas de energia quântica permanentemente repletas.'
+  },
+  {
+    id: 'Cunning',
+    nameEn: 'CUNNING',
+    namePt: 'ASTUTO',
+    descPt: '+15% Crit Chance & +30% Dano Crítico',
+    synergyPt: 'Interceptor de Precisão',
+    color: '#a855f7',
+    lore: 'Algoritmos preditivos de mira que identificam fraquezas microscópicas na geometria das defesas inimigas.'
+  },
+  {
+    id: 'Relentless',
+    nameEn: 'RELENTLESS',
+    namePt: 'IMPLACÁVEL',
+    descPt: '+25% Área Armas & +15% Dano Cinético',
+    synergyPt: 'Artilharia Quântica Pesada',
+    color: '#f97316',
+    lore: 'Ondas de concussão expandidas que ampliam a zona de aniquilação das ogivas balísticas pesadas.'
+  },
+  {
+    id: 'Furious',
+    nameEn: 'FURIOUS',
+    namePt: 'FURIOSO',
+    descPt: '+30% Dano Crítico & +15% Cadência',
+    synergyPt: 'Ataque Frenético Rápido',
+    color: '#ff0000',
+    lore: 'Disparo frenético ininterrupto com dissipação forçada de calor térmico nos canhões primários.'
+  },
+  {
+    id: 'Serene',
+    nameEn: 'SERENE',
+    namePt: 'SERENO',
+    descPt: '+15% Escudo & +2.0 Estrutura/s Regen',
+    synergyPt: 'Tanque Inabalável',
+    color: '#22d3ee',
+    lore: 'Calma computacional imperturbável que reduz flutuações no campo de força e regenera integridade em ritmo estável.'
+  },
+  {
+    id: 'Obsessed',
+    nameEn: 'OBSESSED',
+    namePt: 'OBSESSIVO',
+    descPt: '+100% Alcance Ímã & +25% XP',
+    synergyPt: 'Farme Magnético Acelerado',
+    color: '#eab308',
+    lore: 'Potencializador gravitacional de coleta que atrai fragmentos e orbes de evolução de todo o setor circundante.'
+  },
+  {
+    id: 'Melancholic',
+    nameEn: 'MELANCHOLIC',
+    namePt: 'MELANCÓLICO',
+    descPt: '+20% Debuff Resist & -20% Dano Eventos',
+    synergyPt: 'Proteção Anticatástrofe',
+    color: '#60a5fa',
+    lore: 'Resiliência estóica que isola os circuitos vitais contra desacelerações, corrosão e catástrofes de ambiente.'
+  },
+  {
+    id: 'Euphoric',
+    nameEn: 'EUPHORIC',
+    namePt: 'EUFÓRICO',
+    descPt: '+20% Ativação & +20% Dano de Sistemas',
+    synergyPt: 'Explosão Quântica Eufórica',
+    color: '#ffd700',
+    lore: 'Estado de pico de fluxo energético onde cada módulo tático dispara com velocidade e força extraordinárias.'
+  }
+];
+
+export function renderStudioExpression(
+  ctx: CanvasRenderingContext2D,
+  expressionId: string,
+  width: number,
+  height: number,
+  _time: number
+) {
+  ctx.save();
+  ctx.clearRect(0, 0, width, height);
+
+  ctx.fillStyle = '#05020c';
+  ctx.fillRect(0, 0, width, height);
+
+  const cx = width / 2;
+  const cy = height / 2;
+  const s = Math.min(width, height) / 36;
+  const expr = CYBER_EXPRESSIONS.find(e => e.id === expressionId) || CYBER_EXPRESSIONS[0]!;
+  const color = expr.color;
+
+  // Outer HUD Frame matching Image 2 "MATRIZ SENSORIAL HUD"
+  const boxW = 28 * s;
+  const boxH = 20 * s;
+  ctx.strokeStyle = '#00f0ff88';
+  ctx.lineWidth = 1.6;
+  ctx.strokeRect(cx - boxW / 2, cy - boxH / 2, boxW, boxH);
+
+  // Corner Accents
+  ctx.strokeStyle = '#00f0ff';
+  ctx.lineWidth = 3.0;
+  const cSize = 2.5 * s;
+  // Top Left
+  ctx.beginPath();
+  ctx.moveTo(cx - boxW / 2, cy - boxH / 2 + cSize);
+  ctx.lineTo(cx - boxW / 2, cy - boxH / 2);
+  ctx.lineTo(cx - boxW / 2 + cSize, cy - boxH / 2);
+  ctx.stroke();
+  // Top Right
+  ctx.beginPath();
+  ctx.moveTo(cx + boxW / 2 - cSize, cy - boxH / 2);
+  ctx.lineTo(cx + boxW / 2, cy - boxH / 2);
+  ctx.lineTo(cx + boxW / 2, cy - boxH / 2 + cSize);
+  ctx.stroke();
+  // Bottom Left
+  ctx.beginPath();
+  ctx.moveTo(cx - boxW / 2, cy + boxH / 2 - cSize);
+  ctx.lineTo(cx - boxW / 2, cy + boxH / 2);
+  ctx.lineTo(cx - boxW / 2 + cSize, cy + boxH / 2);
+  ctx.stroke();
+  // Bottom Right
+  ctx.beginPath();
+  ctx.moveTo(cx + boxW / 2 - cSize, cy + boxH / 2);
+  ctx.lineTo(cx + boxW / 2, cy + boxH / 2);
+  ctx.lineTo(cx + boxW / 2, cy + boxH / 2 - cSize);
+  ctx.stroke();
+
+  // HUD Title at bottom
+  ctx.fillStyle = '#00f0ff';
+  ctx.font = `bold ${Math.max(10, 1.3 * s)}px 'Orbitron', monospace`;
+  ctx.textAlign = 'center';
+  ctx.fillText('MATRIZ SENSORIAL HUD', cx, cy + boxH / 2 - 1.2 * s);
+
+  // Draw Facial Vector Optics (scaled up cleanly)
+  const faceScale = s * 0.9;
+  const fx = cx;
+  const fy = cy - 1.5 * s;
+
+  ctx.strokeStyle = color;
+  ctx.fillStyle = color;
+  ctx.lineWidth = 2.5 * (faceScale / s);
+
+  if (expr.id === 'Happy') {
+    ctx.beginPath();
+    ctx.moveTo(fx - 9 * faceScale, fy - 4 * faceScale);
+    ctx.lineTo(fx - 5 * faceScale, fy - 7 * faceScale);
+    ctx.lineTo(fx - 2 * faceScale, fy - 4 * faceScale);
+    ctx.moveTo(fx + 2 * faceScale, fy - 4 * faceScale);
+    ctx.lineTo(fx + 5 * faceScale, fy - 7 * faceScale);
+    ctx.lineTo(fx + 9 * faceScale, fy - 4 * faceScale);
+    ctx.moveTo(fx - 5 * faceScale, fy + 4 * faceScale);
+    ctx.lineTo(fx, fy + 7 * faceScale);
+    ctx.lineTo(fx + 5 * faceScale, fy + 4 * faceScale);
+    ctx.stroke();
+  } else if (expr.id === 'Excited') {
+    ctx.strokeRect(fx - 9 * faceScale, fy - 7 * faceScale, 6 * faceScale, 5 * faceScale);
+    ctx.strokeRect(fx + 3 * faceScale, fy - 7 * faceScale, 6 * faceScale, 5 * faceScale);
+    ctx.beginPath();
+    ctx.moveTo(fx - 5 * faceScale, fy + 3 * faceScale);
+    ctx.lineTo(fx + 5 * faceScale, fy + 3 * faceScale);
+    ctx.lineTo(fx + 3 * faceScale, fy + 7 * faceScale);
+    ctx.lineTo(fx - 3 * faceScale, fy + 7 * faceScale);
+    ctx.closePath();
+    ctx.stroke();
+  } else if (expr.id === 'Joyful') {
+    ctx.beginPath();
+    ctx.moveTo(fx - 9 * faceScale, fy - 2 * faceScale);
+    ctx.lineTo(fx - 5 * faceScale, fy - 7 * faceScale);
+    ctx.lineTo(fx - 1 * faceScale, fy - 2 * faceScale);
+    ctx.moveTo(fx + 1 * faceScale, fy - 2 * faceScale);
+    ctx.lineTo(fx + 5 * faceScale, fy - 7 * faceScale);
+    ctx.lineTo(fx + 9 * faceScale, fy - 2 * faceScale);
+    ctx.moveTo(fx - 4 * faceScale, fy + 4 * faceScale);
+    ctx.lineTo(fx + 4 * faceScale, fy + 4 * faceScale);
+    ctx.stroke();
+  } else if (expr.id === 'Angry') {
+    ctx.beginPath();
+    ctx.moveTo(fx - 10 * faceScale, fy - 7 * faceScale);
+    ctx.lineTo(fx - 2 * faceScale, fy - 3 * faceScale);
+    ctx.moveTo(fx + 10 * faceScale, fy - 7 * faceScale);
+    ctx.lineTo(fx + 2 * faceScale, fy - 3 * faceScale);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(fx - 5 * faceScale, fy + 5 * faceScale);
+    ctx.lineTo(fx - 2 * faceScale, fy + 3 * faceScale);
+    ctx.lineTo(fx + 2 * faceScale, fy + 5 * faceScale);
+    ctx.lineTo(fx + 5 * faceScale, fy + 3 * faceScale);
+    ctx.stroke();
+  } else if (expr.id === 'Stern') {
+    ctx.beginPath();
+    ctx.moveTo(fx - 10 * faceScale, fy - 6 * faceScale);
+    ctx.lineTo(fx + 10 * faceScale, fy - 6 * faceScale);
+    ctx.moveTo(fx - 4 * faceScale, fy + 5 * faceScale);
+    ctx.lineTo(fx + 4 * faceScale, fy + 5 * faceScale);
+    ctx.stroke();
+    ctx.fillRect(fx - 7 * faceScale, fy - 3 * faceScale, 4 * faceScale, 3 * faceScale);
+    ctx.fillRect(fx + 3 * faceScale, fy - 3 * faceScale, 4 * faceScale, 3 * faceScale);
+  } else if (expr.id === 'Surprised') {
+    ctx.strokeRect(fx - 8 * faceScale, fy - 6 * faceScale, 5 * faceScale, 5 * faceScale);
+    ctx.strokeRect(fx + 3 * faceScale, fy - 6 * faceScale, 5 * faceScale, 5 * faceScale);
+    ctx.strokeRect(fx - 2.5 * faceScale, fy + 3 * faceScale, 5 * faceScale, 4 * faceScale);
+  } else if (expr.id === 'Defeated') {
+    ctx.beginPath();
+    ctx.moveTo(fx - 8 * faceScale, fy - 7 * faceScale);
+    ctx.lineTo(fx - 3 * faceScale, fy - 2 * faceScale);
+    ctx.moveTo(fx - 3 * faceScale, fy - 7 * faceScale);
+    ctx.lineTo(fx - 8 * faceScale, fy - 2 * faceScale);
+    ctx.moveTo(fx + 3 * faceScale, fy - 7 * faceScale);
+    ctx.lineTo(fx + 8 * faceScale, fy - 2 * faceScale);
+    ctx.moveTo(fx + 8 * faceScale, fy - 7 * faceScale);
+    ctx.lineTo(fx + 3 * faceScale, fy - 2 * faceScale);
+    ctx.moveTo(fx - 4 * faceScale, fy + 5 * faceScale);
+    ctx.lineTo(fx, fy + 3 * faceScale);
+    ctx.lineTo(fx + 4 * faceScale, fy + 5 * faceScale);
+    ctx.stroke();
+  } else if (expr.id === 'Crying') {
+    ctx.beginPath();
+    ctx.moveTo(fx - 9 * faceScale, fy - 5 * faceScale);
+    ctx.lineTo(fx - 2 * faceScale, fy - 5 * faceScale);
+    ctx.moveTo(fx + 2 * faceScale, fy - 5 * faceScale);
+    ctx.lineTo(fx + 9 * faceScale, fy - 5 * faceScale);
+    ctx.moveTo(fx - 4 * faceScale, fy + 5 * faceScale);
+    ctx.lineTo(fx, fy + 3 * faceScale);
+    ctx.lineTo(fx + 4 * faceScale, fy + 5 * faceScale);
+    ctx.stroke();
+    ctx.strokeStyle = '#38bdf8';
+    ctx.beginPath();
+    ctx.moveTo(fx - 5.5 * faceScale, fy - 3 * faceScale);
+    ctx.lineTo(fx - 5.5 * faceScale, fy + 3 * faceScale);
+    ctx.moveTo(fx + 5.5 * faceScale, fy - 3 * faceScale);
+    ctx.lineTo(fx + 5.5 * faceScale, fy + 3 * faceScale);
+    ctx.stroke();
+  } else {
+    // Default high-tech optical eyes and neutral smile
+    ctx.beginPath();
+    ctx.moveTo(fx - 8 * faceScale, fy - 4 * faceScale);
+    ctx.lineTo(fx - 2 * faceScale, fy - 4 * faceScale);
+    ctx.moveTo(fx + 2 * faceScale, fy - 4 * faceScale);
+    ctx.lineTo(fx + 8 * faceScale, fy - 4 * faceScale);
+    ctx.moveTo(fx - 4 * faceScale, fy + 4 * faceScale);
+    ctx.lineTo(fx + 4 * faceScale, fy + 4 * faceScale);
+    ctx.stroke();
   }
 
   ctx.restore();
