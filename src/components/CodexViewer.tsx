@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { CODEX_ASSETS } from '../data/codexData';
 import { CodexAsset, CodexCategory } from '../types';
 import { renderProceduralAsset } from '../utils/vectorRenderers';
+import { CodexStudio } from './CodexStudio';
 import { Layers, Search, Eye, Download, X, Cpu } from 'lucide-react';
 
 interface CanvasCardProps {
@@ -162,11 +163,14 @@ export const CodexViewer: React.FC = () => {
             Biblioteca Digital & <span className="text-cyber-neonPurple">Codex 16:9</span>
           </h2>
           <p className="font-outfit text-slate-300 text-sm sm:text-base">
-            Todos os drones da Forja Suprema, matrizes de expressões HUD, projéteis e biomas extraídos diretamente das matrizes de renderização de <strong>Geometry Platforms</strong>.
+            O estúdio interativo completo de <strong>Geometry Platforms</strong>: configure formas e raridades do Player, Inimigos, Chefes de Onda, Chefes de Arena, Drones e Classes com munição.
           </p>
         </div>
 
-        {/* Filters & Search Toolbar */}
+        {/* 1. INTERACTIVE COMBINATION STUDIO (O Usuário escolhe Forma, Raridade, Drone ou Classe com Munição) */}
+        <CodexStudio />
+
+        {/* 2. REPOSITORY ASSETS GALLERY TOOLBAR */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-8 bg-cyber-card p-3 rounded-2xl border border-cyber-cardBorder">
           
           {/* Category Tabs */}
@@ -191,7 +195,7 @@ export const CodexViewer: React.FC = () => {
             <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
             <input
               type="text"
-              placeholder="Buscar no Codex..."
+              placeholder="Buscar no acervo..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full bg-cyber-darker border border-cyber-cardBorder rounded-xl pl-10 pr-4 py-2 text-xs font-outfit text-white placeholder-slate-500 focus:outline-none focus:border-cyber-cyan"
