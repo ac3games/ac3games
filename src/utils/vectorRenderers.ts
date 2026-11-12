@@ -318,7 +318,8 @@ export function drawInGameCatalogShape(
 
   const executeShapePath = () => {
     if (isFlower) {
-      drawContinuousLobedShape(8, 0.60, 0.35);
+      // 12 smooth shallow scallops on perimeter (Image 2) with ZERO internal crossing lines (Image 1 strictly forbidden)
+      drawContinuousLobedShape(12, 0.74, 0.28);
     } else if (isTrefoil) {
       drawContinuousLobedShape(3, 0.44, 0.50);
     } else if (isQuatrefoil) {
@@ -458,6 +459,18 @@ export function renderStudioPlayer(
   // Draw pure player shape (isPlayer = true -> no reticle, clean contour)
   drawInGameCatalogShape(ctx, cx, cy, radius, form, rarity.color, true);
 
+  // In-Game Sensory HUD Expression Face (Image 2)
+  const faceScale = s * 0.9;
+  ctx.fillStyle = '#f97316';
+  // Left eye 'I'
+  ctx.fillRect(cx - 7 * faceScale, cy - 4 * faceScale, 3.5 * faceScale, 7 * faceScale);
+  // Right eye 'I'
+  ctx.fillRect(cx + 3.5 * faceScale, cy - 4 * faceScale, 3.5 * faceScale, 7 * faceScale);
+  // Nose dot
+  ctx.fillRect(cx - 1 * faceScale, cy - 8 * faceScale, 2 * faceScale, 2 * faceScale);
+  // Mouth bar
+  ctx.fillRect(cx - 5 * faceScale, cy + 6 * faceScale, 10 * faceScale, 2.5 * faceScale);
+
   ctx.restore();
 }
 
@@ -494,6 +507,8 @@ export function renderStudioEnemy(
 
 /**
  * 3. WAVE BOSS RENDERER
+ * Exact game rule: The wave boss is identical to enemies, but larger and with boss stats!
+ * Overhead in-game boss health bar + 10s enrage countdown bar.
  */
 export function renderStudioWaveBoss(
   ctx: CanvasRenderingContext2D,
@@ -514,39 +529,62 @@ export function renderStudioWaveBoss(
   const s = Math.min(width, height) / 100;
   const form = CATALOG_FORMS[formIdx - 1] || CATALOG_FORMS[0]!;
   const rarity = RARITIES_DATA[rarityIdx - 1] || RARITIES_DATA[0]!;
-  const radius = 34 * s;
+  
+  // Wave boss is identical to the enemy shape, but 35% larger (46*s vs 34*s)
+  const radius = 46 * s;
 
-  // Armor Plates
-  for (let p = 0; p < form.sides; p++) {
-    const pa = (p * 2 * Math.PI) / form.sides - Math.PI / 2;
-    const px = cx + Math.cos(pa) * (radius * 1.35);
-    const py = cy + Math.sin(pa) * (radius * 1.35);
-    ctx.fillStyle = rarity.color;
-    ctx.fillRect(px - 3.5 * s, py - 3.5 * s, 7 * s, 7 * s);
-    ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = 1.2;
-    ctx.strokeRect(px - 3.5 * s, py - 3.5 * s, 7 * s, 7 * s);
-  }
+  // Pulsing boss aura
+  const auraAlpha = 0.15 + Math.sin(time * 4) * 0.08;
+  ctx.fillStyle = rarity.color;
+  ctx.globalAlpha = auraAlpha;
+  ctx.beginPath();
+  ctx.arc(cx, cy, radius * 1.15, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.globalAlpha = 1.0;
 
-  // Enrage Spikes
-  ctx.strokeStyle = '#ff005577';
-  ctx.lineWidth = 1.5;
-  for (let sp = 0; sp < 12; sp++) {
-    const spa = (sp * Math.PI) / 6;
-    const len = radius * 1.45 + Math.sin(time * 8 + sp) * 4 * s;
-    ctx.beginPath();
-    ctx.moveTo(cx + Math.cos(spa) * (radius * 1.05), cy + Math.sin(spa) * (radius * 1.05));
-    ctx.lineTo(cx + Math.cos(spa) * len, cy + Math.sin(spa) * len);
-    ctx.stroke();
-  }
-
+  // Draw identical in-game enemy shape with central hostile reticle, fixed orientation
   drawInGameCatalogShape(ctx, cx, cy, radius, form, rarity.color, false);
+
+  // In-Game Overhead Boss Health Bar & 10s Enrage Timer
+  const barW = 100 * s;
+  const barH = 5 * s;
+  const barY = cy - radius - 14 * s;
+
+  // Health Bar Frame & Dark Base
+  ctx.fillStyle = '#070714';
+  ctx.fillRect(cx - barW / 2, barY, barW, barH);
+  ctx.strokeStyle = '#ffffff';
+  ctx.lineWidth = 1.2;
+  ctx.strokeRect(cx - barW / 2, barY, barW, barH);
+
+  // Boss HP Fill (Red/Magenta)
+  ctx.fillStyle = '#ff0055';
+  ctx.fillRect(cx - barW / 2 + 1, barY + 1, barW * 0.85, barH - 2);
+
+  // Cyan Shield Bar Overlay
+  ctx.fillStyle = '#00f0ff';
+  ctx.fillRect(cx - barW / 2 + 1, barY + 1, barW * 0.42, barH - 2);
+
+  // 10s Enrage Timer Progress Bar
+  const enrageY = barY - 7 * s;
+  const enrageProgress = 0.72;
+  ctx.fillStyle = '#ffaa00';
+  ctx.fillRect(cx - barW / 2, enrageY, barW * enrageProgress, 3 * s);
+  ctx.strokeStyle = '#ffaa00';
+  ctx.lineWidth = 0.8;
+  ctx.strokeRect(cx - barW / 2, enrageY, barW, 3 * s);
 
   ctx.restore();
 }
 
 /**
- * 4. ARENA BOSS RENDERER
+ * 4. ARENA BOSS RENDERER (Images 3 and 5)
+ * Authentic in-game Arena Boss:
+ * - Base geometric shape with double glowing frame
+ * - Huge concentric circular arena rings (yellow, cyan dial gauge with radial tick marks, red ring)
+ * - Central red ocular core with white center dot and 4 crosshairs
+ * - 4 Satellite sensor orbs (cyan and yellow)
+ * - Divergent laser beams (Image 3) or Forcefield Shield "ESCUDO IMUNE" (Image 5)
  */
 export function renderStudioArenaBoss(
   ctx: CanvasRenderingContext2D,
@@ -559,7 +597,7 @@ export function renderStudioArenaBoss(
   ctx.save();
   ctx.clearRect(0, 0, width, height);
 
-  ctx.fillStyle = '#05010b';
+  ctx.fillStyle = '#05020c';
   ctx.fillRect(0, 0, width, height);
 
   const cx = width / 2;
@@ -567,25 +605,155 @@ export function renderStudioArenaBoss(
   const s = Math.min(width, height) / 100;
   const boss = ARENA_BOSSES_DATA[bossIdx - 1] || ARENA_BOSSES_DATA[0]!;
   const rarity = RARITIES_DATA[rarityIdx - 1] || RARITIES_DATA[0]!;
-  const radius = 35 * s;
+  const radius = 38 * s;
 
-  // Outer Hexagon Arena
-  ctx.strokeStyle = `${boss.coreColor}33`;
-  ctx.lineWidth = 1.5;
-  ctx.beginPath();
-  for (let h = 0; h < 6; h++) {
-    const ha = (h * Math.PI) / 3 - Math.PI / 2;
-    const hx = cx + Math.cos(ha) * (radius * 1.6);
-    const hy = cy + Math.sin(ha) * (radius * 1.6);
-    if (h === 0) ctx.moveTo(hx, hy);
-    else ctx.lineTo(hx, hy);
+  // 1. Triple Divergent Laser Beams (for Boss 1 Triangle as in Image 3)
+  if (boss.sides === 3) {
+    const beamColors = ['#00f0ff', '#00ff66', '#ff0055'];
+    const angles = [Math.PI / 2 - 0.32, Math.PI / 2, Math.PI / 2 + 0.32];
+    for (let b = 0; b < 3; b++) {
+      const bColor = beamColors[b]!;
+      const bAngle = angles[b]!;
+      const endX = cx + Math.cos(bAngle) * (radius * 2.8);
+      const endY = cy + Math.sin(bAngle) * (radius * 2.8);
+
+      // Outer laser aura
+      ctx.strokeStyle = `${bColor}55`;
+      ctx.lineWidth = 14 * s;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(endX, endY);
+      ctx.stroke();
+
+      // Dense beam core
+      ctx.strokeStyle = bColor;
+      ctx.lineWidth = 6 * s;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(endX, endY);
+      ctx.stroke();
+
+      // White nuclear center
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2 * s;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(endX, endY);
+      ctx.stroke();
+    }
   }
-  ctx.closePath();
+
+  // 2. Base Geometric Frame with Double Glowing Outline
+  const matchedForm = CATALOG_FORMS.find(f => f.sides === boss.sides) || CATALOG_FORMS[0]!;
+  drawInGameCatalogShape(ctx, cx, cy, radius * 1.05, matchedForm, rarity.color, false);
+
+  // 3. Concentric Circular Arena Rings (Images 3 and 5)
+  const ringR = radius * 0.95;
+
+  // 3A. Outer Yellow Circle Ring
+  ctx.strokeStyle = '#ffd700';
+  ctx.lineWidth = 2.4;
+  ctx.beginPath();
+  ctx.arc(cx, cy, ringR * 1.15, 0, Math.PI * 2);
   ctx.stroke();
 
-  // Find matching catalog form
-  const matchedForm = CATALOG_FORMS.find(f => f.sides === boss.sides) || CATALOG_FORMS[11]!;
-  drawInGameCatalogShape(ctx, cx, cy, radius, matchedForm, rarity.color, false);
+  // 3B. Cyan Dial Gauge Circle with Radial Notches (Compass/Protractor style)
+  ctx.strokeStyle = '#00f0ff';
+  ctx.lineWidth = 1.8;
+  ctx.beginPath();
+  ctx.arc(cx, cy, ringR, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // Radial tick marks around the cyan ring
+  const tickCount = 24;
+  ctx.strokeStyle = '#00f0ff88';
+  ctx.lineWidth = 1.2;
+  for (let t = 0; t < tickCount; t++) {
+    const ta = (t * 2 * Math.PI) / tickCount;
+    const tLen = t % 6 === 0 ? 5.5 * s : 3 * s;
+    ctx.beginPath();
+    ctx.moveTo(cx + Math.cos(ta) * (ringR - tLen), cy + Math.sin(ta) * (ringR - tLen));
+    ctx.lineTo(cx + Math.cos(ta) * ringR, cy + Math.sin(ta) * ringR);
+    ctx.stroke();
+  }
+
+  // 3C. Inner Red/Orange Concentric Circle
+  ctx.strokeStyle = '#ff0055';
+  ctx.lineWidth = 2.0;
+  ctx.beginPath();
+  ctx.arc(cx, cy, ringR * 0.65, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // 4. Central Hostile Ocular Core (Images 3 & 5)
+  const coreR = ringR * 0.42;
+
+  // Red circle fill
+  ctx.fillStyle = '#c8003a';
+  ctx.beginPath();
+  ctx.arc(cx, cy, coreR, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.strokeStyle = '#ffd700';
+  ctx.lineWidth = 1.4;
+  ctx.stroke();
+
+  // Pure white center dot
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath();
+  ctx.arc(cx, cy, coreR * 0.45, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 4 White Crosshair Lines extending outward through the rings
+  ctx.strokeStyle = '#ffffff';
+  ctx.lineWidth = 1.4;
+  ctx.beginPath();
+  ctx.moveTo(cx - ringR * 0.9, cy);
+  ctx.lineTo(cx - coreR * 0.45, cy);
+  ctx.moveTo(cx + coreR * 0.45, cy);
+  ctx.lineTo(cx + ringR * 0.9, cy);
+  ctx.moveTo(cx, cy - ringR * 0.9);
+  ctx.lineTo(cx, cy - coreR * 0.45);
+  ctx.moveTo(cx, cy + coreR * 0.45);
+  ctx.lineTo(cx, cy + ringR * 0.9);
+  ctx.stroke();
+
+  // 5. 4 Satellite Sensor Orbs (cyan and yellow dots in 4 quadrants)
+  const orbDist = ringR * 0.72;
+  const orbAngles = [-Math.PI * 0.75, -Math.PI * 0.25, Math.PI * 0.75, Math.PI * 0.25];
+  const orbColors = ['#ffd700', '#00f0ff', '#00f0ff', '#ffd700'];
+  for (let o = 0; o < 4; o++) {
+    const oa = orbAngles[o]!;
+    const ox = cx + Math.cos(oa) * orbDist;
+    const oy = cy + Math.sin(oa) * orbDist;
+    ctx.fillStyle = orbColors[o]!;
+    ctx.beginPath();
+    ctx.arc(ox, oy, 3.2 * s, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(ox, oy, 1.4 * s, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // 6. Forcefield Shield Overlay for Square & others (Image 5: "ESCUDO IMUNE")
+  if (boss.sides === 4) {
+    ctx.fillStyle = 'rgba(0, 240, 255, 0.12)';
+    ctx.beginPath();
+    ctx.arc(cx, cy, ringR * 1.15, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Floating Shield Badge
+    ctx.fillStyle = '#00f0ff';
+    ctx.font = `bold ${Math.max(11, 2.5 * s)}px 'Orbitron', monospace`;
+    ctx.textAlign = 'center';
+    ctx.fillText('🛡️ ESCUDO IMUNE', cx, cy - 8 * s);
+  }
+
+  // Floating Combat Damage Indicator (as seen in Image 3 and 5)
+  ctx.fillStyle = '#ff3300';
+  ctx.font = `bold ${Math.max(12, 3.0 * s)}px 'Orbitron', sans-serif`;
+  ctx.textAlign = 'left';
+  ctx.fillText('💥 264456', cx + 2 * s, cy - 18 * s);
 
   ctx.restore();
 }
@@ -915,51 +1083,127 @@ export function renderProceduralAsset(
       ctx.stroke();
     }
   } else if (type.startsWith('aura_')) {
-    const platY = cy + 22 * s;
-    ctx.fillStyle = '#061320';
+    // Exact In-Game Aura Environment (Image 4: Aura de Gelo)
+    const platY = cy + 18 * s;
+    const playerY = cy - 2 * s;
+
+    // 1. Metal Platform Floor with Diagonal Cyan Hazard Striping
+    ctx.fillStyle = '#071520';
     ctx.fillRect(0, platY, width, height - platY);
     ctx.strokeStyle = '#00f0ff';
-    ctx.lineWidth = 1.5;
+    ctx.lineWidth = 2.0;
     ctx.beginPath();
     ctx.moveTo(0, platY);
     ctx.lineTo(width, platY);
     ctx.stroke();
 
-    ctx.fillStyle = '#00f0ff55';
-    for (let hx = 0; hx < width; hx += 16 * s) {
+    // Diagonal hazard stripes on the platform edge
+    ctx.strokeStyle = '#00f0ffaa';
+    ctx.lineWidth = 2.5;
+    for (let hx = -width; hx < width * 2; hx += 16 * s) {
       ctx.beginPath();
-      ctx.moveTo(hx, platY);
-      ctx.lineTo(hx + 8 * s, platY);
-      ctx.lineTo(hx, platY + 8 * s);
+      ctx.moveTo(hx, platY + 12 * s);
+      ctx.lineTo(hx + 10 * s, platY);
+      ctx.stroke();
+    }
+
+    // 2. Concentric Cyan Dial Rings (Compass/Gauge style)
+    const auraRadius = 26 * s;
+
+    // Outer notched ring
+    ctx.strokeStyle = '#00f0ffcc';
+    ctx.lineWidth = 1.8;
+    ctx.beginPath();
+    ctx.arc(cx, playerY, auraRadius, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Dial gauge notches
+    ctx.strokeStyle = '#00f0ff88';
+    ctx.lineWidth = 1.2;
+    for (let t = 0; t < 36; t++) {
+      const ta = (t * 2 * Math.PI) / 36;
+      const tLen = t % 4 === 0 ? 4.5 * s : 2.5 * s;
+      ctx.beginPath();
+      ctx.moveTo(cx + Math.cos(ta) * (auraRadius - tLen), playerY + Math.sin(ta) * (auraRadius - tLen));
+      ctx.lineTo(cx + Math.cos(ta) * auraRadius, playerY + Math.sin(ta) * auraRadius);
+      ctx.stroke();
+    }
+
+    // Inner ring
+    ctx.strokeStyle = '#00f0ff';
+    ctx.lineWidth = 1.4;
+    ctx.beginPath();
+    ctx.arc(cx, playerY, auraRadius * 0.78, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // 3. 8 Rotating White Snowflakes along the ring
+    for (let f = 0; f < 8; f++) {
+      const fa = (f * Math.PI) / 4 + time * 0.25;
+      const fx = cx + Math.cos(fa) * (auraRadius * 0.88);
+      const fy = playerY + Math.sin(fa) * (auraRadius * 0.88);
+      ctx.fillStyle = '#ffffff';
+      ctx.font = `bold ${Math.max(10, 4.5 * s)}px Arial`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('❄', fx, fy);
+    }
+
+    // 4. Center Player Ship (Forma 12 - Flower with 12 scallops, face, and flame)
+    const shipR = 12 * s;
+    // Plasma thruster flame
+    const flameH = (7 + Math.sin(time * 16) * 2) * s;
+    ctx.fillStyle = '#ff0077';
+    ctx.beginPath();
+    ctx.moveTo(cx - 3 * s, playerY + shipR * 0.7);
+    ctx.lineTo(cx, playerY + shipR * 0.7 + flameH);
+    ctx.lineTo(cx + 3 * s, playerY + shipR * 0.7);
+    ctx.closePath();
+    ctx.fill();
+
+    // 12-scallop flower contour
+    ctx.strokeStyle = '#ff0055';
+    ctx.lineWidth = 2.2;
+    ctx.fillStyle = '#1c0515';
+    drawInGameCatalogShape(ctx, cx, playerY, shipR, CATALOG_FORMS[11]!, '#ff0055', true);
+
+    // Face expression inside player
+    const fs = s * 0.35;
+    ctx.fillStyle = '#38bdf8';
+    ctx.fillRect(cx - 6 * fs, playerY - 3 * fs, 3 * fs, 5 * fs);
+    ctx.fillRect(cx + 3 * fs, playerY - 3 * fs, 3 * fs, 5 * fs);
+    ctx.fillRect(cx - 4 * fs, playerY + 4 * fs, 8 * fs, 2 * fs);
+
+    // 5. 4 Orbiting Secondary Drones (Image 4)
+    const droneAngles = [time * 1.2, time * 1.2 + Math.PI / 2, time * 1.2 + Math.PI, time * 1.2 + Math.PI * 1.5];
+    const droneDist = auraRadius * 0.65;
+    const droneColors = ['#10b981', '#f97316', '#00f0ff', '#38bdf8'];
+    for (let d = 0; d < 4; d++) {
+      const da = droneAngles[d]!;
+      const dx = cx + Math.cos(da) * droneDist;
+      const dy = playerY + Math.sin(da) * droneDist;
+      ctx.fillStyle = droneColors[d]!;
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.0;
+      ctx.beginPath();
+      ctx.rect(dx - 2.5 * s, dy - 2.5 * s, 5 * s, 5 * s);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(dx, dy, 1.2 * s, 0, Math.PI * 2);
       ctx.fill();
     }
 
-    ctx.strokeStyle = '#00f0ff44';
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    for (let h = 0; h < 6; h++) {
-      const ha = (h * Math.PI) / 3;
-      const hx = cx + Math.cos(ha) * 32 * s;
-      const hy = (cy - 6 * s) + Math.sin(ha) * 32 * s;
-      if (h === 0) ctx.moveTo(hx, hy);
-      else ctx.lineTo(hx, hy);
-    }
-    ctx.closePath();
-    ctx.stroke();
+    // 6. Floating In-Game HUD Heal Indicator (Image 4: "+1 HP")
+    ctx.fillStyle = '#00ff44';
+    ctx.font = `extrabold ${Math.max(12, 4.0 * s)}px 'Orbitron', sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.fillText('+1 HP', cx, playerY - shipR - 5 * s);
 
-    ctx.strokeStyle = baseColor;
-    ctx.beginPath();
-    ctx.arc(cx, cy - 6 * s, 18 * s, 0, Math.PI * 2);
-    ctx.stroke();
-
-    for (let f = 0; f < 8; f++) {
-      const fa = (f * Math.PI) / 4 + time * 0.2;
-      const fx = cx + Math.cos(fa) * 18 * s;
-      const fy = (cy - 6 * s) + Math.sin(fa) * 18 * s;
-      ctx.fillStyle = '#ffffff';
-      ctx.font = `${Math.max(8, 4 * s)}px Arial`;
-      ctx.fillText('❄', fx, fy);
-    }
+    // HUD Drops below platform (Image 4)
+    ctx.fillStyle = '#ffffff';
+    ctx.font = `bold ${Math.max(9, 2.5 * s)}px 'JetBrains Mono', monospace`;
+    ctx.fillText('⚪ x13   🔴 x8   🟡 x0', cx, platY + 22 * s);
   } else if (type === 'hull_vector01') {
     renderStudioPlayer(ctx, 1, 11, width, height, time);
   } else if (type === 'hull_flower') {
