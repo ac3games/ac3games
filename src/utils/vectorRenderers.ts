@@ -2993,9 +2993,9 @@ export function renderStudioBiomeAura(
       ctx.strokeStyle = '#ffea00';
       ctx.lineWidth = 2.2 * s;
       ctx.beginPath();
-      for (let p = 0; p <= arcPoints; p++) {
+      for (let p = 0; p < arcPoints; p++) {
         const pa = (p * Math.PI * 2) / arcPoints;
-        const jitter = (Math.sin(time * 25 + p * 7) * 0.5 + Math.cos(time * 35 + p * 13) * 0.5) * 8 * s;
+        const jitter = (Math.sin(time * 25 + pa * 4) * 0.5 + Math.cos(time * 35 - pa * 8) * 0.5) * 8 * s;
         const px = cx + Math.cos(pa) * (R + jitter);
         const py = cy + Math.sin(pa) * (R + jitter);
         if (p === 0) ctx.moveTo(px, py);
