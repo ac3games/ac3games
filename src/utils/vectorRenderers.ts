@@ -305,8 +305,10 @@ export function drawInGameCatalogShape(
   // Helper: draw clean polygon with exact side count
   const drawPolygonPath = (numSides: number) => {
     ctx.beginPath();
+    // For sides = 4 (Square), offset by Math.PI / 4 so edges are horizontal/vertical (normal upright square, NOT a diamond/losango)
+    const offset = numSides === 4 ? Math.PI / 4 : -Math.PI / 2;
     for (let i = 0; i < numSides; i++) {
-      const angle = (i * 2 * Math.PI) / numSides - Math.PI / 2;
+      const angle = (i * 2 * Math.PI) / numSides + offset;
       const px = cx + r * Math.cos(angle);
       const py = cy + r * Math.sin(angle);
       if (i === 0) ctx.moveTo(px, py);
@@ -369,8 +371,9 @@ export function drawInGameCatalogShape(
   if (!isPlayer && !isFlower && !isTrefoil && !isQuatrefoil && !is4Star && !is5Star && !is6Star) {
     ctx.strokeStyle = `${color}40`;
     ctx.lineWidth = 1.0;
+    const offset = sides === 4 ? Math.PI / 4 : -Math.PI / 2;
     for (let i = 0; i < sides; i++) {
-      const angle = (i * 2 * Math.PI) / sides - Math.PI / 2;
+      const angle = (i * 2 * Math.PI) / sides + offset;
       ctx.beginPath();
       ctx.moveTo(cx, cy);
       ctx.lineTo(cx + r * Math.cos(angle), cy + r * Math.sin(angle));
@@ -517,7 +520,7 @@ export function renderStudioWaveBoss(
   rarityIdx: number,
   width: number,
   height: number,
-  time: number
+  _time: number
 ) {
   ctx.save();
   ctx.clearRect(0, 0, width, height);
@@ -533,15 +536,6 @@ export function renderStudioWaveBoss(
   
   // Wave boss is identical to the enemy shape, but 35% larger (46*s vs 34*s)
   const radius = 46 * s;
-
-  // Pulsing boss aura
-  const auraAlpha = 0.15 + Math.sin(time * 4) * 0.08;
-  ctx.fillStyle = rarity.color;
-  ctx.globalAlpha = auraAlpha;
-  ctx.beginPath();
-  ctx.arc(cx, cy, radius * 1.15, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.globalAlpha = 1.0;
 
   // Draw identical in-game enemy shape with central hostile reticle, fixed orientation
   drawInGameCatalogShape(ctx, cx, cy, radius, form, rarity.color, false);
@@ -805,12 +799,309 @@ export function renderStudioDrone(
 /**
  * 6. CLASS AMMUNITION / PROJECTILE RENDERER
  */
+/**
+ * 6. PROCEDURAL WEAPON PROJECTILES / CLASS AMMUNITIONS
+ * Verbatim from in-game RenderSystem.ts and codex_biblioteca_16_9.html:drawProceduralProjectileFromCode
+ */
+export function drawProceduralProjectile(
+  ctx: CanvasRenderingContext2D,
+  id: string,
+  cx: number,
+  cy: number,
+  scale: number = 4.0
+) {
+  ctx.save();
+  const s = scale;
+
+  switch (id) {
+    case 'rocket_missile':
+    case 'fighter': {
+      // 1. Fighter: Rocket Missile (Bazooka)
+      ctx.fillStyle = '#ffaa00';
+      ctx.beginPath();
+      ctx.moveTo(cx - 10 * s, cy - 2.5 * s);
+      ctx.lineTo(cx - 22 * s, cy);
+      ctx.lineTo(cx - 10 * s, cy + 2.5 * s);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = '#ff2200';
+      ctx.strokeStyle = '#ffaa00';
+      ctx.lineWidth = 1.2 * (s / 4);
+      ctx.beginPath();
+      ctx.moveTo(cx - 6 * s, cy - 2.5 * s);
+      ctx.lineTo(cx - 11 * s, cy - 6.5 * s);
+      ctx.lineTo(cx - 8 * s, cy - 2.5 * s);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(cx - 6 * s, cy + 2.5 * s);
+      ctx.lineTo(cx - 11 * s, cy + 6.5 * s);
+      ctx.lineTo(cx - 8 * s, cy + 2.5 * s);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(cx - 10 * s, cy - 2.8 * s);
+      ctx.lineTo(cx + 2 * s, cy - 2.8 * s);
+      ctx.quadraticCurveTo(cx + 8 * s, cy - 2.5 * s, cx + 14 * s, cy);
+      ctx.quadraticCurveTo(cx + 8 * s, cy + 2.5 * s, cx + 2 * s, cy + 2.8 * s);
+      ctx.lineTo(cx - 10 * s, cy + 2.8 * s);
+      ctx.closePath();
+      ctx.fillStyle = '#1c0707';
+      ctx.fill();
+      ctx.strokeStyle = '#ff3300';
+      ctx.lineWidth = 1.5 * (s / 4);
+      ctx.stroke();
+
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.0 * (s / 4);
+      ctx.beginPath();
+      ctx.moveTo(cx - 7 * s, cy);
+      ctx.lineTo(cx + 11 * s, cy);
+      ctx.stroke();
+      break;
+    }
+    case 'phase_flechette':
+    case 'rogue': {
+      // 2. Rogue: Phase Flechette (Daggers)
+      ctx.strokeStyle = 'rgba(0, 240, 255, 0.45)';
+      ctx.lineWidth = 1.2 * (s / 4);
+      ctx.beginPath();
+      for (let x = -20; x <= -6; x += 1) {
+        const y = Math.sin(x * 0.3) * 4 * s;
+        if (x === -20) ctx.moveTo(cx + x * s, cy + y);
+        else ctx.lineTo(cx + x * s, cy + y);
+      }
+      ctx.stroke();
+
+      ctx.fillStyle = '#031a24';
+      ctx.strokeStyle = '#00f0ff';
+      ctx.lineWidth = 1.5 * (s / 4);
+      ctx.beginPath();
+      ctx.moveTo(cx + 12 * s, cy);
+      ctx.lineTo(cx, cy - 4.5 * s);
+      ctx.lineTo(cx - 8 * s, cy - 2 * s);
+      ctx.lineTo(cx - 4 * s, cy);
+      ctx.lineTo(cx - 8 * s, cy + 2 * s);
+      ctx.lineTo(cx, cy + 4.5 * s);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      break;
+    }
+    case 'plasma_vortex':
+    case 'mage': {
+      // 3. Mage: Plasma Vortex (Fireball)
+      ctx.strokeStyle = '#ff6600';
+      ctx.lineWidth = 2.0 * (s / 4);
+      ctx.beginPath();
+      ctx.arc(cx, cy, 7 * s, 0, Math.PI * 2);
+      ctx.stroke();
+
+      for (let i = 0; i < 3; i++) {
+        const rot = (i * Math.PI * 2) / 3;
+        ctx.strokeStyle = i === 0 ? '#ffffff' : '#ff0055';
+        ctx.lineWidth = 1.5 * (s / 4);
+        ctx.beginPath();
+        ctx.arc(cx, cy, 5 * s, rot, rot + 1.2);
+        ctx.stroke();
+      }
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(cx, cy, 2.5 * s, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    }
+    case 'kinetic_dart':
+    case 'ranger': {
+      // 4. Ranger: Kinetic Dart (Bow)
+      ctx.fillStyle = '#1c1404';
+      ctx.strokeStyle = '#ffcc00';
+      ctx.lineWidth = 1.2 * (s / 4);
+      ctx.beginPath();
+      ctx.moveTo(cx - 10 * s, cy - 1.5 * s);
+      ctx.lineTo(cx + 8 * s, cy - 1.5 * s);
+      ctx.lineTo(cx + 14 * s, cy);
+      ctx.lineTo(cx + 8 * s, cy + 1.5 * s);
+      ctx.lineTo(cx - 10 * s, cy + 1.5 * s);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.0 * (s / 4);
+      ctx.beginPath();
+      ctx.moveTo(cx - 9 * s, cy);
+      ctx.lineTo(cx + 13 * s, cy);
+      ctx.stroke();
+      break;
+    }
+    case 'photon_lance':
+    case 'paladin': {
+      // 5. Paladin: Photon Lance (Holy Beam)
+      ctx.strokeStyle = 'rgba(255, 215, 0, 0.4)';
+      ctx.lineWidth = 4.0 * (s / 4);
+      ctx.beginPath();
+      ctx.moveTo(cx - 16 * s, cy);
+      ctx.lineTo(cx + 16 * s, cy);
+      ctx.stroke();
+
+      ctx.fillStyle = '#ffffff';
+      ctx.strokeStyle = '#ffd700';
+      ctx.lineWidth = 1.5 * (s / 4);
+      ctx.beginPath();
+      ctx.moveTo(cx + 18 * s, cy);
+      ctx.lineTo(cx + 12 * s, cy - 3.5 * s);
+      ctx.lineTo(cx + 6 * s, cy);
+      ctx.lineTo(cx + 12 * s, cy + 3.5 * s);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.8 * (s / 4);
+      ctx.beginPath();
+      ctx.moveTo(cx - 16 * s, cy);
+      ctx.lineTo(cx + 17 * s, cy);
+      ctx.stroke();
+      break;
+    }
+    case 'sonic_shockwave':
+    case 'bard': {
+      // 6. Bard: Sonic Shockwave (Harmonic Pulse)
+      for (let i = 1; i <= 3; i++) {
+        ctx.strokeStyle = '#d946ef';
+        ctx.lineWidth = 2.0 * (s / 4);
+        ctx.beginPath();
+        ctx.arc(cx - 2 * s, cy, i * 4 * s, -Math.PI * 0.55, Math.PI * 0.55);
+        ctx.stroke();
+      }
+      ctx.fillStyle = '#ffffff';
+      ctx.strokeStyle = '#ff00ff';
+      ctx.lineWidth = 1.5 * (s / 4);
+      ctx.beginPath();
+      ctx.arc(cx + 4 * s, cy, 3 * s, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      break;
+    }
+    case 'cryo_needle': {
+      ctx.fillStyle = '#062030';
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 1.4 * (s / 4);
+      ctx.beginPath();
+      ctx.moveTo(cx + 10 * s, cy);
+      ctx.lineTo(cx + 3 * s, cy - 3.5 * s);
+      ctx.lineTo(cx - 7 * s, cy - 2.5 * s);
+      ctx.lineTo(cx - 10 * s, cy);
+      ctx.lineTo(cx - 7 * s, cy + 2.5 * s);
+      ctx.lineTo(cx + 3 * s, cy + 3.5 * s);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.0 * (s / 4);
+      ctx.beginPath();
+      ctx.moveTo(cx - 8 * s, cy);
+      ctx.lineTo(cx + 8 * s, cy);
+      ctx.stroke();
+      break;
+    }
+    case 'quantum_chakram': {
+      ctx.fillStyle = '#170624';
+      ctx.strokeStyle = '#c084fc';
+      ctx.lineWidth = 1.5 * (s / 4);
+      ctx.beginPath();
+      for (let i = 0; i < 3; i++) {
+        const ang = (i * Math.PI * 2) / 3;
+        const x1 = Math.cos(ang) * 9 * s;
+        const y1 = Math.sin(ang) * 9 * s;
+        const x2 = Math.cos(ang + 0.6) * 4 * s;
+        const y2 = Math.sin(ang + 0.6) * 4 * s;
+        if (i === 0) ctx.moveTo(cx + x1, cy + y1);
+        else {
+          ctx.lineTo(cx + x1, cy + y1);
+          ctx.lineTo(cx + x2, cy + y2);
+        }
+      }
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#030308';
+      ctx.beginPath();
+      ctx.arc(cx, cy, 2.5 * s, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#ffffff';
+      ctx.stroke();
+      break;
+    }
+    case 'proximity_mine': {
+      ctx.fillStyle = '#031f13';
+      ctx.strokeStyle = '#10b981';
+      ctx.lineWidth = 1.5 * (s / 4);
+      ctx.beginPath();
+      for (let i = 0; i < 8; i++) {
+        const ang = (i * Math.PI) / 4;
+        const x = Math.cos(ang) * 8 * s;
+        const y = Math.sin(ang) * 8 * s;
+        if (i === 0) ctx.moveTo(cx + x, cy + y);
+        else ctx.lineTo(cx + x, cy + y);
+      }
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#ff0055';
+      ctx.beginPath();
+      ctx.arc(cx, cy, 2.5 * s, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    }
+    case 'tesla_spark': {
+      ctx.fillStyle = 'rgba(59, 130, 246, 0.2)';
+      ctx.beginPath();
+      ctx.arc(cx, cy, 8 * s, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.strokeStyle = '#60a5fa';
+      ctx.lineWidth = 1.2 * (s / 4);
+      for (let i = 0; i < 4; i++) {
+        const ang = (i * Math.PI) / 2;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(cx + Math.cos(ang + 0.3) * 5 * s, cy + Math.sin(ang + 0.3) * 5 * s);
+        ctx.lineTo(cx + Math.cos(ang) * 11 * s, cy + Math.sin(ang) * 11 * s);
+        ctx.stroke();
+      }
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(cx, cy, 3 * s, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    }
+    default: {
+      ctx.fillStyle = '#ff3b30';
+      ctx.beginPath();
+      ctx.arc(cx, cy, 8 * s, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  ctx.restore();
+}
+
 export function renderStudioClassMunition(
   ctx: CanvasRenderingContext2D,
   classId: string,
   width: number,
   height: number,
-  time: number
+  _time: number
 ) {
   ctx.save();
   ctx.clearRect(0, 0, width, height);
@@ -820,106 +1111,9 @@ export function renderStudioClassMunition(
 
   const cx = width / 2;
   const cy = height / 2;
-  const s = Math.min(width, height) / 80;
+  const s = Math.min(width, height) / 38;
 
-  if (classId === 'fighter') {
-    ctx.fillStyle = '#3a0808';
-    ctx.strokeStyle = '#ff3b30';
-    ctx.lineWidth = 2.0;
-    ctx.beginPath();
-    ctx.moveTo(cx + 18 * s, cy);
-    ctx.lineTo(cx + 6 * s, cy - 8 * s);
-    ctx.lineTo(cx - 14 * s, cy - 8 * s);
-    ctx.lineTo(cx - 18 * s, cy - 14 * s);
-    ctx.lineTo(cx - 16 * s, cy);
-    ctx.lineTo(cx - 18 * s, cy + 14 * s);
-    ctx.lineTo(cx - 14 * s, cy + 8 * s);
-    ctx.lineTo(cx + 6 * s, cy + 8 * s);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
-
-    ctx.fillStyle = '#ffaa00';
-    ctx.beginPath();
-    ctx.arc(cx - 20 * s, cy, (4 + Math.sin(time * 20) * 1.5) * s, 0, Math.PI * 2);
-    ctx.fill();
-  } else if (classId === 'rogue') {
-    for (const offset of [-8 * s, 8 * s]) {
-      ctx.fillStyle = '#062033';
-      ctx.strokeStyle = '#38bdf8';
-      ctx.lineWidth = 1.8;
-      ctx.beginPath();
-      ctx.moveTo(cx + 16 * s, cy + offset);
-      ctx.lineTo(cx - 12 * s, cy + offset - 5 * s);
-      ctx.lineTo(cx - 6 * s, cy + offset);
-      ctx.lineTo(cx - 12 * s, cy + offset + 5 * s);
-      ctx.closePath();
-      ctx.fill();
-      ctx.stroke();
-    }
-  } else if (classId === 'mage') {
-    ctx.fillStyle = '#571800';
-    ctx.strokeStyle = '#f97316';
-    ctx.lineWidth = 2.0;
-    ctx.beginPath();
-    ctx.arc(cx, cy, 14 * s, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.stroke();
-
-    for (let f = 0; f < 8; f++) {
-      const fa = (f * Math.PI) / 4 + time * 1.5;
-      const fl = (18 + Math.sin(time * 12 + f) * 4) * s;
-      ctx.strokeStyle = '#ffd700';
-      ctx.lineWidth = 1.2;
-      ctx.beginPath();
-      ctx.moveTo(cx + Math.cos(fa) * 14 * s, cy + Math.sin(fa) * 14 * s);
-      ctx.lineTo(cx + Math.cos(fa) * fl, cy + Math.sin(fa) * fl);
-      ctx.stroke();
-    }
-  } else if (classId === 'bard') {
-    ctx.strokeStyle = '#c084fc';
-    ctx.lineWidth = 1.8;
-    for (let w = 1; w <= 3; w++) {
-      const wr = (w * 8 + Math.sin(time * 8) * 3) * s;
-      ctx.beginPath();
-      ctx.arc(cx - 6 * s, cy, wr, -Math.PI * 0.45, Math.PI * 0.45);
-      ctx.stroke();
-    }
-    ctx.fillStyle = '#ffffff';
-    ctx.font = `${Math.max(12, 10 * s)}px Arial`;
-    ctx.fillText('♪', cx + 10 * s, cy - 6 * s);
-    ctx.fillText('♫', cx + 16 * s, cy + 8 * s);
-  } else if (classId === 'paladin') {
-    ctx.strokeStyle = '#ffd700';
-    ctx.lineWidth = 3.5;
-    ctx.beginPath();
-    ctx.moveTo(cx - 26 * s, cy);
-    ctx.lineTo(cx + 26 * s, cy);
-    ctx.stroke();
-
-    ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.moveTo(cx - 26 * s, cy);
-    ctx.lineTo(cx + 26 * s, cy);
-    ctx.stroke();
-  } else if (classId === 'ranger') {
-    ctx.strokeStyle = '#10b981';
-    ctx.lineWidth = 1.8;
-    ctx.beginPath();
-    ctx.moveTo(cx - 22 * s, cy);
-    ctx.lineTo(cx + 22 * s, cy);
-    ctx.stroke();
-
-    ctx.fillStyle = '#a7f3d0';
-    ctx.beginPath();
-    ctx.moveTo(cx + 26 * s, cy);
-    ctx.lineTo(cx + 14 * s, cy - 7 * s);
-    ctx.lineTo(cx + 17 * s, cy);
-    ctx.lineTo(cx + 14 * s, cy + 7 * s);
-    ctx.closePath();
-    ctx.fill();
-  }
+  drawProceduralProjectile(ctx, classId, cx, cy, s);
 
   ctx.restore();
 }
