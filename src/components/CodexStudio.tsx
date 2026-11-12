@@ -5,16 +5,18 @@ import {
   ARENA_BOSSES_DATA,
   DRONES_DATA,
   HERO_CLASSES_DATA,
+  BIOME_AURAS_DATA,
   renderStudioPlayer,
   renderStudioEnemy,
   renderStudioWaveBoss,
   renderStudioArenaBoss,
   renderStudioDrone,
-  renderStudioHeroClassWeapon
+  renderStudioHeroClassWeapon,
+  renderStudioBiomeAura
 } from '../utils/vectorRenderers';
-import { User, Skull, ShieldAlert, Award, Crosshair, Zap, Download, Sparkles } from 'lucide-react';
+import { User, Skull, ShieldAlert, Award, Crosshair, Zap, Compass, Download, Sparkles } from 'lucide-react';
 
-type StudioTab = 'player' | 'enemy' | 'wave_boss' | 'arena_boss' | 'drone' | 'hero_class';
+type StudioTab = 'player' | 'enemy' | 'wave_boss' | 'arena_boss' | 'drone' | 'hero_class' | 'biome_aura';
 
 export const CodexStudio: React.FC = () => {
   const [activeTab, setActiveTab] = useState<StudioTab>('player');
@@ -35,6 +37,7 @@ export const CodexStudio: React.FC = () => {
   const [droneId, setDroneId] = useState<string>('missiles');
   const [heroClassId, setHeroClassId] = useState<string>('vanguard');
   const [isEvolved, setIsEvolved] = useState<boolean>(false);
+  const [biomeAuraId, setBiomeAuraId] = useState<string>('normal');
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -63,6 +66,8 @@ export const CodexStudio: React.FC = () => {
         renderStudioDrone(ctx, droneId, canvas.width, canvas.height, elapsed);
       } else if (activeTab === 'hero_class') {
         renderStudioHeroClassWeapon(ctx, heroClassId, canvas.width, canvas.height, elapsed, isEvolved);
+      } else if (activeTab === 'biome_aura') {
+        renderStudioBiomeAura(ctx, biomeAuraId, canvas.width, canvas.height, elapsed);
       }
 
       animId = requestAnimationFrame(render);
@@ -83,7 +88,8 @@ export const CodexStudio: React.FC = () => {
     arenaBossRarity,
     droneId,
     heroClassId,
-    isEvolved
+    isEvolved,
+    biomeAuraId
   ]);
 
   // Download 1080p Crystal Clear PNG
@@ -114,6 +120,9 @@ export const CodexStudio: React.FC = () => {
     } else if (activeTab === 'hero_class') {
       renderStudioHeroClassWeapon(offCtx, heroClassId, 1920, 1080, 0, isEvolved);
       filename = `classe_heroi_${heroClassId}${isEvolved ? '_evolucao_reliquia' : '_base'}.png`;
+    } else if (activeTab === 'biome_aura') {
+      renderStudioBiomeAura(offCtx, biomeAuraId, 1920, 1080, 0);
+      filename = `codex_aura_${biomeAuraId}_1080p.png`;
     }
 
     const link = document.createElement('a');
@@ -138,6 +147,7 @@ export const CodexStudio: React.FC = () => {
 
   const selectedDrone = DRONES_DATA.find(d => d.id === droneId) || DRONES_DATA[0]!;
   const selectedHeroClass = HERO_CLASSES_DATA.find(c => c.id === heroClassId) || HERO_CLASSES_DATA[0]!;
+  const selectedBiomeAura = BIOME_AURAS_DATA.find(a => a.id === biomeAuraId) || BIOME_AURAS_DATA[0]!;
 
   return (
     <div className="bg-cyber-card rounded-3xl p-6 sm:p-8 border border-cyber-cyan/50 shadow-neon-cyan/20 mb-16">
@@ -226,6 +236,18 @@ export const CodexStudio: React.FC = () => {
           >
             <Zap className="w-4 h-4" />
             <span>Classes & Armas de Heróis</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('biome_aura')}
+            className={`px-3 py-2 rounded-xl flex items-center gap-2 transition-all ${
+              activeTab === 'biome_aura'
+                ? 'bg-emerald-400 text-black font-bold shadow-lg shadow-emerald-400/25'
+                : 'bg-cyber-darker text-slate-300 hover:text-white border border-cyber-cardBorder'
+            }`}
+          >
+            <Compass className="w-4 h-4" />
+            <span>Auras de Biomas (11)</span>
           </button>
         </div>
       </div>
@@ -842,6 +864,122 @@ export const CodexStudio: React.FC = () => {
                   <div className="flex justify-between p-2 rounded bg-cyber-card border border-cyber-cardBorder/40 text-[11px]">
                     <span className="text-slate-400">Implementação no Motor:</span>
                     <span className="text-white font-mono">{selectedHeroClass.codeRef}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 7: AURAS DE BIOMAS (11) */}
+          {activeTab === 'biome_aura' && (
+            <div>
+              <div className="mb-6 space-y-4">
+                <div>
+                  <label className="block text-xs font-mono text-cyber-cyan font-bold uppercase mb-1.5">
+                    1. Escolha a Aura do Bioma (11 Biomas):
+                  </label>
+                  <select
+                    value={biomeAuraId}
+                    onChange={(e) => setBiomeAuraId(e.target.value)}
+                    className="w-full bg-cyber-card border border-cyber-cardBorder rounded-xl px-3 py-2 text-sm text-white font-mono focus:outline-none focus:border-cyber-cyan"
+                  >
+                    {BIOME_AURAS_DATA.map((a, idx) => (
+                      <option key={a.id} value={a.id}>
+                        #{idx + 1}: {a.namePt} ({a.nameEn})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-mono text-slate-400 font-bold uppercase mb-1.5">
+                    2. Seleção Rápida de Bioma:
+                  </label>
+                  <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto pr-1">
+                    {BIOME_AURAS_DATA.map((a) => (
+                      <button
+                        key={a.id}
+                        onClick={() => setBiomeAuraId(a.id)}
+                        className={`px-2.5 py-1.5 rounded-lg border text-left font-mono text-[11px] transition-all flex items-center gap-2 ${
+                          biomeAuraId === a.id
+                            ? 'bg-cyber-card text-white font-bold'
+                            : 'bg-cyber-darker text-slate-400 hover:text-white border-cyber-cardBorder'
+                        }`}
+                        style={{
+                          borderColor: biomeAuraId === a.id ? a.colorHex : undefined,
+                          boxShadow: biomeAuraId === a.id ? `0 0 12px ${a.colorHex}40` : undefined
+                        }}
+                      >
+                        <span
+                          className="w-2.5 h-2.5 rounded-full shrink-0"
+                          style={{ backgroundColor: a.colorHex, boxShadow: `0 0 6px ${a.colorHex}` }}
+                        />
+                        <span className="truncate">{a.namePt.replace('Aura ', '').replace('da ', '').replace('de ', '').replace('do ', '')}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Explanatory Legend */}
+              <div className="pt-4 border-t border-cyber-cardBorder/60">
+                <span
+                  className="font-mono text-xs font-bold px-2.5 py-1 rounded inline-block mb-2"
+                  style={{ backgroundColor: `${selectedBiomeAura.colorHex}22`, color: selectedBiomeAura.colorHex }}
+                >
+                  NÍVEL DE CAMPO // AURA DE BIOMA
+                </span>
+
+                <h4 className="font-orbitron font-bold text-xl text-white mb-1 flex items-center gap-2">
+                  <span
+                    className="w-3.5 h-3.5 rounded-full inline-block"
+                    style={{ backgroundColor: selectedBiomeAura.colorHex, boxShadow: `0 0 8px ${selectedBiomeAura.colorHex}` }}
+                  />
+                  {selectedBiomeAura.namePt}
+                </h4>
+                <p className="font-mono text-xs text-cyber-cyan mb-3">
+                  ID: #{selectedBiomeAura.id} // {selectedBiomeAura.nameEn.toUpperCase()}
+                </p>
+
+                <div className="space-y-3 font-mono text-xs mb-4">
+                  {/* Combat Bonus */}
+                  <div className="p-2.5 rounded bg-cyber-card border border-cyber-cardBorder/40">
+                    <span className="text-slate-400 block mb-0.5">BÔNUS DE COMBATE & PODER DO BIOMA:</span>
+                    <span className="text-white font-bold block" style={{ color: selectedBiomeAura.colorHex }}>
+                      {selectedBiomeAura.bonusPt}
+                    </span>
+                  </div>
+
+                  {/* Engine Instantiation Rules */}
+                  <div className="p-3 rounded-xl bg-black/60 border border-cyber-cyan/30 text-[11px] leading-relaxed">
+                    <span className="text-cyber-cyan font-bold block mb-1.5 uppercase tracking-wider">
+                      ⚙️ REGRA DE INSTANCIAÇÃO (MOTOR):
+                    </span>
+                    <div className="space-y-1 text-slate-300">
+                      <div>• Ganho na Plataforma: <span className="text-amber-400 font-bold">+1.0s/s</span></div>
+                      <div>• Limiar Mínimo: <span className="text-amber-400 font-bold">T_min = 15.0s + (Dificuldade × 5.0s)</span></div>
+                      <div>• Decaimento Fora da Plataforma: <span className="text-amber-400 font-bold">-0.4s/s</span> (Dreno ativo: <span className="text-red-400 font-bold">-1.0s/s</span>)</div>
+                      <div>• Raio de Referência: <span className="text-amber-400 font-bold">R = 86px</span> padronizado (Fire Aura baseline)</div>
+                      <div className="text-[10px] text-slate-400 pt-1 border-t border-cyber-cardBorder/40">
+                        Código Fonte: <span className="text-white font-mono">BiomeAuraManager.ts</span> & <span className="text-white font-mono">RenderSystem.ts:lines 4778-5365</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Active Procedural Geometry */}
+                  <div className="p-2.5 rounded bg-cyber-darker border border-cyber-cardBorder/50 text-[11px]">
+                    <span className="text-purple-300 font-bold block mb-1 uppercase tracking-wider">
+                      📐 GEOMETRIA PROCEDURAL ATIVA:
+                    </span>
+                    <p className="font-outfit text-slate-300 leading-relaxed">
+                      {selectedBiomeAura.geomPt}
+                    </p>
+                  </div>
+
+                  {/* Lore */}
+                  <div className="text-[11px] font-outfit text-slate-300 leading-relaxed border-t border-cyber-cardBorder/40 pt-2">
+                    <strong className="text-white font-mono block mb-0.5">LORE DO BIOMA:</strong>
+                    {selectedBiomeAura.lorePt}
                   </div>
                 </div>
               </div>

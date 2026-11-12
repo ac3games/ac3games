@@ -2463,6 +2463,777 @@ export function renderStudioClassMunition(
   ctx.restore();
 }
 
+export interface BiomeAuraInfo {
+  id: string;
+  namePt: string;
+  nameEn: string;
+  colorHex: string;
+  colorNumber: number;
+  haloColor: number;
+  coreColor: number;
+  bonusPt: string;
+  geomPt: string;
+  lorePt: string;
+}
+
+export const BIOME_AURAS_DATA: BiomeAuraInfo[] = [
+  {
+    id: 'normal',
+    namePt: 'Aura da Floresta Quântica',
+    nameEn: 'Quantum Forest Aura',
+    colorHex: '#00ff66',
+    colorNumber: 0x00ff66,
+    haloColor: 0x10b981,
+    coreColor: 0x34d399,
+    bonusPt: 'SIFÃO VITAL & ESCUDO DE ESPOROS: +12.0 HP/s DE CURA E -40% DANO SOFRIDO!',
+    geomPt: 'Anel névoa esmeralda (largura 22px) + Anel core mint com filamento branco + Anel de vinhas interior (R-10) + 6 folhas em diamante com veios + 8 esporos bio-sintéticos em contra-rotação.',
+    lorePt: 'Ativada nas plataformas bio-quânticas. Restaura a integridade estrutural e sela microfissuras da nave.'
+  },
+  {
+    id: 'magma',
+    namePt: 'Aura Vulcânica Incandescente',
+    nameEn: 'Incandescent Volcanic Aura',
+    colorHex: '#ff4400',
+    colorNumber: 0xff4400,
+    haloColor: 0xff4400,
+    coreColor: 0xffea00,
+    bonusPt: 'SOBRECARGA DE CHAMAS ATÔMICAS: +60% DANO GLOBAL EM TODAS AS ARMAS E MAGIAS!',
+    geomPt: 'Halo térmico de 25px + 12 línguas de fogo vetoriais pontiagudas (Vector Flame Sickles) com cauda pulsante (18+sin*8) + Núcleo de labareda dourada + Anel de contenção magmática + 6 faíscas ejetadas.',
+    lorePt: 'Forjada em plataformas de magma condensado. Infunde ogivas e lasers com plasma térmico hiperconcentrado.'
+  },
+  {
+    id: 'ice',
+    namePt: 'Aura Criogênica SubZero',
+    nameEn: 'SubZero Cryogenic Aura',
+    colorHex: '#00ffff',
+    colorNumber: 0x00ffff,
+    haloColor: 0x00ffff,
+    coreColor: 0x00e5ff,
+    bonusPt: 'ESTASE CRIOGÊNICA TOTAL: +50% CADÊNCIA DE TIRO E CAMPO DE ESTASE DE GELO!',
+    geomPt: 'Halo glacial de 25px + 6 Flocos de Neve Hexagonais Facetados orbitando em R=86px (com 6 ramificações e espículas em 45°) + Anel de gelo periwinkle com filamento branco puro.',
+    lorePt: 'Resfriamento supercondutor instantâneo que acelera a ignição de disparos e retarda matéria hostil.'
+  },
+  {
+    id: 'electric',
+    namePt: 'Aura Voltaica Megawatt',
+    nameEn: 'Megawatt Voltaic Aura',
+    colorHex: '#ffea00',
+    colorNumber: 0xffea00,
+    haloColor: 0xffea00,
+    coreColor: 0xffffff,
+    bonusPt: 'SUPERCONDUÇÃO VOLTAICA: 3.0x REGENERAÇÃO DE MANA E DESCARGAS ELÉTRICAS!',
+    geomPt: 'Halo ambiente de 20px + Anel de Arco Voltaico de alta velocidade oscilando com 24 pontos estocásticos com jitter senoidal duplo + 4 Capacitores Tesla com descargas e faíscas para fora.',
+    lorePt: 'Rede de condensadores de alta voltagem. Conduz surtos de elétrons para aniquilar escudos cibernéticos.'
+  },
+  {
+    id: 'void',
+    namePt: 'Aura Singulárica do Vazio',
+    nameEn: 'Singular Void Aura',
+    colorHex: '#a000ff',
+    colorNumber: 0xa000ff,
+    haloColor: 0x581c87,
+    coreColor: 0xa000ff,
+    bonusPt: 'FENDA TEMPORAL & ÍMÃ ABSOLUTO: -45% COOLDOWNS E ATRAÇÃO DE 100% DOS DROPS!',
+    geomPt: 'Halo do Horizonte de Eventos + Anel gravitacional duplo + 2 Braços Espirais de Sucção de Arquimedes (Archimedean Suction Spirals) com fio dorsal branco + 6 partículas sugadas para a fenda.',
+    lorePt: 'Dobra o tecido do hiperespaço local, colapsando o tempo de recarga e canalizando todos os recursos caídos.'
+  },
+  {
+    id: 'overcharged',
+    namePt: 'Aura de Reator Sobrecarregado',
+    nameEn: 'Overcharged Reactor Aura',
+    colorHex: '#ffaa00',
+    colorNumber: 0xffaa00,
+    haloColor: 0xef4444,
+    coreColor: 0xfef08a,
+    bonusPt: 'ANIQUILAÇÃO CRÍTICA & HIPER-XP: 3.0x EXP, +40% CHANCE CRÍTICA E 2.0x DANO CRÍTICO!',
+    geomPt: 'Halo de contenção de plasma + 2 Pentágonos Concorrentes Contra-Rotativos (externo R=86px horário, interno R=0.80 anti-horário) + 5 Nodos Capacitores de Descarga Vermelhos nos vértices.',
+    lorePt: 'Libera o limitador do reator de fissão quântica para amplificação geométrica de dano crítico.'
+  },
+  {
+    id: 'chronos',
+    namePt: 'Aura Temporal de Chronos',
+    nameEn: 'Chronos Temporal Aura',
+    colorHex: '#ffd700',
+    colorNumber: 0xffd700,
+    haloColor: 0xeab308,
+    coreColor: 0xffd700,
+    bonusPt: 'DOMO CHRONOS & ESQUIVA ABSOLUTA: +40% ESQUIVA E DESACELERAÇÃO DE PROJÉTEIS INIMIGOS!',
+    geomPt: 'Halo de bisel dourado + Anel mostrador + 12 Marcadores de Horas do Relógio Cósmico (cardeais brancos longos de 13px) + Ponteiro Táquion de alta velocidade + Orbe Temporal Chronos orbitando.',
+    lorePt: 'Cria uma bolha temporal local onde disparos inimigos desaceleram e manobras evasivas tornam-se imperceptíveis.'
+  },
+  {
+    id: 'cyber_grid',
+    namePt: 'Aura Cibernética Neon',
+    nameEn: 'Neon Cybernetic Aura',
+    colorHex: '#ff00aa',
+    colorNumber: 0xff00aa,
+    haloColor: 0x00f0ff,
+    coreColor: 0xff00aa,
+    bonusPt: 'DISPARO QUÂNTICO PERFURANTE: PERFURAÇÃO INFINITA E +75% DANO DE RICOCHETE!',
+    geomPt: '4 Suportes de Mira HUD segmentados em ciano + 8 Nodos de Telemetria de Dados + Hipercubo 3D Real Wireframe girando em 3 eixos (rotX, rotY, rotZ) no centro com 12 arestas e 8 vértices brilhantes.',
+    lorePt: 'Interliga o vetor de disparo com a malha computacional central para perfurar qualquer barreira.'
+  },
+  {
+    id: 'solar_flare',
+    namePt: 'Aura Solar Incandescente',
+    nameEn: 'Incandescent Solar Aura',
+    colorHex: '#ff0055',
+    colorNumber: 0xff0055,
+    haloColor: 0xf59e0b,
+    coreColor: 0xffea00,
+    bonusPt: 'PULSO RADIATIVO INCANDESCENTE: CORONA SOLAR DE 100 DANO TÉRMICO/S EM ÁREA!',
+    geomPt: 'Halo corona suave + 12 Proeminências Solares Dinâmicas com comprimento pulsante (14+sin*9) alternando amarelo e carmesim + Anel corona com filamento branco incandescente.',
+    lorePt: 'Incinerador radioativo contínuo que desintegra inimigos menores ao redor do casco do caça.'
+  },
+  {
+    id: 'crystal_prism',
+    namePt: 'Aura Prismática Cortante',
+    nameEn: 'Prismatic Cutting Aura',
+    colorHex: '#e25cff',
+    colorNumber: 0xe25cff,
+    haloColor: 0x06b6d4,
+    coreColor: 0xe25cff,
+    bonusPt: 'REFRAÇÃO DEVASTADORA: +100% DANO CRÍTICO E DISPAROS ADICIONAIS REFRATADOS!',
+    geomPt: 'Halo de refração ciano + Anel facetado magenta com núcleo branco + 6 Cristais Prismáticos em Losango (Rhombus) orbitando em R=86px com preenchimento translúcido e linha de refração interna.',
+    lorePt: 'Prismas ópticos de precisão que refratam qualquer feixe disparado em múltiplos ângulos de abate.'
+  },
+  {
+    id: 'abyssal',
+    namePt: 'Aura do Miasma Abissal',
+    nameEn: 'Abyssal Miasma Aura',
+    colorHex: '#38bdf8',
+    colorNumber: 0x38bdf8,
+    haloColor: 0x581c87,
+    coreColor: 0x38bdf8,
+    bonusPt: 'DANO VERDADEIRO & SIFÃO CINÉTICO: +50% DANO VERDADEIRO E +5 HP / +10 EN POR ABATE!',
+    geomPt: 'Halo do abismo profundo + Anel de Tentáculos Fluidos Ondulatórios com 6 lóbulos bio-cinéticos ondulando em onda senoidal (waveAmp = 8+sin*3.5) + Filamento branco + 6 Nodos de Miasma roxos/brancos.',
+    lorePt: 'Canalização da matéria escura das profundezas do cosmos. Converte a destruição de alvos em sobrevivência.'
+  }
+];
+
+/**
+ * Real-time 60 FPS Procedural Biome Aura Showcase Renderer
+ * Verbatim recreation of RenderSystem.ts:lines 4778-5365 & codex_auras_biomas.html
+ */
+export function renderStudioBiomeAura(
+  ctx: CanvasRenderingContext2D,
+  biomeId: string,
+  width: number,
+  height: number,
+  time: number
+) {
+  ctx.save();
+  ctx.clearRect(0, 0, width, height);
+
+  // Deep space canvas background
+  ctx.fillStyle = '#030109';
+  ctx.fillRect(0, 0, width, height);
+
+  const cx = width / 2;
+  const cy = height / 2;
+
+  // Responsive scaling: Base 1080p -> s = 2.4, R = 206px. Scales smoothly to card size or 1080p
+  const scaleRef = Math.min(width / 1920, height / 1080);
+  const s = Math.max(0.35, 2.4 * scaleRef);
+  const R = 86 * s;
+
+  const aura = BIOME_AURAS_DATA.find((a) => a.id === biomeId) || BIOME_AURAS_DATA[0]!;
+
+  // 1. Draw Platform Rail & Hazard Platform Stripes
+  const platY = cy + 120 * s;
+  ctx.fillStyle = '#060d1a';
+  ctx.fillRect(0, platY, width, height - platY);
+
+  // Top Hazard Rail
+  ctx.strokeStyle = '#00f0ff';
+  ctx.lineWidth = Math.max(1, 3.5 * scaleRef);
+  ctx.beginPath();
+  ctx.moveTo(0, platY);
+  ctx.lineTo(width, platY);
+  ctx.stroke();
+
+  // Hazard Stripes
+  ctx.fillStyle = 'rgba(0, 240, 255, 0.22)';
+  const stripeStep = Math.max(14, 40 * scaleRef);
+  for (let x = 0; x < width; x += stripeStep) {
+    ctx.beginPath();
+    ctx.moveTo(x, platY);
+    ctx.lineTo(x + 22 * scaleRef, platY + 28 * scaleRef);
+    ctx.lineTo(x + 10 * scaleRef, platY + 28 * scaleRef);
+    ctx.lineTo(x - 12 * scaleRef, platY);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  // 2. Translucent Radial Gradient Background
+  const grad = ctx.createRadialGradient(cx, cy, 20 * scaleRef, cx, cy, R * 1.25);
+  grad.addColorStop(0, `${aura.colorHex}33`);
+  grad.addColorStop(0.5, `${aura.colorHex}15`);
+  grad.addColorStop(1, 'transparent');
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.arc(cx, cy, R * 1.25, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 3. Render Aura Geometric Components by Type
+  ctx.save();
+  switch (aura.id) {
+    case 'normal': {
+      // Emerald Mist Ring
+      ctx.strokeStyle = 'rgba(16, 185, 129, 0.18)';
+      ctx.lineWidth = 22 * s;
+      ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.stroke();
+
+      // Mint Core Ring + White Filament
+      ctx.strokeStyle = '#34d399';
+      ctx.lineWidth = 2.8 * s;
+      ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.stroke();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.0 * s;
+      ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.stroke();
+
+      // Inner Vine Filament Ring
+      ctx.strokeStyle = 'rgba(5, 150, 105, 0.55)';
+      ctx.lineWidth = 1.6 * s;
+      ctx.beginPath(); ctx.arc(cx, cy, R - 10 * s, 0, Math.PI * 2); ctx.stroke();
+
+      // 6 Orbiting Emerald Diamond Leaves
+      for (let i = 0; i < 6; i++) {
+        const angle = time * 1.6 + (i * Math.PI) / 3;
+        const lx = cx + Math.cos(angle) * R;
+        const ly = cy + Math.sin(angle) * R;
+        ctx.fillStyle = '#00ff66';
+        ctx.beginPath();
+        ctx.moveTo(lx, ly - 8 * s);
+        ctx.lineTo(lx + 8 * s, ly);
+        ctx.lineTo(lx, ly + 8 * s);
+        ctx.lineTo(lx - 8 * s, ly);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1.2 * s;
+        ctx.beginPath();
+        ctx.moveTo(lx, ly - 7 * s);
+        ctx.lineTo(lx, ly + 7 * s);
+        ctx.stroke();
+      }
+
+      // Orbiting Bio-Spore Motes
+      for (let sp = 0; sp < 8; sp++) {
+        const sAng = -time * 2.2 + (sp * Math.PI) / 4;
+        const sDist = R + Math.sin(time * 3 + sp) * 6 * s;
+        const sx = cx + Math.cos(sAng) * sDist;
+        const sy = cy + Math.sin(sAng) * sDist;
+        ctx.fillStyle = '#6ee7b7';
+        ctx.beginPath();
+        ctx.arc(sx, sy, 2.4 * s, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      break;
+    }
+
+    case 'magma': {
+      const rot = time * 1.6;
+      ctx.strokeStyle = 'rgba(255, 68, 0, 0.16)';
+      ctx.lineWidth = 25 * s;
+      ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.stroke();
+
+      const numFlames = 12;
+      for (let i = 0; i < numFlames; i++) {
+        const fa = rot + (i * Math.PI * 2) / numFlames;
+        const flameLen = (18 + Math.sin(time * 8 + i * 2) * 8) * s;
+        const p0x = cx + Math.cos(fa - 0.12) * (R - 10 * s);
+        const p0y = cy + Math.sin(fa - 0.12) * (R - 10 * s);
+        const p1x = cx + Math.cos(fa + 0.22) * (R + flameLen);
+        const p1y = cy + Math.sin(fa + 0.22) * (R + flameLen);
+        const p2x = cx + Math.cos(fa + 0.12) * (R - 10 * s);
+        const p2y = cy + Math.sin(fa + 0.12) * (R - 10 * s);
+
+        ctx.fillStyle = i % 2 === 0 ? '#ff3300' : '#ff7700';
+        ctx.beginPath();
+        ctx.moveTo(p0x, p0y); ctx.lineTo(p1x, p1y); ctx.lineTo(p2x, p2y);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.fillStyle = '#ffea00';
+        ctx.beginPath();
+        ctx.moveTo(p0x, p0y);
+        ctx.lineTo(cx + Math.cos(fa + 0.18) * (R + flameLen * 0.65), cy + Math.sin(fa + 0.18) * (R + flameLen * 0.65));
+        ctx.lineTo(p2x, p2y);
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      ctx.strokeStyle = '#ff4400';
+      ctx.lineWidth = 2.4 * s;
+      ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.stroke();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 0.9 * s;
+      ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.stroke();
+
+      for (let f = 0; f < 6; f++) {
+        const fa = -time * 3 + f * 1.3;
+        const fd = R + 14 * s + Math.sin(time * 5 + f) * 16 * s;
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(cx + Math.cos(fa) * fd, cy + Math.sin(fa) * fd, 2.0 * s, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      break;
+    }
+
+    case 'ice': {
+      const rot = time * 0.45;
+      ctx.strokeStyle = 'rgba(0, 255, 255, 0.15)';
+      ctx.lineWidth = 25 * s;
+      ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.stroke();
+
+      for (let i = 0; i < 6; i++) {
+        const fa = rot + (i * Math.PI) / 3;
+        const fx = cx + Math.cos(fa) * R;
+        const fy = cy + Math.sin(fa) * R;
+        const snowRot = time * 1.2 + i;
+
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1.4 * s;
+
+        for (let b = 0; b < 6; b++) {
+          const ba = snowRot + (b * Math.PI) / 3;
+          const bx = fx + Math.cos(ba) * 11 * s;
+          const by = fy + Math.sin(ba) * 11 * s;
+          ctx.beginPath(); ctx.moveTo(fx, fy); ctx.lineTo(bx, by); ctx.stroke();
+
+          const spX = fx + Math.cos(ba) * 6 * s;
+          const spY = fy + Math.sin(ba) * 6 * s;
+          const s1 = ba + Math.PI / 4;
+          const s2 = ba - Math.PI / 4;
+          ctx.beginPath(); ctx.moveTo(spX, spY); ctx.lineTo(spX + Math.cos(s1) * 4 * s, spY + Math.sin(s1) * 4 * s); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(spX, spY); ctx.lineTo(spX + Math.cos(s2) * 4 * s, spY + Math.sin(s2) * 4 * s); ctx.stroke();
+        }
+
+        ctx.fillStyle = '#00e5ff';
+        ctx.beginPath(); ctx.arc(fx, fy, 2.8 * s, 0, Math.PI * 2); ctx.fill();
+      }
+
+      ctx.strokeStyle = '#00e5ff';
+      ctx.lineWidth = 2.2 * s;
+      ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.stroke();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 0.9 * s;
+      ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.stroke();
+      break;
+    }
+
+    case 'electric': {
+      ctx.strokeStyle = 'rgba(255, 234, 0, 0.18)';
+      ctx.lineWidth = 20 * s;
+      ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.stroke();
+
+      const arcPoints = 24;
+      ctx.strokeStyle = '#ffea00';
+      ctx.lineWidth = 2.2 * s;
+      ctx.beginPath();
+      for (let p = 0; p <= arcPoints; p++) {
+        const pa = (p * Math.PI * 2) / arcPoints;
+        const jitter = (Math.sin(time * 25 + p * 7) * 0.5 + Math.cos(time * 35 + p * 13) * 0.5) * 8 * s;
+        const px = cx + Math.cos(pa) * (R + jitter);
+        const py = cy + Math.sin(pa) * (R + jitter);
+        if (p === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+      ctx.stroke();
+
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 0.9 * s;
+      ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.stroke();
+
+      for (let c = 0; c < 4; c++) {
+        const ca = time * 2.5 + (c * Math.PI) / 2;
+        const cpx = cx + Math.cos(ca) * R;
+        const cpy = cy + Math.sin(ca) * R;
+
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath(); ctx.arc(cpx, cpy, 3.8 * s, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#ffea00';
+        ctx.lineWidth = 1.6 * s;
+        ctx.beginPath(); ctx.arc(cpx, cpy, 3.8 * s, 0, Math.PI * 2); ctx.stroke();
+
+        const sparkLen = (14 + Math.sin(time * 40 + c) * 6) * s;
+        ctx.beginPath();
+        ctx.moveTo(cpx, cpy);
+        ctx.lineTo(cx + Math.cos(ca) * (R + sparkLen), cy + Math.sin(ca) * (R + sparkLen));
+        ctx.stroke();
+      }
+      break;
+    }
+
+    case 'void': {
+      const rotSpeed = -time * 2.8;
+      const totalTurns = 2.0;
+      const maxTheta = totalTurns * Math.PI * 2;
+      const minR = 14 * s;
+      const maxR = R;
+      const kSlope = (maxR - minR) / maxTheta;
+      const steps = 90;
+
+      ctx.strokeStyle = 'rgba(88, 28, 135, 0.28)';
+      ctx.lineWidth = 18 * s;
+      ctx.beginPath(); ctx.arc(cx, cy, maxR, 0, Math.PI * 2); ctx.stroke();
+      ctx.strokeStyle = '#a000ff';
+      ctx.lineWidth = 2.6 * s;
+      ctx.beginPath(); ctx.arc(cx, cy, maxR, 0, Math.PI * 2); ctx.stroke();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 0.9 * s;
+      ctx.beginPath(); ctx.arc(cx, cy, maxR, 0, Math.PI * 2); ctx.stroke();
+
+      for (let arm = 0; arm < 2; arm++) {
+        const phase = arm * Math.PI;
+
+        ctx.strokeStyle = '#a000ff';
+        ctx.lineWidth = 2.4 * s;
+        ctx.beginPath();
+        for (let st = 0; st <= steps; st++) {
+          const theta = (st / steps) * maxTheta;
+          const rad = minR + kSlope * theta;
+          const ang = rotSpeed + theta + phase;
+          const px = cx + Math.cos(ang) * rad;
+          const py = cy + Math.sin(ang) * rad;
+          if (st === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+        }
+        ctx.stroke();
+
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+        ctx.lineWidth = 0.9 * s;
+        ctx.beginPath();
+        for (let st = 0; st <= steps; st++) {
+          const theta = (st / steps) * maxTheta;
+          const rad = minR + kSlope * theta;
+          const ang = rotSpeed + theta + phase;
+          const px = cx + Math.cos(ang) * rad;
+          const py = cy + Math.sin(ang) * rad;
+          if (st === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+        }
+        ctx.stroke();
+      }
+
+      for (let p = 0; p < 6; p++) {
+        const frac = ((time * 0.8 + p * 0.16) % 1);
+        const rad = maxR - frac * (maxR - minR);
+        const ang = rotSpeed + frac * maxTheta + (p % 2 === 0 ? 0 : Math.PI);
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(cx + Math.cos(ang) * rad, cy + Math.sin(ang) * rad, 2.4 * s, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      break;
+    }
+
+    case 'overcharged': {
+      ctx.strokeStyle = 'rgba(239, 68, 68, 0.25)';
+      ctx.lineWidth = 20 * s;
+      ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.stroke();
+
+      ctx.strokeStyle = '#ffaa00';
+      ctx.lineWidth = 2.6 * s;
+      ctx.beginPath();
+      for (let i = 0; i < 5; i++) {
+        const pa = -time * 1.5 + (i * 2 * Math.PI) / 5;
+        const px = cx + Math.cos(pa) * R;
+        const py = cy + Math.sin(pa) * R;
+        if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+      ctx.stroke();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 0.9 * s;
+      ctx.stroke();
+
+      const inR = R * 0.80;
+      ctx.strokeStyle = '#fef08a';
+      ctx.lineWidth = 1.8 * s;
+      ctx.beginPath();
+      for (let i = 0; i < 5; i++) {
+        const pa = time * 2.0 + (i * 2 * Math.PI) / 5;
+        const px = cx + Math.cos(pa) * inR;
+        const py = cy + Math.sin(pa) * inR;
+        if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+      ctx.stroke();
+
+      for (let i = 0; i < 5; i++) {
+        const pa = -time * 1.5 + (i * 2 * Math.PI) / 5;
+        const nx = cx + Math.cos(pa) * R;
+        const ny = cy + Math.sin(pa) * R;
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath(); ctx.arc(nx, ny, 3.8 * s, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#ef4444';
+        ctx.lineWidth = 1.8 * s;
+        ctx.beginPath(); ctx.arc(nx, ny, 3.8 * s, 0, Math.PI * 2); ctx.stroke();
+      }
+      break;
+    }
+
+    case 'chronos': {
+      ctx.strokeStyle = 'rgba(234, 179, 8, 0.22)';
+      ctx.lineWidth = 18 * s;
+      ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.stroke();
+
+      ctx.strokeStyle = '#ffd700';
+      ctx.lineWidth = 2.4 * s;
+      ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.stroke();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 0.9 * s;
+      ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.stroke();
+
+      for (let i = 0; i < 12; i++) {
+        const ta = (i * Math.PI) / 6;
+        const isCardinal = i % 3 === 0;
+        const tLen = (isCardinal ? 13 : 7) * s;
+        const x1 = cx + Math.cos(ta) * (R - tLen);
+        const y1 = cy + Math.sin(ta) * (R - tLen);
+        const x2 = cx + Math.cos(ta) * (R + tLen);
+        const y2 = cy + Math.sin(ta) * (R + tLen);
+        ctx.strokeStyle = isCardinal ? '#ffffff' : '#ffd700';
+        ctx.lineWidth = (isCardinal ? 2.4 : 1.4) * s;
+        ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+      }
+
+      const handAngle = time * 2.8;
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2.4 * s;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(cx + Math.cos(handAngle) * (R - 16 * s), cy + Math.sin(handAngle) * (R - 16 * s));
+      ctx.stroke();
+
+      const ox = cx + Math.cos(-time * 1.2) * R;
+      const oy = cy + Math.sin(-time * 1.2) * R;
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath(); ctx.arc(ox, oy, 4.2 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = '#ffd700';
+      ctx.lineWidth = 1.8 * s;
+      ctx.beginPath(); ctx.arc(ox, oy, 4.2 * s, 0, Math.PI * 2); ctx.stroke();
+      break;
+    }
+
+    case 'cyber_grid': {
+      const bracketRot = time * 1.0;
+      const bracketSpan = Math.PI * 0.32;
+      for (let b = 0; b < 4; b++) {
+        const bAng = bracketRot + (b * Math.PI) / 2;
+        ctx.strokeStyle = '#00f0ff';
+        ctx.lineWidth = 3.2 * s;
+        ctx.beginPath();
+        ctx.arc(cx, cy, R, bAng - bracketSpan * 0.5, bAng + bracketSpan * 0.5);
+        ctx.stroke();
+      }
+
+      for (let d = 0; d < 8; d++) {
+        const da = -time * 1.8 + (d * Math.PI) / 4;
+        ctx.fillStyle = '#00f0ff';
+        ctx.beginPath();
+        ctx.arc(cx + Math.cos(da) * R, cy + Math.sin(da) * R, 2.6 * s, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      const cubeS = 42 * s;
+      const rawVertices = [
+        [-cubeS, -cubeS, -cubeS], [ cubeS, -cubeS, -cubeS], [ cubeS,  cubeS, -cubeS], [-cubeS,  cubeS, -cubeS],
+        [-cubeS, -cubeS,  cubeS], [ cubeS, -cubeS,  cubeS], [ cubeS,  cubeS,  cubeS], [-cubeS,  cubeS,  cubeS]
+      ];
+      const cubeEdges = [
+        [0, 1], [1, 2], [2, 3], [3, 0],
+        [4, 5], [5, 6], [6, 7], [7, 4],
+        [0, 4], [1, 5], [2, 6], [3, 7]
+      ];
+
+      const rotX = time * 0.9;
+      const rotY = time * 1.4;
+      const rotZ = time * 0.6;
+      const cxX = Math.cos(rotX), sxX = Math.sin(rotX);
+      const cxY = Math.cos(rotY), sxY = Math.sin(rotY);
+      const cxZ = Math.cos(rotZ), sxZ = Math.sin(rotZ);
+
+      const proj = rawVertices.map(([vx, vy, vz]) => {
+        const y1 = vy * cxX - vz * sxX;
+        const z1 = vy * sxX + vz * cxX;
+        const x2 = vx * cxY + z1 * sxY;
+        const x3 = x2 * cxZ - y1 * sxZ;
+        const y3 = x2 * sxZ + y1 * cxZ;
+        return { x: cx + x3, y: cy + y3 };
+      });
+
+      ctx.strokeStyle = '#ff00aa';
+      ctx.lineWidth = 1.8 * s;
+      for (const [i1, i2] of cubeEdges) {
+        const p1 = proj[i1]!;
+        const p2 = proj[i2]!;
+        ctx.beginPath();
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
+        ctx.stroke();
+      }
+
+      for (const p of proj) {
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 2.4 * s, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      break;
+    }
+
+    case 'solar_flare': {
+      ctx.strokeStyle = 'rgba(245, 158, 11, 0.22)';
+      ctx.lineWidth = 20 * s;
+      ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.stroke();
+
+      for (let i = 0; i < 12; i++) {
+        const fa = time * 1.4 + (i * Math.PI) / 6;
+        const rayLen = (14 + Math.sin(time * 8 + i) * 9) * s;
+        const x1 = cx + Math.cos(fa) * (R - 5 * s);
+        const y1 = cy + Math.sin(fa) * (R - 5 * s);
+        const x2 = cx + Math.cos(fa) * (R + rayLen);
+        const y2 = cy + Math.sin(fa) * (R + rayLen);
+
+        ctx.strokeStyle = i % 2 === 0 ? '#ffea00' : '#ff0055';
+        ctx.lineWidth = 2.4 * s;
+        ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+      }
+
+      ctx.strokeStyle = '#ff0055';
+      ctx.lineWidth = 2.6 * s;
+      ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.stroke();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 0.9 * s;
+      ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.stroke();
+      break;
+    }
+
+    case 'crystal_prism': {
+      ctx.strokeStyle = 'rgba(6, 182, 212, 0.22)';
+      ctx.lineWidth = 18 * s;
+      ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.stroke();
+      ctx.strokeStyle = '#e25cff';
+      ctx.lineWidth = 2.4 * s;
+      ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.stroke();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 0.9 * s;
+      ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.stroke();
+
+      for (let i = 0; i < 6; i++) {
+        const pa = time * 1.8 + (i * Math.PI) / 3;
+        const px = cx + Math.cos(pa) * R;
+        const py = cy + Math.sin(pa) * R;
+        const rotPrism = pa + Math.PI / 2;
+
+        const cosP = Math.cos(rotPrism);
+        const sinP = Math.sin(rotPrism);
+        const rP = (lx: number, ly: number) => ({
+          x: px + (lx * cosP - ly * sinP) * s,
+          y: py + (lx * sinP + ly * cosP) * s
+        });
+
+        const pTop = rP(0, -13);
+        const pRight = rP(8, 0);
+        const pBottom = rP(0, 13);
+        const pLeft = rP(-8, 0);
+
+        ctx.fillStyle = 'rgba(226, 92, 255, 0.50)';
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1.5 * s;
+        ctx.beginPath();
+        ctx.moveTo(pTop.x, pTop.y);
+        ctx.lineTo(pRight.x, pRight.y);
+        ctx.lineTo(pBottom.x, pBottom.y);
+        ctx.lineTo(pLeft.x, pLeft.y);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1.2 * s;
+        ctx.beginPath(); ctx.moveTo(pLeft.x, pLeft.y); ctx.lineTo(pRight.x, pRight.y); ctx.stroke();
+      }
+      break;
+    }
+
+    case 'abyssal': {
+      const waveCount = 6;
+      const waveAmp = (8 + Math.sin(time * 3.0) * 3.5) * s;
+      const totalSteps = 72;
+
+      ctx.strokeStyle = 'rgba(88, 28, 135, 0.28)';
+      ctx.lineWidth = 22 * s;
+      ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.stroke();
+
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 2.6 * s;
+      ctx.beginPath();
+      for (let k = 0; k <= totalSteps; k++) {
+        const rad = (k * Math.PI * 2) / totalSteps;
+        const wave = Math.sin(time * 4.5 + rad * waveCount) * waveAmp;
+        const px = cx + Math.cos(rad) * (R + wave);
+        const py = cy + Math.sin(rad) * (R + wave);
+        if (k === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+      ctx.stroke();
+
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 0.9 * s;
+      ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.stroke();
+
+      for (let m = 0; m < 6; m++) {
+        const ma = -time * 2.0 + (m * Math.PI) / 3;
+        const mx = cx + Math.cos(ma) * R;
+        const my = cy + Math.sin(ma) * R;
+        ctx.fillStyle = '#a855f7';
+        ctx.beginPath(); ctx.arc(mx, my, 3.4 * s, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath(); ctx.arc(mx, my, 1.3 * s, 0, Math.PI * 2); ctx.fill();
+      }
+      break;
+    }
+  }
+  ctx.restore();
+
+  // 4. Draw Center Player Ship (Vector-01 Interceptor)
+  const shipScale = s * 0.85;
+  ctx.fillStyle = '#ff0055';
+  ctx.beginPath();
+  ctx.moveTo(cx - 5 * shipScale, cy + 12 * shipScale);
+  ctx.lineTo(cx, cy + (22 + Math.sin(time * 18) * 5) * shipScale);
+  ctx.lineTo(cx + 5 * shipScale, cy + 12 * shipScale);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.fillStyle = '#060f1c';
+  ctx.strokeStyle = aura.colorHex;
+  ctx.lineWidth = 2.4 * shipScale;
+  ctx.beginPath();
+  ctx.moveTo(cx, cy - 22 * shipScale);
+  ctx.lineTo(cx + 16 * shipScale, cy + 14 * shipScale);
+  ctx.lineTo(cx, cy + 8 * shipScale);
+  ctx.lineTo(cx - 16 * shipScale, cy + 14 * shipScale);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath();
+  ctx.moveTo(cx, cy - 12 * shipScale);
+  ctx.lineTo(cx + 5 * shipScale, cy + 2 * shipScale);
+  ctx.lineTo(cx - 5 * shipScale, cy + 2 * shipScale);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.restore();
+}
+
 /**
  * Universal Gallery Item Renderer for CodexViewer
  */
@@ -2527,127 +3298,10 @@ export function renderProceduralAsset(
       ctx.stroke();
     }
   } else if (type.startsWith('aura_')) {
-    // Exact In-Game Aura Environment (Image 4: Aura de Gelo)
-    const platY = cy + 18 * s;
-    const playerY = cy - 2 * s;
-
-    // 1. Metal Platform Floor with Diagonal Cyan Hazard Striping
-    ctx.fillStyle = '#071520';
-    ctx.fillRect(0, platY, width, height - platY);
-    ctx.strokeStyle = '#00f0ff';
-    ctx.lineWidth = 2.0;
-    ctx.beginPath();
-    ctx.moveTo(0, platY);
-    ctx.lineTo(width, platY);
-    ctx.stroke();
-
-    // Diagonal hazard stripes on the platform edge
-    ctx.strokeStyle = '#00f0ffaa';
-    ctx.lineWidth = 2.5;
-    for (let hx = -width; hx < width * 2; hx += 16 * s) {
-      ctx.beginPath();
-      ctx.moveTo(hx, platY + 12 * s);
-      ctx.lineTo(hx + 10 * s, platY);
-      ctx.stroke();
-    }
-
-    // 2. Concentric Cyan Dial Rings (Compass/Gauge style)
-    const auraRadius = 26 * s;
-
-    // Outer notched ring
-    ctx.strokeStyle = '#00f0ffcc';
-    ctx.lineWidth = 1.8;
-    ctx.beginPath();
-    ctx.arc(cx, playerY, auraRadius, 0, Math.PI * 2);
-    ctx.stroke();
-
-    // Dial gauge notches
-    ctx.strokeStyle = '#00f0ff88';
-    ctx.lineWidth = 1.2;
-    for (let t = 0; t < 36; t++) {
-      const ta = (t * 2 * Math.PI) / 36;
-      const tLen = t % 4 === 0 ? 4.5 * s : 2.5 * s;
-      ctx.beginPath();
-      ctx.moveTo(cx + Math.cos(ta) * (auraRadius - tLen), playerY + Math.sin(ta) * (auraRadius - tLen));
-      ctx.lineTo(cx + Math.cos(ta) * auraRadius, playerY + Math.sin(ta) * auraRadius);
-      ctx.stroke();
-    }
-
-    // Inner ring
-    ctx.strokeStyle = '#00f0ff';
-    ctx.lineWidth = 1.4;
-    ctx.beginPath();
-    ctx.arc(cx, playerY, auraRadius * 0.78, 0, Math.PI * 2);
-    ctx.stroke();
-
-    // 3. 8 Rotating White Snowflakes along the ring
-    for (let f = 0; f < 8; f++) {
-      const fa = (f * Math.PI) / 4 + time * 0.25;
-      const fx = cx + Math.cos(fa) * (auraRadius * 0.88);
-      const fy = playerY + Math.sin(fa) * (auraRadius * 0.88);
-      ctx.fillStyle = '#ffffff';
-      ctx.font = `bold ${Math.max(10, 4.5 * s)}px Arial`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('❄', fx, fy);
-    }
-
-    // 4. Center Player Ship (Forma 12 - Flower with 12 scallops, face, and flame)
-    const shipR = 12 * s;
-    // Plasma thruster flame
-    const flameH = (7 + Math.sin(time * 16) * 2) * s;
-    ctx.fillStyle = '#ff0077';
-    ctx.beginPath();
-    ctx.moveTo(cx - 3 * s, playerY + shipR * 0.7);
-    ctx.lineTo(cx, playerY + shipR * 0.7 + flameH);
-    ctx.lineTo(cx + 3 * s, playerY + shipR * 0.7);
-    ctx.closePath();
-    ctx.fill();
-
-    // 12-scallop flower contour
-    ctx.strokeStyle = '#ff0055';
-    ctx.lineWidth = 2.2;
-    ctx.fillStyle = '#1c0515';
-    drawInGameCatalogShape(ctx, cx, playerY, shipR, CATALOG_FORMS[11]!, '#ff0055', true);
-
-    // Face expression inside player
-    const fs = s * 0.35;
-    ctx.fillStyle = '#38bdf8';
-    ctx.fillRect(cx - 6 * fs, playerY - 3 * fs, 3 * fs, 5 * fs);
-    ctx.fillRect(cx + 3 * fs, playerY - 3 * fs, 3 * fs, 5 * fs);
-    ctx.fillRect(cx - 4 * fs, playerY + 4 * fs, 8 * fs, 2 * fs);
-
-    // 5. 4 Orbiting Secondary Drones (Image 4)
-    const droneAngles = [time * 1.2, time * 1.2 + Math.PI / 2, time * 1.2 + Math.PI, time * 1.2 + Math.PI * 1.5];
-    const droneDist = auraRadius * 0.65;
-    const droneColors = ['#10b981', '#f97316', '#00f0ff', '#38bdf8'];
-    for (let d = 0; d < 4; d++) {
-      const da = droneAngles[d]!;
-      const dx = cx + Math.cos(da) * droneDist;
-      const dy = playerY + Math.sin(da) * droneDist;
-      ctx.fillStyle = droneColors[d]!;
-      ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 1.0;
-      ctx.beginPath();
-      ctx.rect(dx - 2.5 * s, dy - 2.5 * s, 5 * s, 5 * s);
-      ctx.fill();
-      ctx.stroke();
-      ctx.fillStyle = '#ffffff';
-      ctx.beginPath();
-      ctx.arc(dx, dy, 1.2 * s, 0, Math.PI * 2);
-      ctx.fill();
-    }
-
-    // 6. Floating In-Game HUD Heal Indicator (Image 4: "+1 HP")
-    ctx.fillStyle = '#00ff44';
-    ctx.font = `extrabold ${Math.max(12, 4.0 * s)}px 'Orbitron', sans-serif`;
-    ctx.textAlign = 'center';
-    ctx.fillText('+1 HP', cx, playerY - shipR - 5 * s);
-
-    // HUD Drops below platform (Image 4)
-    ctx.fillStyle = '#ffffff';
-    ctx.font = `bold ${Math.max(9, 2.5 * s)}px 'JetBrains Mono', monospace`;
-    ctx.fillText('⚪ x13   🔴 x8   🟡 x0', cx, platY + 22 * s);
+    const rawId = type.replace('aura_', '');
+    renderStudioBiomeAura(ctx, rawId, width, height, time);
+    ctx.restore();
+    return;
   } else if (type === 'hull_vector01') {
     renderStudioPlayer(ctx, 1, 11, width, height, time);
   } else if (type === 'hull_flower') {

@@ -335,50 +335,170 @@ export const CODEX_ASSETS: CodexAsset[] = [
     ]
   },
 
-  // --- 3. AURAS DE CENÁRIO E BIOMAS (11 Auras - Imagem 3) ---
+  // --- 3. AURAS DE CENÁRIO E BIOMAS (11 Auras Oficiais da Engine) ---
   {
-    id: 'aura_cryo',
-    name: 'Aura Criogênica do Ártico Sintético',
+    id: 'aura_normal',
+    name: 'Aura da Floresta Quântica',
     category: 'auras',
     categoryLabel: 'Auras & Biomas de Combate',
-    badge: 'ESTASE & PERIGO',
-    color: '#00f0ff',
-    desc: 'Plataforma com trilhos diagonais de advertência neon, anéis de estase com flocos de neve e matriz de frio.',
-    renderType: 'aura_cryo',
+    badge: 'SIFÃO VITAL',
+    color: '#00ff66',
+    desc: 'Anel de névoa esmeralda, vinhas bio-luminescentes, 6 folhas em diamante e esporos bio-sintéticos.',
+    renderType: 'aura_normal',
     technicalSpecs: [
-      { label: 'Bioma', value: 'Geleira Sintética' },
-      { label: 'Efeito de Campo', value: 'Anel Criogênico R = 180px' },
-      { label: 'Plataforma', value: 'Trilhos de Perigo Neon' }
+      { label: 'Bioma', value: 'Floresta Quântica' },
+      { label: 'Bônus de Combate', value: '+12.0 HP/s & -40% Dano Sofrido' },
+      { label: 'Taxa de Carga', value: '+1.0s/s na Plataforma' }
     ]
   },
   {
-    id: 'aura_solar',
-    name: 'Aura Solar de Fusão Estelar',
+    id: 'aura_magma',
+    name: 'Aura Vulcânica Incandescente',
     category: 'auras',
     categoryLabel: 'Auras & Biomas de Combate',
-    badge: 'FUSÃO TERMONUCLEAR',
-    color: '#ffd700',
-    desc: 'Anéis solares com ondas de calor pulsante, erupções de fótons e faixas de radiação sobre o cenário.',
-    renderType: 'aura_solar',
+    badge: 'SOBRECARGA TÉRMICA',
+    color: '#ff4400',
+    desc: 'Halo térmico de 25px, 12 línguas de fogo vetoriais (Vector Flame Sickles) com cauda pulsante e faíscas.',
+    renderType: 'aura_magma',
     technicalSpecs: [
-      { label: 'Bioma', value: 'Coroa Solar Vulcânica' },
-      { label: 'Efeito de Campo', value: 'Chamas Fotônicas' },
-      { label: 'Plataforma', value: 'Trilhos Magmáticos' }
+      { label: 'Bioma', value: 'Vulcânico Incandescente' },
+      { label: 'Bônus de Combate', value: '+60% Dano Global' },
+      { label: 'Taxa de Carga', value: '+1.0s/s na Plataforma' }
+    ]
+  },
+  {
+    id: 'aura_ice',
+    name: 'Aura Criogênica SubZero',
+    category: 'auras',
+    categoryLabel: 'Auras & Biomas de Combate',
+    badge: 'ESTASE GLACIAL',
+    color: '#00ffff',
+    desc: 'Halo glacial de 25px, 6 flocos de neve hexagonais facetados em R=86px com ramificações e espículas a 45°.',
+    renderType: 'aura_ice',
+    technicalSpecs: [
+      { label: 'Bioma', value: 'SubZero Criogênico' },
+      { label: 'Bônus de Combate', value: '+50% Cadência & Estase Inimiga' },
+      { label: 'Taxa de Carga', value: '+1.0s/s na Plataforma' }
+    ]
+  },
+  {
+    id: 'aura_electric',
+    name: 'Aura Voltaica Megawatt',
+    category: 'auras',
+    categoryLabel: 'Auras & Biomas de Combate',
+    badge: 'SUPERCONDUÇÃO',
+    color: '#ffea00',
+    desc: 'Halo voltaico, anel de arco elétrico em alta velocidade com jitter senoidal e 4 capacitores Tesla com descargas.',
+    renderType: 'aura_electric',
+    technicalSpecs: [
+      { label: 'Bioma', value: 'Megawatt Voltaico' },
+      { label: 'Bônus de Combate', value: '3.0x Regeneração de Mana' },
+      { label: 'Taxa de Carga', value: '+1.0s/s na Plataforma' }
     ]
   },
   {
     id: 'aura_void',
-    name: 'Aura de Vácuo Quântico',
+    name: 'Aura Singulárica do Vazio',
     category: 'auras',
     categoryLabel: 'Auras & Biomas de Combate',
-    badge: 'GRAVIDADE ZERO',
-    color: '#a855f7',
-    desc: 'Geometrias hexagonais transparentes flutuantes com distorção óptica e linhas de interferência de fase.',
+    badge: 'GRAVIDADE ABSOLUTA',
+    color: '#a000ff',
+    desc: 'Halo do horizonte de eventos, dois braços espirais de Arquimedes com sucção e partículas sugadas para a fenda.',
     renderType: 'aura_void',
     technicalSpecs: [
-      { label: 'Bioma', value: 'Vácuo Profundo' },
-      { label: 'Efeito de Campo', value: 'Singularidade Central' },
-      { label: 'Plataforma', value: 'Plataformas Flutuantes' }
+      { label: 'Bioma', value: 'Vazio Singular' },
+      { label: 'Bônus de Combate', value: '-45% Cooldowns & 100% Atração de Drops' },
+      { label: 'Taxa de Carga', value: '+1.0s/s na Plataforma' }
+    ]
+  },
+  {
+    id: 'aura_overcharged',
+    name: 'Aura de Reator Sobrecarregado',
+    category: 'auras',
+    categoryLabel: 'Auras & Biomas de Combate',
+    badge: 'FISSÃO QUÂNTICA',
+    color: '#ffaa00',
+    desc: 'Dois pentágonos contra-rotativos (horário e anti-horário) com 5 nós de descarga de plasma nos vértices.',
+    renderType: 'aura_overcharged',
+    technicalSpecs: [
+      { label: 'Bioma', value: 'Reator Sobrecarregado' },
+      { label: 'Bônus de Combate', value: '3.0x EXP, +40% Crítico & 2.0x Dano Crítico' },
+      { label: 'Taxa de Carga', value: '+1.0s/s na Plataforma' }
+    ]
+  },
+  {
+    id: 'aura_chronos',
+    name: 'Aura Temporal de Chronos',
+    category: 'auras',
+    categoryLabel: 'Auras & Biomas de Combate',
+    badge: 'DOMO TEMPORAL',
+    color: '#ffd700',
+    desc: 'Bisel dourado, anel mostrador cósmico com 12 marcadores de hora, ponteiro táquion e orbe temporal orbitante.',
+    renderType: 'aura_chronos',
+    technicalSpecs: [
+      { label: 'Bioma', value: 'Chronos Temporal' },
+      { label: 'Bônus de Combate', value: '+40% Esquiva & Balística Inimiga Desacelerada' },
+      { label: 'Taxa de Carga', value: '+1.0s/s na Plataforma' }
+    ]
+  },
+  {
+    id: 'aura_cyber_grid',
+    name: 'Aura Cibernética Neon',
+    category: 'auras',
+    categoryLabel: 'Auras & Biomas de Combate',
+    badge: 'MATRIZ VETORIAL',
+    color: '#ff00aa',
+    desc: '4 suportes de mira HUD segmentados, 8 nós de telemetria e hipercubo 3D wireframe real girando em 3 eixos.',
+    renderType: 'aura_cyber_grid',
+    technicalSpecs: [
+      { label: 'Bioma', value: 'Grade Cibernética Neon' },
+      { label: 'Bônus de Combate', value: 'Perfuração Infinita & +75% Dano Ricochete' },
+      { label: 'Taxa de Carga', value: '+1.0s/s na Plataforma' }
+    ]
+  },
+  {
+    id: 'aura_solar_flare',
+    name: 'Aura Solar Incandescente',
+    category: 'auras',
+    categoryLabel: 'Auras & Biomas de Combate',
+    badge: 'CORONA SOLAR',
+    color: '#ff0055',
+    desc: 'Corona solar com 12 proeminências dinâmicas pulsantes alternando amarelo e carmesim com filamento branco.',
+    renderType: 'aura_solar_flare',
+    technicalSpecs: [
+      { label: 'Bioma', value: 'Explosão Solar' },
+      { label: 'Bônus de Combate', value: '100 Dano Térmico/s em Área' },
+      { label: 'Taxa de Carga', value: '+1.0s/s na Plataforma' }
+    ]
+  },
+  {
+    id: 'aura_crystal_prism',
+    name: 'Aura Prismática Cortante',
+    category: 'auras',
+    categoryLabel: 'Auras & Biomas de Combate',
+    badge: 'REFRAÇÃO ÓPTICA',
+    color: '#e25cff',
+    desc: 'Halo de refração ciano, anel facetado e 6 cristais prismáticos em losango orbitando com linhas de refração interna.',
+    renderType: 'aura_crystal_prism',
+    technicalSpecs: [
+      { label: 'Bioma', value: 'Prisma Cristalino' },
+      { label: 'Bônus de Combate', value: '+100% Dano Crítico & Disparos Refratados' },
+      { label: 'Taxa de Carga', value: '+1.0s/s na Plataforma' }
+    ]
+  },
+  {
+    id: 'aura_abyssal',
+    name: 'Aura do Miasma Abissal',
+    category: 'auras',
+    categoryLabel: 'Auras & Biomas de Combate',
+    badge: 'DANO VERDADEIRO',
+    color: '#38bdf8',
+    desc: 'Halo do abismo profundo, anel de tentáculos bio-cinéticos fluidos ondulando em senóide e 6 nós de miasma.',
+    renderType: 'aura_abyssal',
+    technicalSpecs: [
+      { label: 'Bioma', value: 'Miasma Abissal' },
+      { label: 'Bônus de Combate', value: '+50% Dano Puro, +5 HP & +10 EN por Kill' },
+      { label: 'Taxa de Carga', value: '+1.0s/s na Plataforma' }
     ]
   },
 
