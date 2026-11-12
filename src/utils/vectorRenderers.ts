@@ -823,6 +823,13 @@ export interface HeroClassData {
   weaponName: string;
   munitionName: string;
   munitionDetails: string;
+  activeSkillName: string;
+  activeSkillDetails: string;
+  numericalBonuses: {
+    label: string;
+    value: string;
+    desc: string;
+  }[];
   codeRef: string;
 }
 
@@ -843,7 +850,19 @@ export const HERO_CLASSES_DATA: HeroClassData[] = [
     weaponName: 'Bazuca de Plasma (Vanguarda)',
     munitionName: 'Ogiva Balística Concussiva Termodinâmica',
     munitionDetails: 'Projéteis balísticos pesados que geram onda de choque expansiva de 140px com empurrão e desintegração de blindagens.',
-    codeRef: 'HullSetupOverlay.ts:line 253'
+    activeSkillName: 'Barreira Reativa Hexagonal (Kinetic Shield Blast)',
+    activeSkillDetails: 'Aciona barreira reativa com onda de choque cinético que repele projéteis hostis e inflige 180 de dano em área (140px).',
+    numericalBonuses: [
+      { label: 'Dano Físico', value: '+18.0%', desc: 'Multiplicador base 1.18x em todas as armas e impactos balísticos (PWR 12)' },
+      { label: 'Dano Crítico Físico', value: '156.0%', desc: 'Multiplicador de acerto crítico aumentado em +6.0% sobre a base (PWR 12)' },
+      { label: 'HP Máximo do Casco', value: '+30.0%', desc: 'Multiplicador de 1.30x na integridade máxima da nave Vector-01 (HUL 12)' },
+      { label: 'Regeneração de Casco', value: '+0.60 HP/s', desc: 'Reparo automático contínuo de nanites na integridade do casco (HUL 12)' },
+      { label: 'Cadência & Disparo', value: '+10.0%', desc: 'Redução de tempo de recarga entre salvas da arma primária (AGI 10)' },
+      { label: 'Velocidade da Nave', value: '+5.0%', desc: 'Aceleração linear e agilidade de navegação entre pistas (AGI 10)' },
+      { label: 'Taxa Crítica Física', value: '6.50%', desc: '+1.50% de chance sobre a base padrão de 5.0% (AGI 10)' },
+      { label: 'Esquiva Quântica', value: '1.50%', desc: 'Chance passiva de anular 100% de qualquer dano recebido (AGI 10)' }
+    ],
+    codeRef: 'HullSetupOverlay.ts:line 253 / SkillCalculator.ts:line 31'
   },
   {
     id: 'interceptor',
@@ -861,7 +880,19 @@ export const HERO_CLASSES_DATA: HeroClassData[] = [
     weaponName: 'Adagas Cibernéticas (Interceptador)',
     munitionName: 'Dupla de Lâminas Ondulatórias de Fase',
     munitionDetails: '2 adagas paralelas ondulatórias em frequência senoidal cruzando o centro (±16px) com alta perfuração e taxa crítica.',
-    codeRef: 'HullSetupOverlay.ts:line 254'
+    activeSkillName: 'Campo de Estase Temporal (Chronos Stasis Field)',
+    activeSkillDetails: 'Projeta mostrador cronométrico holográfico sci-fi que desacelera tempo, naves e disparos inimigos em 60% por 4 segundos.',
+    numericalBonuses: [
+      { label: 'Esquiva Quântica', value: '2.10%', desc: 'A maior esquiva base do jogo: 2.10% de chance passiva de fasagem que anula 100% do impacto (AGI 14)' },
+      { label: 'Taxa Crítica Física', value: '7.10%', desc: 'Chance cirúrgica de acerto crítico aumentada em +2.10% sobre a base (AGI 14)' },
+      { label: 'Cadência de Disparo', value: '+14.0%', desc: 'Ataques em altíssima frequência com recarga acelerada (AGI 14)' },
+      { label: 'Velocidade da Nave', value: '+7.0%', desc: 'A maior velocidade e aceleração de deslocamento entre os 6 heróis (AGI 14)' },
+      { label: 'Velocidade dos Projéteis', value: '+4.2%', desc: 'Lâminas viajam 4.2% mais rápido até o alvo (AGI 14)' },
+      { label: 'Taxa Crítica de Sistemas', value: '7.00%', desc: 'Chance de acertos críticos para módulos e habilidades ativas (PRC 10)' },
+      { label: 'Aceleração de Recarga', value: '+15.0%', desc: 'Recarga acelerada para habilidades ativas e módulos táticos (PRC 10)' },
+      { label: 'Dano Físico', value: '+15.0%', desc: 'Multiplicador de 1.15x de dano de corte plasmático (PWR 10)' }
+    ],
+    codeRef: 'HullSetupOverlay.ts:line 254 / SkillCalculator.ts:line 37'
   },
   {
     id: 'disruptor',
@@ -879,7 +910,19 @@ export const HERO_CLASSES_DATA: HeroClassData[] = [
     weaponName: 'Cajado Solar (Disruptor)',
     munitionName: 'Esfera de Plasma Coronal Incandescente',
     munitionDetails: 'Esferas térmicas incandescentes com labaredas orbitais que aplicam Queimadura contínua (Burn DoT) e desestabilização de escudos.',
-    codeRef: 'HullSetupOverlay.ts:line 255'
+    activeSkillName: 'Singularidade Quântica (Vector Pulse Nova)',
+    activeSkillDetails: 'Colapsa hipercubo 4D Tesseract que detona ondas espirais de plasma quântico causando 320 de dano térmico com queima contínua (Burn DoT).',
+    numericalBonuses: [
+      { label: 'Dano de Sistemas', value: '+21.0%', desc: 'O maior dano de módulos, drones e magias do jogo: multiplicador 1.21x (SYS 14)' },
+      { label: 'Dano Crítico de Sistemas', value: '157.0%', desc: 'Multiplicador de acerto crítico mágico devastador (SYS 14)' },
+      { label: 'Taxa Crítica de Sistemas', value: '7.40%', desc: '+2.40% de chance de crítico para módulos e habilidades (PRC 12)' },
+      { label: 'Aceleração de Recarga', value: '+18.0%', desc: 'Recarga acelerada para spam constante de módulos quânticos (PRC 12)' },
+      { label: 'HP Máximo do Casco', value: '+25.0%', desc: 'Integridade de 1.25x com +0.50 HP/s de regeneração (HUL 10)' },
+      { label: 'Defesa de Escudo', value: '+2.0%', desc: 'Absorção passiva direta de danos sofridos (HUL 10)' },
+      { label: 'Esquiva a Áreas (AoE)', value: '1.80%', desc: 'Fasagem contra explosões e zonas de perigo (PRC 12)' },
+      { label: 'Energia Quântica Base', value: '66 EN', desc: 'Reserva de 66 EN com regeneração de 0.66 EN/s (NRG 8)' }
+    ],
+    codeRef: 'HullSetupOverlay.ts:line 255 / SkillCalculator.ts:line 44'
   },
   {
     id: 'resonator',
@@ -897,7 +940,19 @@ export const HERO_CLASSES_DATA: HeroClassData[] = [
     weaponName: 'Sintetizador Harmônico (Ressonador)',
     munitionName: 'Pulsos de Choque Acústico & Notas Harmônicas',
     munitionDetails: 'Ondas acústicas oscilatórias e notas sônicas perfurantes que causam cavitação estrutural, desorientação e estase nos inimigos.',
-    codeRef: 'HullSetupOverlay.ts:line 256'
+    activeSkillName: 'Onda de Choque Acústica (Acoustic Disruptor Wave)',
+    activeSkillDetails: 'Emite osciloscópio de ondas senoidais fluorescentes com anéis de ressonância acústica que empurram hordas, quebram escudos e desaceleram em 45%.',
+    numericalBonuses: [
+      { label: 'Taxa Crítica de Sistemas', value: '7.80%', desc: 'A maior taxa crítica de sistemas do jogo: +2.80% sobre a base (PRC 14)' },
+      { label: 'Aceleração de Recarga', value: '+21.0%', desc: 'A mais rápida reciclagem de habilidades e módulos da esquadra (PRC 14)' },
+      { label: 'Energia Máxima', value: '74 EN', desc: 'Reserva ampliada para 74 EN com alta recuperação de 0.74 EN/s (NRG 12)' },
+      { label: 'Resistência a Debuffs', value: '-7.2%', desc: 'Reduz a duração de congelamentos, lentidões e atordoamentos hostis (NRG 12)' },
+      { label: 'Dano de Módulos & Drones', value: '+15.0%', desc: 'Amplificação harmônica de dano para toda a esquadra de drones (SYS 10)' },
+      { label: 'Cadência de Disparo', value: '+10.0%', desc: 'Cadência acelerada de ondas sônicas (AGI 10)' },
+      { label: 'Esquiva Mágica & Acústica', value: '2.10%', desc: 'Dissipação passiva de ataques e esferas de choque (PRC 14)' },
+      { label: 'Velocidade da Nave', value: '+5.0%', desc: 'Mobilidade ágil com deslocamento de pistas suave (AGI 10)' }
+    ],
+    codeRef: 'HullSetupOverlay.ts:line 256 / SkillCalculator.ts:line 51'
   },
   {
     id: 'bastion',
@@ -915,7 +970,19 @@ export const HERO_CLASSES_DATA: HeroClassData[] = [
     weaponName: 'Prisma de Luz Sagrada (Bastião)',
     munitionName: 'Feixe Colimado de Luz Divina Táquion',
     munitionDetails: 'Feixe colimado direcional de longo alcance com prisma de refração em diamante, incineração contínua e nanites de reparo.',
-    codeRef: 'HullSetupOverlay.ts:line 257'
+    activeSkillName: 'Matriz Sagrada de Auto-Reparo (Aegis Repair Matrix)',
+    activeSkillDetails: 'Manifesta domo geodésico de 3 prismas de ouro orbitais com nanites que curam 25 HP/s e bloqueiam 80% do dano sofrido por 5 segundos.',
+    numericalBonuses: [
+      { label: 'HP Máximo do Casco', value: '+35.0%', desc: 'O maior chassi do jogo: multiplicador 1.35x de vida máxima (HUL 14)' },
+      { label: 'Regeneração Contínua', value: '+0.70 HP/s', desc: 'A mais rápida regeneração passiva de vida entre todos os heróis (HUL 14)' },
+      { label: 'Defesa Passiva de Escudo', value: '+2.8%', desc: 'Bloqueio natural de 2.8% de todo o dano recebido (HUL 14)' },
+      { label: 'Dano de Espinhos (Thorns)', value: '1.4% HP', desc: 'Reflete 1.4% da vida máxima como dano direto ao colidir com inimigos (HUL 14)' },
+      { label: 'Resistência a Perigos', value: '+2.8%', desc: 'Redução de dano de armadilhas, lasers e hazards ambientais (HUL 14)' },
+      { label: 'Dano Físico Balístico', value: '+18.0%', desc: 'Multiplicador de 1.18x de poder de fogo primário pesado (PWR 12)' },
+      { label: 'Dano Crítico Físico', value: '156.0%', desc: 'Disparos colimados com alto impacto crítico (PWR 12)' },
+      { label: 'Alcance Magnético', value: '+14px', desc: 'Atração estendida de fragmentos e cristais soltos (HUL 14)' }
+    ],
+    codeRef: 'HullSetupOverlay.ts:line 257 / SkillCalculator.ts:line 58'
   },
   {
     id: 'marksman',
@@ -933,7 +1000,19 @@ export const HERO_CLASSES_DATA: HeroClassData[] = [
     weaponName: 'Arco Cibernético (Atirador)',
     munitionName: 'Flechas Flechette Hipersônicas de Precisão',
     munitionDetails: 'Flechas vetoriais hipersônicas disparadas com precisão cirúrgica de longo alcance e multiplicador extremo de dano crítico.',
-    codeRef: 'HullSetupOverlay.ts:line 258'
+    activeSkillName: 'Barragem Flechette de Precisão (Tactical Barrage Shots)',
+    activeSkillDetails: 'Dispara leque cirúrgico de 5 flechettes hipersônicas perfurantes de altíssima penetração crítica com multiplicador de 2.5x dano crítico.',
+    numericalBonuses: [
+      { label: 'Precisão Balística', value: '100%', desc: 'Trajetória colimada linear sem desvio angular ou dispersão (PRC 12)' },
+      { label: 'Cadência de Disparo', value: '+14.0%', desc: 'Disparo contínuo e rápido de flechettes cinéticas (AGI 14)' },
+      { label: 'Velocidade da Nave', value: '+7.0%', desc: 'Alta mobilidade e aceleração para reposicionamento tático (AGI 14)' },
+      { label: 'Taxa Crítica Física', value: '7.10%', desc: '+2.10% de chance de crítico em cada disparo flechette (AGI 14)' },
+      { label: 'Taxa Crítica de Sistemas', value: '7.40%', desc: 'Críticos ampliados para habilidades e drones táticos (PRC 12)' },
+      { label: 'Velocidade dos Projéteis', value: '+4.2%', desc: 'Flechettes supersônicas atingem o alvo instantaneamente (AGI 14)' },
+      { label: 'Esquiva Quântica', value: '2.10%', desc: 'Chance passiva de desviar completamente de projéteis hostis (AGI 14)' },
+      { label: 'Aceleração de Recarga', value: '+18.0%', desc: 'Reciclagem rápida de habilidades e rajadas de sniper (PRC 12)' }
+    ],
+    codeRef: 'HullSetupOverlay.ts:line 258 / SkillCalculator.ts:line 65'
   }
 ];
 

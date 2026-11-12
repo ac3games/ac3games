@@ -739,6 +739,35 @@ export const CodexStudio: React.FC = () => {
                     </p>
                   </div>
 
+                  {/* Active Skill */}
+                  <div className="p-2.5 rounded bg-purple-950/30 border border-purple-500/40">
+                    <span className="text-purple-300 block mb-0.5 font-bold">HABILIDADE ATIVA ÚNICA:</span>
+                    <span className="text-white font-bold block mb-1">{selectedHeroClass.activeSkillName}</span>
+                    <p className="font-outfit text-xs text-purple-200 leading-relaxed">
+                      {selectedHeroClass.activeSkillDetails}
+                    </p>
+                  </div>
+
+                  {/* Detailed Numerical Attributes Breakdown */}
+                  <div className="p-3 rounded-xl bg-cyber-darker border border-cyber-cardBorder/80">
+                    <span className="text-emerald-400 font-bold block mb-2 text-[11px] uppercase tracking-wider">
+                      📊 BÔNUS EXATOS EM NÚMEROS (MOTOR DO JOGO):
+                    </span>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {selectedHeroClass.numericalBonuses.map((bonus, bIdx) => (
+                        <div key={bIdx} className="p-2 rounded bg-cyber-card/80 border border-cyber-cardBorder/40">
+                          <div className="flex justify-between items-center mb-0.5">
+                            <span className="text-slate-300 font-semibold text-[11px]">{bonus.label}</span>
+                            <span className="text-emerald-400 font-bold font-mono text-xs">{bonus.value}</span>
+                          </div>
+                          <p className="font-outfit text-[10px] text-slate-400 leading-tight">
+                            {bonus.desc}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
                   <div className="flex justify-between p-2 rounded bg-cyber-card border border-cyber-cardBorder/40 text-[11px]">
                     <span className="text-slate-400">Implementação no Motor:</span>
                     <span className="text-white font-mono">{selectedHeroClass.codeRef}</span>
