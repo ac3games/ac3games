@@ -97,6 +97,7 @@ export const CodexViewer: React.FC = () => {
     { id: 'drones', label: '⚔️ Forja de Drones (16)', count: CODEX_ASSETS.filter(a => a.category === 'drones').length },
     { id: 'expressions', label: '🤖 Matriz Sensorial HUD (20)', count: CODEX_ASSETS.filter(a => a.category === 'expressions').length },
     { id: 'auras', label: '🌌 Auras & Biomas (11)', count: CODEX_ASSETS.filter(a => a.category === 'auras').length },
+    { id: 'platforms', label: '🏞️ Cenários & Plataformas (11)', count: CODEX_ASSETS.filter(a => a.category === 'platforms').length },
     { id: 'player', label: '🚀 Chassis do Piloto (12)', count: CODEX_ASSETS.filter(a => a.category === 'player').length },
     { id: 'projectiles', label: '💥 Balística Vetorial (10)', count: CODEX_ASSETS.filter(a => a.category === 'projectiles').length }
   ];

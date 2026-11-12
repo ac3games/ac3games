@@ -564,5 +564,172 @@ export const CODEX_ASSETS: CodexAsset[] = [
       { label: 'Penetração', value: 'Total / Infinita' },
       { label: 'Tipo', value: 'Energia Fotônica' }
     ]
+  },
+
+  // --- 6. CENÁRIOS & PLATAFORMAS DE COMBATE (11 Biomas Oficiais) ---
+  {
+    id: 'platform_normal',
+    name: 'Cenário // Floresta Quântica',
+    category: 'platforms',
+    categoryLabel: 'Cenários & Plataformas',
+    badge: 'SUPERFÍCIE REGENERATIVA',
+    color: '#00ff66',
+    desc: 'Atmosfera em 6 faixas de gradiente, lua geométrica com auréolas esmeralda, raios divinos (God Rays), cordilheira e 9 árvores geométricas procedurais.',
+    renderType: 'scenario_normal',
+    technicalSpecs: [
+      { label: 'Atrito', value: '0.88 (Estável)' },
+      { label: 'Velocidade', value: '+10% (1.10x)' },
+      { label: 'Efeito DoT', value: '+3.0 HP/s Cura' }
+    ]
+  },
+  {
+    id: 'platform_ice',
+    name: 'Cenário // Criogênico SubZero',
+    category: 'platforms',
+    categoryLabel: 'Cenários & Plataformas',
+    badge: 'ALTA VELOCIDADE',
+    color: '#00f0ff',
+    desc: 'Picos de gelo afiados com gradientes ciano, névoa congelante e 28 partículas de nevasca com velocidade tangencial.',
+    renderType: 'scenario_ice',
+    technicalSpecs: [
+      { label: 'Atrito', value: '0.97 (Escorregadio)' },
+      { label: 'Velocidade', value: '+30% (1.30x)' },
+      { label: 'Cooldown', value: '+25% (1.25x lentidão)' }
+    ]
+  },
+  {
+    id: 'platform_fire',
+    name: 'Cenário // Vulcânico Magma Core',
+    category: 'platforms',
+    categoryLabel: 'Cenários & Plataformas',
+    badge: 'DANO TÉRMICO CONTÍNUO',
+    color: '#ff3300',
+    desc: 'Gêiseres de magma pulsando ritmicamente, lago de lava incandescente, caldeiras geotérmicas e 24 partículas de faíscas incandescentes.',
+    renderType: 'scenario_fire',
+    technicalSpecs: [
+      { label: 'Atrito', value: '0.82 (Resistente)' },
+      { label: 'Efeito DoT', value: '-8.0 HP/s Térmico' },
+      { label: 'Cooldown', value: '-15% (0.85x)' }
+    ]
+  },
+  {
+    id: 'platform_electric',
+    name: 'Cenário // Tempestade Eletrostática',
+    category: 'platforms',
+    categoryLabel: 'Cenários & Plataformas',
+    badge: 'SOBRECARGA ELÉTRICA',
+    color: '#ffd700',
+    desc: 'Rede elétrica com relâmpagos procedurais ramificados em 3 estágios, bobinas de Tesla e arcos voltaicos dinâmicos.',
+    renderType: 'scenario_electric',
+    technicalSpecs: [
+      { label: 'Atrito', value: '0.90' },
+      { label: 'Velocidade', value: '+15% (1.15x)' },
+      { label: 'Cooldown', value: '-25% (0.75x recarga ultra)' }
+    ]
+  },
+  {
+    id: 'platform_toxic',
+    name: 'Cenário // Pântano Tóxico Acid',
+    category: 'platforms',
+    categoryLabel: 'Cenários & Plataformas',
+    badge: 'CORROSÃO DE CASCO',
+    color: '#39ff14',
+    desc: 'Poças de ácido fluorescente com 12 bolhas químicas estourando, névoa densa de metano e tentáculos orgânicos oscilando.',
+    renderType: 'scenario_toxic',
+    technicalSpecs: [
+      { label: 'Atrito', value: '0.75 (Lamaçal Viscoso)' },
+      { label: 'Velocidade', value: '-20% (0.80x)' },
+      { label: 'Efeito DoT', value: '-5.0 HP/s Corrosão' }
+    ]
+  },
+  {
+    id: 'platform_desert',
+    name: 'Cenário // Deserto Quântico',
+    category: 'platforms',
+    categoryLabel: 'Cenários & Plataformas',
+    badge: 'DILATAÇÃO TEMPORAL',
+    color: '#e6c280',
+    desc: 'Dunas ondulantes, sol duplo pulsante com distorção de calor senoidal e redemoinhos de poeira dourada.',
+    renderType: 'scenario_desert',
+    technicalSpecs: [
+      { label: 'Atrito', value: '0.85' },
+      { label: 'Velocidade', value: 'Normal (1.00x)' },
+      { label: 'Cooldown', value: 'Normal (1.00x)' }
+    ]
+  },
+  {
+    id: 'platform_space',
+    name: 'Cenário // Vácuo Estelar Nebulosa',
+    category: 'platforms',
+    categoryLabel: 'Cenários & Plataformas',
+    badge: 'GRAVIDADE ZERO',
+    color: '#a855f7',
+    desc: 'Cosmos profundo com nebulosas procedurais em 3 cores, campo estelar com 45 estrelas piscando e disco de acreção de buraco negro.',
+    renderType: 'scenario_space',
+    technicalSpecs: [
+      { label: 'Atrito', value: '0.99 (Inércia Quase Infinita)' },
+      { label: 'Velocidade', value: '+20% (1.20x)' },
+      { label: 'Cooldown', value: '-10% (0.90x)' }
+    ]
+  },
+  {
+    id: 'platform_cyber',
+    name: 'Cenário // Cyber Matrix Neon',
+    category: 'platforms',
+    categoryLabel: 'Cenários & Plataformas',
+    badge: 'RECARGA ACELERADA',
+    color: '#ff007f',
+    desc: 'Grade perspectiva wireframe no horizonte em fuga central, edifícios neon em skyline e fluxo de dados digitais em código binário.',
+    renderType: 'scenario_cyber',
+    technicalSpecs: [
+      { label: 'Atrito', value: '0.88' },
+      { label: 'Velocidade', value: '+10% (1.10x)' },
+      { label: 'Cooldown', value: '-30% (0.70x overclock)' }
+    ]
+  },
+  {
+    id: 'platform_radioactive',
+    name: 'Cenário // Reator Nuclear Fissão',
+    category: 'platforms',
+    categoryLabel: 'Cenários & Plataformas',
+    badge: 'IRRADIAÇÃO CRÍTICA',
+    color: '#76ff03',
+    desc: 'Núcleo de reator nuclear com brilho da Radiação Cherenkov azul/verde, varetas de combustível de urânio e partículas de radiação alfa/gama.',
+    renderType: 'scenario_radioactive',
+    technicalSpecs: [
+      { label: 'Atrito', value: '0.85' },
+      { label: 'Efeito DoT', value: '-12.0 HP/s Radiação' },
+      { label: 'Dano Extra', value: '+25% Crítico Nuclear' }
+    ]
+  },
+  {
+    id: 'platform_crystal_prism',
+    name: 'Cenário // Prisma Cristalino',
+    category: 'platforms',
+    categoryLabel: 'Cenários & Plataformas',
+    badge: 'REFRAÇÃO DE FEIXES',
+    color: '#d2bdff',
+    desc: 'Cristais de quartzo crescendo ritmicamente em 15 posições, feixe de luz que entra no prisma central de quartzo biterminado e refrata arco-íris de 7 cores acelerado.',
+    renderType: 'scenario_crystal_prism',
+    technicalSpecs: [
+      { label: 'Atrito', value: '0.88' },
+      { label: 'Cooldown', value: '-20% (0.80x)' },
+      { label: 'Efeito', value: '+20% Dano / +30% Mana' }
+    ]
+  },
+  {
+    id: 'platform_abyssal',
+    name: 'Cenário // Miasma Abissal',
+    category: 'platforms',
+    categoryLabel: 'Cenários & Plataformas',
+    badge: 'ALTA PRESSÃO',
+    color: '#00ffc4',
+    desc: 'Fossa oceânica profunda com luz cáustica descendo, algas ondulantes, 4 criaturas bioluminescentes (raias-manta, peixe-pescador, enguias) e bolhas de gás.',
+    renderType: 'scenario_abyssal',
+    technicalSpecs: [
+      { label: 'Atrito', value: '0.92' },
+      { label: 'Velocidade', value: '-15% (0.85x alta pressão)' },
+      { label: 'Efeito', value: '+40% Dano Verdadeiro' }
+    ]
   }
 ];

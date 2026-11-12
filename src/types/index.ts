@@ -18,6 +18,7 @@ export type CodexCategory =
   | 'drones' 
   | 'expressions' 
   | 'auras' 
+  | 'platforms'
   | 'player' 
   | 'projectiles' 
   | 'skills' 

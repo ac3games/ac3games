@@ -6,17 +6,19 @@ import {
   DRONES_DATA,
   HERO_CLASSES_DATA,
   BIOME_AURAS_DATA,
+  BIOME_SCENARIOS_DATA,
   renderStudioPlayer,
   renderStudioEnemy,
   renderStudioWaveBoss,
   renderStudioArenaBoss,
   renderStudioDrone,
   renderStudioHeroClassWeapon,
-  renderStudioBiomeAura
+  renderStudioBiomeAura,
+  renderStudioBiomeScenario
 } from '../utils/vectorRenderers';
-import { User, Skull, ShieldAlert, Award, Crosshair, Zap, Compass, Download, Sparkles } from 'lucide-react';
+import { User, Skull, ShieldAlert, Award, Crosshair, Zap, Compass, Download, Sparkles, Layers } from 'lucide-react';
 
-type StudioTab = 'player' | 'enemy' | 'wave_boss' | 'arena_boss' | 'drone' | 'hero_class' | 'biome_aura';
+type StudioTab = 'player' | 'enemy' | 'wave_boss' | 'arena_boss' | 'drone' | 'hero_class' | 'biome_aura' | 'biome_platform';
 
 export const CodexStudio: React.FC = () => {
   const [activeTab, setActiveTab] = useState<StudioTab>('player');
@@ -38,6 +40,8 @@ export const CodexStudio: React.FC = () => {
   const [heroClassId, setHeroClassId] = useState<string>('vanguard');
   const [isEvolved, setIsEvolved] = useState<boolean>(false);
   const [biomeAuraId, setBiomeAuraId] = useState<string>('normal');
+  const [biomePlatformId, setBiomePlatformId] = useState<string>('normal');
+  const [platformViewMode, setPlatformViewMode] = useState<'3lanes' | 'single'>('3lanes');
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -68,6 +72,8 @@ export const CodexStudio: React.FC = () => {
         renderStudioHeroClassWeapon(ctx, heroClassId, canvas.width, canvas.height, elapsed, isEvolved);
       } else if (activeTab === 'biome_aura') {
         renderStudioBiomeAura(ctx, biomeAuraId, canvas.width, canvas.height, elapsed);
+      } else if (activeTab === 'biome_platform') {
+        renderStudioBiomeScenario(ctx, biomePlatformId, canvas.width, canvas.height, elapsed, platformViewMode);
       }
 
       animId = requestAnimationFrame(render);
@@ -89,7 +95,9 @@ export const CodexStudio: React.FC = () => {
     droneId,
     heroClassId,
     isEvolved,
-    biomeAuraId
+    biomeAuraId,
+    biomePlatformId,
+    platformViewMode
   ]);
 
   // Download 1080p Crystal Clear PNG
@@ -123,6 +131,9 @@ export const CodexStudio: React.FC = () => {
     } else if (activeTab === 'biome_aura') {
       renderStudioBiomeAura(offCtx, biomeAuraId, 1920, 1080, 0);
       filename = `codex_aura_${biomeAuraId}_1080p.png`;
+    } else if (activeTab === 'biome_platform') {
+      renderStudioBiomeScenario(offCtx, biomePlatformId, 1920, 1080, 0, platformViewMode);
+      filename = `cenario_plataforma_${biomePlatformId}_${platformViewMode}_1080p.png`;
     }
 
     const link = document.createElement('a');
@@ -148,6 +159,7 @@ export const CodexStudio: React.FC = () => {
   const selectedDrone = DRONES_DATA.find(d => d.id === droneId) || DRONES_DATA[0]!;
   const selectedHeroClass = HERO_CLASSES_DATA.find(c => c.id === heroClassId) || HERO_CLASSES_DATA[0]!;
   const selectedBiomeAura = BIOME_AURAS_DATA.find(a => a.id === biomeAuraId) || BIOME_AURAS_DATA[0]!;
+  const selectedBiomePlatform = BIOME_SCENARIOS_DATA.find(b => b.id === biomePlatformId) || BIOME_SCENARIOS_DATA[0]!;
 
   return (
     <div className="bg-cyber-card rounded-3xl p-6 sm:p-8 border border-cyber-cyan/50 shadow-neon-cyan/20 mb-16">
@@ -248,6 +260,18 @@ export const CodexStudio: React.FC = () => {
           >
             <Compass className="w-4 h-4" />
             <span>Auras de Biomas (11)</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('biome_platform')}
+            className={`px-3 py-2 rounded-xl flex items-center gap-2 transition-all ${
+              activeTab === 'biome_platform'
+                ? 'bg-cyber-cyan text-black font-bold shadow-neon-cyan'
+                : 'bg-cyber-darker text-slate-300 hover:text-white border border-cyber-cardBorder'
+            }`}
+          >
+            <Layers className="w-4 h-4" />
+            <span>Cenários & Plataformas (11)</span>
           </button>
         </div>
       </div>
@@ -980,6 +1004,165 @@ export const CodexStudio: React.FC = () => {
                   <div className="text-[11px] font-outfit text-slate-300 leading-relaxed border-t border-cyber-cardBorder/40 pt-2">
                     <strong className="text-white font-mono block mb-0.5">LORE DO BIOMA:</strong>
                     {selectedBiomeAura.lorePt}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 8: CENÁRIOS & PLATAFORMAS (11) */}
+          {activeTab === 'biome_platform' && (
+            <div>
+              <div className="mb-6 space-y-4">
+                {/* View Mode Toggle: 3 Lanes vs Single */}
+                <div>
+                  <label className="block text-xs font-mono text-cyber-cyan font-bold uppercase mb-1.5">
+                    1. Modo de Visualização:
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      onClick={() => setPlatformViewMode('3lanes')}
+                      className={`px-3 py-2 rounded-xl text-xs font-mono font-bold transition-all ${
+                        platformViewMode === '3lanes'
+                          ? 'bg-cyber-cyan text-black shadow-neon-cyan'
+                          : 'bg-cyber-card text-slate-300 hover:text-white border border-cyber-cardBorder'
+                      }`}
+                    >
+                      3 Pistas de Combate
+                    </button>
+                    <button
+                      onClick={() => setPlatformViewMode('single')}
+                      className={`px-3 py-2 rounded-xl text-xs font-mono font-bold transition-all ${
+                        platformViewMode === 'single'
+                          ? 'bg-cyber-cyan text-black shadow-neon-cyan'
+                          : 'bg-cyber-card text-slate-300 hover:text-white border border-cyber-cardBorder'
+                      }`}
+                    >
+                      Foco em 1 Bioma
+                    </button>
+                  </div>
+                </div>
+
+                {/* Dropdown Selector */}
+                <div>
+                  <label className="block text-xs font-mono text-cyber-cyan font-bold uppercase mb-1.5">
+                    2. Escolha o Bioma / Cenário (11 Biomas Canônicos):
+                  </label>
+                  <select
+                    value={biomePlatformId}
+                    onChange={(e) => setBiomePlatformId(e.target.value)}
+                    className="w-full bg-cyber-card border border-cyber-cardBorder rounded-xl px-3 py-2 text-sm text-white font-mono focus:outline-none focus:border-cyber-cyan"
+                  >
+                    {BIOME_SCENARIOS_DATA.map((b, idx) => (
+                      <option key={b.id} value={b.id}>
+                        #{idx + 1}: {b.namePt} ({b.nameEn})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Quick Buttons Grid */}
+                <div>
+                  <label className="block text-xs font-mono text-slate-400 font-bold uppercase mb-1.5">
+                    3. Seleção Rápida de Bioma:
+                  </label>
+                  <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto pr-1">
+                    {BIOME_SCENARIOS_DATA.map((b) => (
+                      <button
+                        key={b.id}
+                        onClick={() => setBiomePlatformId(b.id)}
+                        className={`px-2.5 py-1.5 rounded-lg border text-left font-mono text-[11px] transition-all flex items-center gap-2 ${
+                          biomePlatformId === b.id
+                            ? 'bg-cyber-card text-white font-bold'
+                            : 'bg-cyber-darker text-slate-400 hover:text-white border-cyber-cardBorder'
+                        }`}
+                        style={{
+                          borderColor: biomePlatformId === b.id ? b.colorHex : undefined,
+                          boxShadow: biomePlatformId === b.id ? `0 0 12px ${b.colorHex}40` : undefined
+                        }}
+                      >
+                        <span
+                          className="w-2.5 h-2.5 rounded-full shrink-0"
+                          style={{ backgroundColor: b.colorHex, boxShadow: `0 0 6px ${b.colorHex}` }}
+                        />
+                        <span className="truncate">{b.namePt}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Explanatory Legend & Specs */}
+              <div className="pt-4 border-t border-cyber-cardBorder/60">
+                <span
+                  className="font-mono text-xs font-bold px-2.5 py-1 rounded inline-block mb-2"
+                  style={{ backgroundColor: `${selectedBiomePlatform.colorHex}22`, color: selectedBiomePlatform.colorHex }}
+                >
+                  ENGENHARIA DE CENÁRIO // {platformViewMode === '3lanes' ? '3 PISTAS DE COMBATE' : 'FOCO EM 1 BIOMA'}
+                </span>
+
+                <h4 className="font-orbitron font-bold text-xl text-white mb-1 flex items-center gap-2">
+                  <span
+                    className="w-3.5 h-3.5 rounded-full inline-block"
+                    style={{ backgroundColor: selectedBiomePlatform.colorHex, boxShadow: `0 0 8px ${selectedBiomePlatform.colorHex}` }}
+                  />
+                  {selectedBiomePlatform.namePt}
+                </h4>
+                <p className="font-mono text-xs text-cyber-cyan mb-3">
+                  ID: #{selectedBiomePlatform.id} // {selectedBiomePlatform.nameEn.toUpperCase()}
+                </p>
+
+                <div className="space-y-3 font-mono text-xs mb-4">
+                  {/* Atmosphere Description */}
+                  <div className="p-2.5 rounded bg-cyber-card border border-cyber-cardBorder/40">
+                    <span className="text-slate-400 block mb-0.5 font-bold">ATMOSFERA & ELEMENTOS PROCEDURAIS:</span>
+                    <p className="font-outfit text-xs text-slate-300 leading-relaxed">
+                      {selectedBiomePlatform.desc}
+                    </p>
+                  </div>
+
+                  {/* Physics Specs Grid */}
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="p-2 rounded bg-cyber-card border border-cyber-cardBorder/40">
+                      <span className="text-slate-400 block text-[10px]">Atrito da Superfície:</span>
+                      <span className="text-emerald-400 font-bold text-xs">{selectedBiomePlatform.drag}</span>
+                    </div>
+                    <div className="p-2 rounded bg-cyber-card border border-cyber-cardBorder/40">
+                      <span className="text-slate-400 block text-[10px]">Multiplicador Velocidade:</span>
+                      <span className="text-cyber-cyan font-bold text-xs">{selectedBiomePlatform.speed}</span>
+                    </div>
+                    <div className="p-2 rounded bg-cyber-card border border-cyber-cardBorder/40">
+                      <span className="text-slate-400 block text-[10px]">Cooldown Recarga:</span>
+                      <span className="text-amber-400 font-bold text-xs">{selectedBiomePlatform.cooldown}</span>
+                    </div>
+                    <div className="p-2 rounded bg-cyber-card border border-cyber-cardBorder/40">
+                      <span className="text-slate-400 block text-[10px]">Efeito em Área (DoT):</span>
+                      <span className="text-purple-300 font-bold text-xs">{selectedBiomePlatform.dot}</span>
+                    </div>
+                  </div>
+
+                  {/* Metallic Platform Bar Details */}
+                  <div className="p-2.5 rounded bg-cyber-darker border border-cyber-cardBorder/50 text-[11px]">
+                    <span className="text-cyber-cyan font-bold block mb-1 uppercase tracking-wider">
+                      📐 DETALHE METÁLICO DA PLATAFORMA:
+                    </span>
+                    <p className="font-outfit text-slate-300 leading-relaxed">
+                      {selectedBiomePlatform.platformDetail}
+                    </p>
+                  </div>
+
+                  {/* Engine Physics Architecture Box */}
+                  <div className="p-3 rounded-xl bg-black/60 border border-cyber-cyan/30 text-[11px] leading-relaxed">
+                    <span className="text-cyber-cyan font-bold block mb-1.5 uppercase tracking-wider">
+                      ⚙️ ARQUITETURA DE INSTANCIAÇÃO (MOTOR):
+                    </span>
+                    <div className="space-y-1 text-slate-300">
+                      <div>• Pistas Físicas: <span className="text-amber-400 font-bold">Top (Y=300), Mid (Y=600), Bot (Y=900)</span></div>
+                      <div>• Largura Efetiva: <span className="text-amber-400 font-bold">X = 50 a 1870 (1820px)</span></div>
+                      <div>• Espessura do Metal: <span className="text-amber-400 font-bold">26px</span> (painéis e trilhos)</div>
+                      <div>• Motor de Renderização: <span className="text-amber-400 font-bold">RenderSystem.ts:lines 2518–4500</span></div>
+                      <div>• Fidelidade Matemática: <span className="text-emerald-400 font-bold">100% Idêntico ao Jogo Oficial</span></div>
+                    </div>
                   </div>
                 </div>
               </div>

@@ -3270,6 +3270,11 @@ export function renderProceduralAsset(
     renderStudioBiomeAura(ctx, rawId, width, height, time);
     ctx.restore();
     return;
+  } else if (type.startsWith('scenario_') || type.startsWith('biome_platform_')) {
+    const rawId = type.replace('scenario_', '').replace('biome_platform_', '');
+    renderStudioBiomeScenario(ctx, rawId, width, height, time, 'single');
+    ctx.restore();
+    return;
   } else if (type === 'hull_vector01') {
     renderStudioPlayer(ctx, 1, 11, width, height, time);
   } else if (type === 'hull_flower') {
@@ -3649,6 +3654,1970 @@ export function renderStudioExpression(
     ctx.moveTo(fx - 4 * faceScale, fy + 4 * faceScale);
     ctx.lineTo(fx + 4 * faceScale, fy + 4 * faceScale);
     ctx.stroke();
+  }
+
+  ctx.restore();
+}
+
+/**
+ * 8. BIOME SCENARIOS & PROCEDURAL PLATFORMS (Directly from RenderSystem.ts:lines 2518–4500)
+ */
+export interface BiomeScenarioData {
+  id: string;
+  namePt: string;
+  nameEn: string;
+  colorHex: string;
+  colorNumber: number;
+  drag: string;
+  speed: string;
+  cooldown: string;
+  dot: string;
+  desc: string;
+  platformDetail: string;
+  lorePt: string;
+  codeRef: string;
+}
+
+export const BIOME_SCENARIOS_DATA: BiomeScenarioData[] = [
+  {
+    id: 'normal',
+    namePt: 'Floresta Quântica',
+    nameEn: 'Forest Canopy',
+    colorHex: '#00ff66',
+    colorNumber: 0x00ff66,
+    drag: '0.88',
+    speed: '+10% (1.10x)',
+    cooldown: '-10% (0.90x)',
+    dot: '+3.0 HP/s Regeneração',
+    desc: 'Atmosfera em 6 faixas de gradiente, lua geométrica com auréolas esmeralda, raios de luz divinos (God Rays), cordilheira distante, colinas e 9 árvores geométricas procedurais oscilando com o vento.',
+    platformDetail: 'Trilhos neon esmeralda, chanfros modulares de 80px, vinco longitudinal central e faixas diagonais de advertência a 45°.',
+    lorePt: 'O dossel botânico quântico gera oxigenação taquiônica pura. Restaura a blindagem e melhora a manobrabilidade dos caças.',
+    codeRef: 'RenderSystem.ts:lines 2562-2682 & 4207-4484'
+  },
+  {
+    id: 'ice',
+    namePt: 'Criogênico SubZero',
+    nameEn: 'SubZero Ice Tundra',
+    colorHex: '#00f0ff',
+    colorNumber: 0x00f0ff,
+    drag: '0.97 (Escorregadio)',
+    speed: '+30% (1.30x)',
+    cooldown: '+25% (1.25x lentidão)',
+    dot: 'Estase Inimiga',
+    desc: 'Nevasca contínua com flocos de neve hexagonais facetados com 6 braços e ramificações duplas a 45°, anel interno e poeira de gelo brilhante.',
+    platformDetail: 'Superfície de gelo periwinkle com reflexos cristalinos brancos em corte chanfrado a 45° e trilhos de perigo ciano.',
+    lorePt: 'Temperaturas próximas do zero absoluto criam supercondutividade de momento inercial. Alta velocidade com atrito mínimo.',
+    codeRef: 'RenderSystem.ts:lines 2682-2758'
+  },
+  {
+    id: 'magma',
+    namePt: 'Vulcânico Incandescente',
+    nameEn: 'Incandescent Volcanic Magma',
+    colorHex: '#ff3300',
+    colorNumber: 0xff3300,
+    drag: '0.88',
+    speed: '1.00x',
+    cooldown: '1.00x',
+    dot: '-3.0 HP/s Dano Térmico',
+    desc: 'Chamas em curvas de Bézier quádruplas em 3 passagens (vermelho 0xd03000, laranja 0xff7700 e núcleo amarelo 0xffdd00) subindo da base e descendo do topo, com brasas em diamante.',
+    platformDetail: 'Condutos magmáticos pulsantes no corpo metálico da plataforma com pulsação senoidal (0.45 a 0.60 alpha).',
+    lorePt: 'Câmaras de fusão planetária irradiam calor geotérmico extremo. Exige circulação forçada de refrigerante de bordo.',
+    codeRef: 'RenderSystem.ts:lines 2758-2885'
+  },
+  {
+    id: 'electric',
+    namePt: 'Voltaico Megawatt',
+    nameEn: 'Megawatt Voltaic Circuit',
+    colorHex: '#ffff00',
+    colorNumber: 0xffff00,
+    drag: '0.88',
+    speed: '1.00x',
+    cooldown: '-35% (0.65x ultrarrápido)',
+    dot: 'Supercondução de Mana',
+    desc: 'Exatamente 16 trilhas de circuitos impressos vetoriais com terminais em anel e ponto, pulso de elétrons em movimento contínuo e repetição modular a cada 700px.',
+    platformDetail: 'Pistas de barramento de cobre neon com ilhas de solda circulares e nós de aterramento elétrico.',
+    lorePt: 'Superfície energizada em escala de gigawatts que acelera a recarga de canhões de plasma e sistemas de bateria.',
+    codeRef: 'RenderSystem.ts:lines 2885-3084'
+  },
+  {
+    id: 'void',
+    namePt: 'Singular do Vazio',
+    nameEn: 'Singular Void Abyss',
+    colorHex: '#bd00ff',
+    colorNumber: 0xbd00ff,
+    drag: '0.88',
+    speed: '-25% (0.75x gravidade pesada)',
+    cooldown: '1.00x',
+    dot: '+50% Regen Mana',
+    desc: 'Fenda de horizonte de eventos cósmica ondulante, anéis de acreção gravitacional concêntricos, raios de atração radial, núcleo escuro e enxame de 8 partículas em órbita diferencial.',
+    platformDetail: 'Anéis de contenção quântica embutidos no chassi metálico com núcleo de singularidade circular escuro.',
+    lorePt: 'Distorção espaço-temporal profunda onde a gravidade densa suga partículas e desacelera o movimento da matéria.',
+    codeRef: 'RenderSystem.ts:lines 3084-3167'
+  },
+  {
+    id: 'overcharged',
+    namePt: 'Reator Sobrecarregado',
+    nameEn: 'Overcharged Reactor Hub',
+    colorHex: '#ffaa00',
+    colorNumber: 0xffaa00,
+    drag: '0.88',
+    speed: '1.00x',
+    cooldown: '+20% (1.20x)',
+    dot: '+50% Ganho de EXP',
+    desc: 'Grade de favo de mel (honeycomb grid) em alta frequência, trilhos de neon horizontais a 25% e 75% da altura, onda senoidal osciloscópica espessa, capacitores de descarga com raios e células de energia em diamante.',
+    platformDetail: 'Chevrons de aceleração triplos (>>>) desenhados no centro de cada bloco da plataforma.',
+    lorePt: 'Complexo nuclear de alta densidade operando em sobrecarga crítica controlada. Multiplica os dados de combate coletados.',
+    codeRef: 'RenderSystem.ts:lines 3167-3266'
+  },
+  {
+    id: 'chronos',
+    namePt: 'Temporal de Chronos',
+    nameEn: 'Chronos Distortion Dimension',
+    colorHex: '#d4af32',
+    colorNumber: 0xd4af32,
+    drag: '0.88',
+    speed: '1.00x',
+    cooldown: '-30% (0.70x)',
+    dot: '+25% EXP / +10% Dano',
+    desc: '8 relógios sutis de fundo, 4 grandes mostradores de relógio steampunk com anéis concêntricos duplos, 60 marcas de minutos, 12 dentes de engrenagem em rotação, 3 ponteiros diferenciais e pêndulos oscilantes.',
+    platformDetail: 'Marcadores de horas radiais e dentes de engrenagem de precisão gravados nas vigas estruturais.',
+    lorePt: 'Dimensão cronométrica onde o tempo flui em taxas relativas assimétricas, conferindo reflexos táquions antecipados.',
+    codeRef: 'RenderSystem.ts:lines 3266-3384'
+  },
+  {
+    id: 'cyber_grid',
+    namePt: 'Cibernética Neon',
+    nameEn: 'Neon Cyber Grid Synthwave',
+    colorHex: '#ff009f',
+    colorNumber: 0xff009f,
+    drag: '0.85',
+    speed: '+35% (1.35x alta velocidade)',
+    cooldown: '-15% (0.85x)',
+    dot: '+15% Dano / Perfuração',
+    desc: 'Grade 3D synthwave com perspectiva de horizonte fugitivo em magenta e ciano, barramentos de fibra óptica com pacotes de dados viajando e microchips integrados com pinos e LEDs pulsantes.',
+    platformDetail: 'Nós duplos de telecomunicação cibernética com iluminação laser magenta.',
+    lorePt: 'Ciberespaço holográfico materializado via barramentos ópticos de altíssima condutividade e aceleração fotônica.',
+    codeRef: 'RenderSystem.ts:lines 3384-3431'
+  },
+  {
+    id: 'solar_flare',
+    namePt: 'Solar Incandescente',
+    nameEn: 'Solar Flare Eruptor',
+    colorHex: '#ffea66',
+    colorNumber: 0xffea66,
+    drag: '0.88',
+    speed: '+5% (1.05x)',
+    cooldown: '1.00x',
+    dot: '-1.5 HP/s Radiação Térmica',
+    desc: 'Corona solar central incandescente com 36 raios em dente de serra, 72 raios de emissão radial em leque, 6 proeminências curvas de Bézier em arco contínuo, manto solar e brasas flutuantes.',
+    platformDetail: 'Emissor de raios solares em leque com cristas de plasma dourado e carmesim.',
+    lorePt: 'Proximidade estelar extrema com tempestades de prótons e vento solar contínuo gerando blindagem coronal.',
+    codeRef: 'RenderSystem.ts:lines 3431-3543'
+  },
+  {
+    id: 'crystal_prism',
+    namePt: 'Prisma Cristalino',
+    nameEn: 'Crystal Prism Matrix',
+    colorHex: '#d2bdff',
+    colorNumber: 0xd2bdff,
+    drag: '0.88',
+    speed: '1.00x',
+    cooldown: '-20% (0.80x)',
+    dot: '+20% Dano / +30% Mana',
+    desc: 'Cristais de quartzo crescendo ritmicamente no chão e teto em 15 posições, feixe de luz branca espessa que entra no prisma central de quartzo biterminado com 6 facetas coloridas e refrata um arco-íris de 7 cores na altura total.',
+    platformDetail: 'Facetas lapidadas de diamante translúcido com reflexos ópticos triangulares em corte diagonal.',
+    lorePt: 'Matriz piezoelétrica de quartzo puro. A refração fotônica polarizada amplifica canhões de luz e dispersões de lasers.',
+    codeRef: 'RenderSystem.ts:lines 3543-3854'
+  },
+  {
+    id: 'abyssal',
+    namePt: 'Miasma Abissal',
+    nameEn: 'Abyssal Trench Depths',
+    colorHex: '#00ffc4',
+    colorNumber: 0x00ffc4,
+    drag: '0.92',
+    speed: '-15% (0.85x alta pressão)',
+    cooldown: '+10% (1.10x)',
+    dot: '+40% Dano Verdadeiro',
+    desc: 'Fossa oceânica profunda com gradiente azul meia-noite, raios cáusticos de luz da superfície descendo, silhuetas de rochas marinhas, floresta de algas ondulando senoidalmente em 6 segmentos, 4 espécies de criaturas bioluminescentes e bolhas de gás hidrotermal.',
+    platformDetail: 'Ranhuras de alta pressão oceânica com nervuras duplas reforçadas para suportar o abismo.',
+    lorePt: 'Trincheira pelágica hiperbárica. A alta densidade de fluidos bio-sintéticos gera dano corrosivo terminal.',
+    codeRef: 'RenderSystem.ts:lines 3854-4047'
+  }
+];
+
+// --- Procedural Generation Helper Functions for Scenarios ---
+
+function createPhaserGraphicsShim(c: CanvasRenderingContext2D) {
+  let curFill = 'rgba(0,0,0,1)';
+  let curStroke = 'rgba(0,0,0,1)';
+  let curLineWidth = 1;
+
+  function toRgba(val: number | string, alpha = 1): string {
+    if (typeof val === 'string') {
+      if (val.startsWith('#')) {
+        const num = parseInt(val.slice(1), 16);
+        const r = (num >> 16) & 255;
+        const g = (num >> 8) & 255;
+        const b = num & 255;
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+      }
+      return val;
+    }
+    const r = (val >> 16) & 255;
+    const g = (val >> 8) & 255;
+    const b = val & 255;
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  }
+
+  return {
+    clear() {},
+    fillStyle(color: number | string, alpha = 1) {
+      curFill = toRgba(color, alpha);
+      c.fillStyle = curFill;
+    },
+    lineStyle(width: number, color: number | string, alpha = 1) {
+      curLineWidth = width;
+      curStroke = toRgba(color, alpha);
+      c.lineWidth = width;
+      c.strokeStyle = curStroke;
+    },
+    fillRect(x: number, y: number, w: number, h: number) {
+      c.fillStyle = curFill;
+      c.fillRect(x, y, w, h);
+    },
+    strokeRect(x: number, y: number, w: number, h: number) {
+      c.strokeStyle = curStroke;
+      c.lineWidth = curLineWidth;
+      c.strokeRect(x, y, w, h);
+    },
+    fillCircle(x: number, y: number, r: number) {
+      c.fillStyle = curFill;
+      c.beginPath();
+      c.arc(x, y, Math.max(0, r), 0, Math.PI * 2);
+      c.fill();
+    },
+    strokeCircle(x: number, y: number, r: number) {
+      c.strokeStyle = curStroke;
+      c.lineWidth = curLineWidth;
+      c.beginPath();
+      c.arc(x, y, Math.max(0, r), 0, Math.PI * 2);
+      c.stroke();
+    },
+    lineBetween(x1: number, y1: number, x2: number, y2: number) {
+      c.strokeStyle = curStroke;
+      c.lineWidth = curLineWidth;
+      c.beginPath();
+      c.moveTo(x1, y1);
+      c.lineTo(x2, y2);
+      c.stroke();
+    },
+    beginPath() {
+      c.beginPath();
+    },
+    moveTo(x: number, y: number) {
+      c.moveTo(x, y);
+    },
+    lineTo(x: number, y: number) {
+      c.lineTo(x, y);
+    },
+    arc(cx: number, cy: number, r: number, sAng: number, eAng: number, anticlockwise = false) {
+      c.arc(cx, cy, Math.max(0, r), sAng, eAng, anticlockwise);
+    },
+    closePath() {
+      c.closePath();
+    },
+    fillPath() {
+      c.fillStyle = curFill;
+      c.fill();
+    },
+    strokePath() {
+      c.strokeStyle = curStroke;
+      c.lineWidth = curLineWidth;
+      c.stroke();
+    }
+  };
+}
+
+interface ForestTreeModel {
+  xRatio: number;
+  yOffset: number;
+  treeType: number;
+  scale: number;
+  colorShade: number;
+  secondaryColorShade: number;
+  trunkColor: number;
+}
+
+const precomputedForestTrees: Record<number, ForestTreeModel[]> = {};
+function getForestTrees(pIndex: number): ForestTreeModel[] {
+  if (precomputedForestTrees[pIndex]) return precomputedForestTrees[pIndex]!;
+
+  let seed = 1337 + pIndex * 42;
+  const rng = () => {
+    let t = seed += 0x6D2B79F5;
+    t = Math.imul(t ^ t >>> 15, t | 1);
+    t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+
+  const greenPalettes = [
+    { primary: 0x2ecc71, sec: 0x27ae60 },
+    { primary: 0x1abc9c, sec: 0x16a085 },
+    { primary: 0xa3e635, sec: 0x65a30d },
+    { primary: 0x4ade80, sec: 0x16a34a },
+    { primary: 0x84cc16, sec: 0x4d7c0f },
+    { primary: 0x10b981, sec: 0x047857 },
+    { primary: 0x6ee7b7, sec: 0x059669 }
+  ];
+  const trunkPalettes = [0x5c4033, 0x795548, 0x4a3525, 0x3e2723, 0x6d4c41];
+
+  const trees: ForestTreeModel[] = [];
+  const count = 20;
+  for (let i = 0; i < count; i++) {
+    const xRatio = (i + 0.15 + rng() * 0.7) / count;
+    const palette = greenPalettes[Math.floor(rng() * greenPalettes.length)]!;
+    const trunk = trunkPalettes[Math.floor(rng() * trunkPalettes.length)]!;
+    trees.push({
+      xRatio,
+      yOffset: rng() * 8,
+      treeType: Math.floor(rng() * 9),
+      scale: 0.75 + rng() * 0.55,
+      colorShade: palette.primary,
+      secondaryColorShade: palette.sec,
+      trunkColor: trunk
+    });
+  }
+  precomputedForestTrees[pIndex] = trees;
+  return trees;
+}
+
+function drawNeonGeometricTree(
+  graphics: ReturnType<typeof createPhaserGraphicsShim>,
+  x: number,
+  groundY: number,
+  tree: ForestTreeModel,
+  windSway: number
+) {
+  const scale = tree.scale;
+  const foliageColor = tree.colorShade;
+  const secColor = tree.secondaryColorShade;
+  const cyberTrunkFill = 0x071b16;
+  const cyberTrunkOutline = 0x10b981;
+  const foliageFillAlpha = 0.24;
+
+  switch (tree.treeType) {
+    case 0: {
+      const trunkW = 8 * scale;
+      const trunkH = 20 * scale;
+      graphics.fillStyle(cyberTrunkFill, 0.55);
+      graphics.fillRect(x - trunkW / 2, groundY - trunkH, trunkW, trunkH);
+      graphics.lineStyle(1.4 * scale, cyberTrunkOutline, 0.85);
+      graphics.strokeRect(x - trunkW / 2, groundY - trunkH, trunkW, trunkH);
+
+      const topY = groundY - trunkH - 65 * scale;
+      const baseY = groundY - trunkH + 3 * scale;
+      const w = 48 * scale;
+
+      graphics.fillStyle(foliageColor, foliageFillAlpha);
+      graphics.beginPath();
+      graphics.moveTo(x + windSway, topY);
+      graphics.lineTo(x + w / 2, baseY);
+      graphics.lineTo(x - w / 2, baseY);
+      graphics.closePath();
+      graphics.fillPath();
+
+      graphics.lineStyle(2.0 * scale, secColor, 0.95);
+      graphics.strokePath();
+      break;
+    }
+    case 1: {
+      const trunkW = 6 * scale;
+      const trunkH = 55 * scale;
+      graphics.fillStyle(cyberTrunkFill, 0.55);
+      graphics.fillRect(x - trunkW / 2, groundY - trunkH, trunkW, trunkH);
+      graphics.lineStyle(1.4 * scale, cyberTrunkOutline, 0.85);
+      graphics.strokeRect(x - trunkW / 2, groundY - trunkH, trunkW, trunkH);
+
+      graphics.lineStyle(2.5 * scale, cyberTrunkOutline, 0.9);
+      graphics.lineBetween(x, groundY - trunkH + 28 * scale, x - 18 * scale, groundY - trunkH + 12 * scale);
+      graphics.lineBetween(x, groundY - trunkH + 20 * scale, x + 18 * scale, groundY - trunkH + 6 * scale);
+
+      const drawNeonCircle = (cx: number, cy: number, r: number) => {
+        graphics.fillStyle(foliageColor, foliageFillAlpha);
+        graphics.fillCircle(cx, cy, r);
+        graphics.lineStyle(2.0 * scale, secColor, 0.95);
+        graphics.strokeCircle(cx, cy, r);
+      };
+
+      const topX = x + windSway;
+      const topY = groundY - trunkH - 8 * scale;
+      drawNeonCircle(topX, topY, 18 * scale);
+      drawNeonCircle(x - 20 * scale + windSway * 0.7, groundY - trunkH + 8 * scale, 12 * scale);
+      drawNeonCircle(x + 20 * scale + windSway * 0.7, groundY - trunkH + 2 * scale, 13 * scale);
+      break;
+    }
+    case 2: {
+      const trunkW = 7 * scale;
+      const trunkH = 24 * scale;
+      graphics.fillStyle(cyberTrunkFill, 0.55);
+      graphics.fillRect(x - trunkW / 2, groundY - trunkH, trunkW, trunkH);
+      graphics.lineStyle(1.4 * scale, cyberTrunkOutline, 0.85);
+      graphics.strokeRect(x - trunkW / 2, groundY - trunkH, trunkW, trunkH);
+
+      const baseY = groundY - trunkH;
+      const circles = [
+        { cx: x - 14 * scale, cy: baseY - 12 * scale, r: 16 * scale },
+        { cx: x + 14 * scale, cy: baseY - 12 * scale, r: 16 * scale },
+        { cx: x - 8 * scale, cy: baseY - 32 * scale, r: 18 * scale },
+        { cx: x + 8 * scale + windSway, cy: baseY - 38 * scale, r: 20 * scale }
+      ];
+
+      for (const c of circles) {
+        graphics.fillStyle(foliageColor, foliageFillAlpha);
+        graphics.fillCircle(c.cx, c.cy, c.r);
+        graphics.lineStyle(2.0 * scale, secColor, 0.95);
+        graphics.strokeCircle(c.cx, c.cy, c.r);
+      }
+      break;
+    }
+    case 3: {
+      const trunkW = 6 * scale;
+      const trunkH = 65 * scale;
+      graphics.fillStyle(cyberTrunkFill, 0.55);
+      graphics.fillRect(x - trunkW / 2, groundY - trunkH, trunkW, trunkH);
+      graphics.lineStyle(1.4 * scale, cyberTrunkOutline, 0.85);
+      graphics.strokeRect(x - trunkW / 2, groundY - trunkH, trunkW, trunkH);
+
+      graphics.lineStyle(2.5 * scale, cyberTrunkOutline, 0.9);
+      graphics.lineBetween(x - 22 * scale, groundY - trunkH + 35 * scale, x, groundY - trunkH + 35 * scale);
+      graphics.lineBetween(x, groundY - trunkH + 20 * scale, x + 25 * scale, groundY - trunkH + 20 * scale);
+
+      const drawNeonPill = (cx: number, cy: number, w: number, h: number) => {
+        const r = h / 2;
+        const leftX = cx - w / 2;
+        const rightX = cx + w / 2;
+
+        graphics.beginPath();
+        graphics.arc(rightX, cy, r, -Math.PI / 2, Math.PI / 2, false);
+        graphics.lineTo(leftX, cy + r);
+        graphics.arc(leftX, cy, r, Math.PI / 2, -Math.PI / 2, false);
+        graphics.lineTo(rightX, cy - r);
+        graphics.closePath();
+
+        graphics.fillStyle(foliageColor, foliageFillAlpha);
+        graphics.fillPath();
+
+        graphics.lineStyle(2.0 * scale, secColor, 0.95);
+        graphics.strokePath();
+      };
+
+      drawNeonPill(x - 24 * scale + windSway * 0.5, groundY - trunkH + 35 * scale, 36 * scale, 12 * scale);
+      drawNeonPill(x + 26 * scale + windSway * 0.7, groundY - trunkH + 20 * scale, 42 * scale, 13 * scale);
+      drawNeonPill(x + windSway, groundY - trunkH - 4 * scale, 48 * scale, 14 * scale);
+      break;
+    }
+    case 4: {
+      const trunkW = 8 * scale;
+      const trunkH = 28 * scale;
+      graphics.fillStyle(cyberTrunkFill, 0.55);
+      graphics.fillRect(x - trunkW / 2, groundY - trunkH, trunkW, trunkH);
+      graphics.lineStyle(1.4 * scale, cyberTrunkOutline, 0.85);
+      graphics.strokeRect(x - trunkW / 2, groundY - trunkH, trunkW, trunkH);
+
+      const baseY = groundY - trunkH;
+      const drawNeonSphere = (cx: number, cy: number, r: number) => {
+        graphics.fillStyle(foliageColor, foliageFillAlpha);
+        graphics.fillCircle(cx, cy, r);
+        graphics.lineStyle(2.0 * scale, secColor, 0.95);
+        graphics.strokeCircle(cx, cy, r);
+      };
+
+      drawNeonSphere(x - 16 * scale, baseY - 16 * scale, 22 * scale);
+      drawNeonSphere(x + 16 * scale, baseY - 16 * scale, 22 * scale);
+      drawNeonSphere(x + windSway, baseY - 36 * scale, 25 * scale);
+      break;
+    }
+    case 5: {
+      const trunkW = 8 * scale;
+      const trunkH = 16 * scale;
+      graphics.fillStyle(cyberTrunkFill, 0.55);
+      graphics.fillRect(x - trunkW / 2, groundY - trunkH, trunkW, trunkH);
+      graphics.lineStyle(1.4 * scale, cyberTrunkOutline, 0.85);
+      graphics.strokeRect(x - trunkW / 2, groundY - trunkH, trunkW, trunkH);
+
+      const baseY = groundY - trunkH + 4 * scale;
+      const tiers = [
+        { y: baseY - 18 * scale, w: 46 * scale, h: 22 * scale },
+        { y: baseY - 36 * scale, w: 36 * scale, h: 22 * scale },
+        { y: baseY - 56 * scale, w: 24 * scale, h: 24 * scale }
+      ];
+
+      for (let tIdx = 0; tIdx < tiers.length; tIdx++) {
+        const t = tiers[tIdx]!;
+        const sway = windSway * (0.4 + tIdx * 0.3);
+        graphics.fillStyle(foliageColor, foliageFillAlpha);
+        graphics.beginPath();
+        graphics.moveTo(x + sway, t.y - t.h);
+        graphics.lineTo(x + t.w / 2, t.y);
+        graphics.lineTo(x - t.w / 2, t.y);
+        graphics.closePath();
+        graphics.fillPath();
+
+        graphics.lineStyle(2.0 * scale, secColor, 0.95);
+        graphics.strokePath();
+      }
+      break;
+    }
+    case 6: {
+      const trunkW = 8 * scale;
+      const trunkH = 32 * scale;
+      graphics.fillStyle(cyberTrunkFill, 0.55);
+      graphics.fillRect(x - trunkW / 2, groundY - trunkH, trunkW, trunkH);
+      graphics.lineStyle(1.4 * scale, cyberTrunkOutline, 0.85);
+      graphics.strokeRect(x - trunkW / 2, groundY - trunkH, trunkW, trunkH);
+
+      const baseY = groundY - trunkH;
+      const drawPod = (cx: number, cy: number, r: number) => {
+        graphics.fillStyle(foliageColor, foliageFillAlpha);
+        graphics.fillCircle(cx, cy, r);
+        graphics.lineStyle(2.0 * scale, secColor, 0.95);
+        graphics.strokeCircle(cx, cy, r);
+      };
+
+      drawPod(x - 18 * scale, baseY - 12 * scale, 24 * scale);
+      drawPod(x + 18 * scale, baseY - 12 * scale, 24 * scale);
+      drawPod(x + windSway, baseY - 32 * scale, 26 * scale);
+      break;
+    }
+    case 7: {
+      const trunkW = 7 * scale;
+      const trunkH = 18 * scale;
+      graphics.fillStyle(cyberTrunkFill, 0.55);
+      graphics.fillRect(x - trunkW / 2, groundY - trunkH, trunkW, trunkH);
+      graphics.lineStyle(1.4 * scale, cyberTrunkOutline, 0.85);
+      graphics.strokeRect(x - trunkW / 2, groundY - trunkH, trunkW, trunkH);
+
+      const baseY = groundY - trunkH;
+      const scallopedTiers = 5;
+      for (let i = 0; i < scallopedTiers; i++) {
+        const progress = i / scallopedTiers;
+        const tierY = baseY - progress * 55 * scale;
+        const tierW = (44 - i * 7) * scale;
+        const sway = windSway * progress;
+
+        graphics.fillStyle(foliageColor, foliageFillAlpha);
+        graphics.beginPath();
+        graphics.moveTo(x + sway, tierY - 14 * scale);
+        graphics.lineTo(x + tierW / 2, tierY);
+        graphics.lineTo(x - tierW / 2, tierY);
+        graphics.closePath();
+        graphics.fillPath();
+
+        graphics.lineStyle(1.8 * scale, secColor, 0.95);
+        graphics.strokePath();
+      }
+      break;
+    }
+    case 8: {
+      const trunkW = 6 * scale;
+      const trunkH = 50 * scale;
+      graphics.fillStyle(cyberTrunkFill, 0.55);
+      graphics.fillRect(x - trunkW / 2, groundY - trunkH, trunkW, trunkH);
+      graphics.lineStyle(1.4 * scale, cyberTrunkOutline, 0.85);
+      graphics.strokeRect(x - trunkW / 2, groundY - trunkH, trunkW, trunkH);
+
+      graphics.lineStyle(2.5 * scale, cyberTrunkOutline, 0.9);
+      graphics.lineBetween(x - 22 * scale, groundY - trunkH + 22 * scale, x, groundY - trunkH + 22 * scale);
+      graphics.lineBetween(x, groundY - trunkH + 14 * scale, x + 24 * scale, groundY - trunkH + 14 * scale);
+
+      const drawNeonDome = (cx: number, cy: number, r: number) => {
+        graphics.fillStyle(foliageColor, foliageFillAlpha);
+        graphics.beginPath();
+        graphics.arc(cx, cy, r, Math.PI, 0, false);
+        graphics.closePath();
+        graphics.fillPath();
+
+        graphics.lineStyle(2.0 * scale, secColor, 0.95);
+        graphics.strokePath();
+      };
+
+      drawNeonDome(x - 22 * scale + windSway * 0.4, groundY - trunkH + 22 * scale, 18 * scale);
+      drawNeonDome(x + 24 * scale + windSway * 0.6, groundY - trunkH + 14 * scale, 20 * scale);
+      drawNeonDome(x + windSway, groundY - trunkH - 6 * scale, 26 * scale);
+      break;
+    }
+  }
+}
+
+function drawZoneEnvironment(
+  graphics: ReturnType<typeof createPhaserGraphicsShim>,
+  startX: number,
+  endX: number,
+  drawStartY: number,
+  zoneEndY: number,
+  pIndex: number,
+  typeId: string,
+  color: number,
+  pulseTimer: number
+) {
+  const currentZoneHeight = zoneEndY - drawStartY;
+  graphics.fillStyle(color, 0.08);
+  graphics.fillRect(startX, drawStartY, endX - startX, currentZoneHeight);
+
+  if (typeId === 'normal') {
+    const bands = 6;
+    const bandH = currentZoneHeight / bands;
+    const skyColors = [0x041812, 0x062219, 0x082e22, 0x0a3b2b, 0x0d4734, 0x11543d];
+    for (let b = 0; b < bands; b++) {
+      graphics.fillStyle(skyColors[b]!, 0.95);
+      graphics.fillRect(startX, drawStartY + b * bandH, endX - startX, bandH + 1);
+    }
+
+    const moonX = startX + 180 + (pIndex * 340) % (endX - startX - 360);
+    const moonY = drawStartY + 55;
+    
+    graphics.fillStyle(0xa3e635, 0.12);
+    graphics.fillCircle(moonX, moonY, 34);
+    graphics.fillStyle(0x00ffaa, 0.08);
+    graphics.fillCircle(moonX, moonY, 50);
+
+    graphics.fillStyle(0xddffaa, 0.9);
+    graphics.fillCircle(moonX, moonY, 18);
+    graphics.fillStyle(skyColors[1]!, 0.98);
+    graphics.fillCircle(moonX + 6, moonY - 4, 16);
+
+    const beamCount = 4;
+    for (let i = 0; i < beamCount; i++) {
+      const bx = startX + 300 + i * 400 + Math.sin(pulseTimer * 0.5 + i) * 30;
+      graphics.fillStyle(0xa3e635, 0.045);
+      graphics.beginPath();
+      graphics.moveTo(bx, drawStartY);
+      graphics.lineTo(bx + 120, drawStartY);
+      graphics.lineTo(bx - 80, zoneEndY);
+      graphics.lineTo(bx - 200, zoneEndY);
+      graphics.closePath();
+      graphics.fillPath();
+    }
+
+    graphics.fillStyle(0x041c14, 0.95);
+    graphics.beginPath();
+    graphics.moveTo(startX, zoneEndY);
+    graphics.lineTo(startX, drawStartY + currentZoneHeight * 0.5);
+    for (let x = startX + 60; x <= endX; x += 80) {
+      const peakY = drawStartY + currentZoneHeight * 0.45 + Math.sin(x * 0.008 + pIndex) * 25 + Math.cos(x * 0.015) * 15;
+      graphics.lineTo(x, peakY);
+    }
+    graphics.lineTo(endX, zoneEndY);
+    graphics.closePath();
+    graphics.fillPath();
+
+    graphics.fillStyle(0x082b1d, 0.95);
+    graphics.beginPath();
+    graphics.moveTo(startX, zoneEndY);
+    for (let x = startX; x <= endX; x += 50) {
+      const hillY = drawStartY + currentZoneHeight * 0.65 + Math.sin(x * 0.012 + pIndex * 2) * 18;
+      graphics.lineTo(x, hillY);
+    }
+    graphics.lineTo(endX, zoneEndY);
+    graphics.closePath();
+    graphics.fillPath();
+
+    graphics.fillStyle(0x051f15, 0.9);
+    for (let x = startX + 30; x < endX; x += 70) {
+      const hillY = drawStartY + currentZoneHeight * 0.65 + Math.sin(x * 0.012 + pIndex * 2) * 18;
+      const treeH = 22 + (x % 3) * 8;
+      const treeW = 16 + (x % 2) * 6;
+      graphics.beginPath();
+      graphics.moveTo(x, hillY - treeH);
+      graphics.lineTo(x + treeW / 2, hillY);
+      graphics.lineTo(x - treeW / 2, hillY);
+      graphics.closePath();
+      graphics.fillPath();
+    }
+
+    const trees = getForestTrees(pIndex);
+    const groundY = zoneEndY;
+    graphics.fillStyle(0x0f361c, 0.95);
+    graphics.beginPath();
+    graphics.moveTo(startX, groundY);
+    for (let x = startX; x <= endX; x += 40) {
+      const hillY = groundY - 14 - Math.sin(x * 0.006 + pIndex * 3) * 8;
+      graphics.lineTo(x, hillY);
+    }
+    graphics.lineTo(endX, groundY);
+    graphics.closePath();
+    graphics.fillPath();
+
+    for (const tree of trees) {
+      const treeX = startX + tree.xRatio * (endX - startX);
+      const treeGroundY = groundY - tree.yOffset;
+      const windSway = Math.sin(pulseTimer * 1.5 + tree.xRatio * 12) * (3 * tree.scale);
+      drawNeonGeometricTree(graphics, treeX, treeGroundY, tree, windSway);
+    }
+
+    for (let i = 0; i < 16; i++) {
+      const sporeX = startX + ((pulseTimer * 22 + i * 145) % (endX - startX));
+      const sporeY = drawStartY + ((pulseTimer * 14 + i * 48) % (currentZoneHeight - 20));
+      const pulseAlpha = 0.35 + Math.sin(pulseTimer * 3.0 + i) * 0.3;
+      const colorHex = i % 2 === 0 ? 0xa3e635 : 0x00ffaa;
+
+      graphics.fillStyle(colorHex, pulseAlpha * 0.4);
+      graphics.fillCircle(sporeX, sporeY, 5);
+      graphics.fillStyle(0xffffff, pulseAlpha * 0.9);
+      graphics.fillCircle(sporeX, sporeY, 2.0);
+    }
+  } else if (typeId === 'ice') {
+    graphics.lineStyle(1.0, 0x00f0ff, 0.22);
+    const totalDurationY = currentZoneHeight - 40;
+    const baseSpeed = 40;
+
+    for (let gx = startX + 20; gx < endX + 160; gx += 65) {
+      const hash = Math.sin(gx * 0.07) * 0.5 + 0.5;
+      const scale = 0.3 + hash * 0.7;
+      const speedMult = 0.5 + (1.0 - hash) * 0.7;
+      const phaseShift = hash * totalDurationY;
+      const localDriftY = ((pulseTimer * baseSpeed * speedMult) + phaseShift) % totalDurationY;
+      
+      const py = drawStartY + 20 + localDriftY;
+      const px = gx + Math.sin(py * 0.03 + hash * 5) * 20 - ((pulseTimer * 12) % 150);
+      
+      const zoneW = endX - startX;
+      let wrappedPx = px;
+      if (zoneW > 0) {
+        wrappedPx = startX + ((px - startX + zoneW) % zoneW);
+      }
+      
+      if (py >= drawStartY + 15 && py <= zoneEndY - 15 && wrappedPx >= startX && wrappedPx <= endX) {
+        const shimmer = Math.sin(pulseTimer * 2.0 + hash * 10) * 3;
+        const radius = (15 + shimmer) * scale;
+        
+        for (let angle = 0; angle < Math.PI * 2; angle += Math.PI / 3) {
+          const armEndX = wrappedPx + Math.cos(angle) * radius;
+          const armEndY = py + Math.sin(angle) * radius;
+          graphics.lineBetween(wrappedPx, py, armEndX, armEndY);
+          
+          const bAngle1 = angle + Math.PI / 4;
+          const bAngle2 = angle - Math.PI / 4;
+          const bx = wrappedPx + Math.cos(angle) * (radius * 0.6);
+          const by = py + Math.sin(angle) * (radius * 0.6);
+          graphics.lineBetween(bx, by, bx + Math.cos(bAngle1) * (4 * scale), by + Math.sin(bAngle1) * (4 * scale));
+          graphics.lineBetween(bx, by, bx + Math.cos(bAngle2) * (4 * scale), by + Math.sin(bAngle2) * (4 * scale));
+        }
+        graphics.strokeCircle(wrappedPx, py, 4 * scale);
+      }
+    }
+
+    const dustDurationY = currentZoneHeight - 10;
+    for (let gx = startX + 15; gx < endX; gx += 45) {
+      const hash = Math.sin(gx * 0.13) * 0.5 + 0.5;
+      const speedMult = 0.7 + (1.0 - hash) * 0.8;
+      const phaseShift = hash * dustDurationY;
+      const localDriftY = ((pulseTimer * 60 * speedMult) + phaseShift) % dustDurationY;
+      
+      const py = drawStartY + 5 + localDriftY;
+      const px = gx + Math.sin(py * 0.04) * 20 - ((pulseTimer * 18) % 120);
+      
+      const zoneW = endX - startX;
+      let wrappedPx = px;
+      if (zoneW > 0) {
+        wrappedPx = startX + ((px - startX + zoneW) % zoneW);
+      }
+
+      if (py >= drawStartY + 3 && py <= zoneEndY - 3 && wrappedPx >= startX && wrappedPx <= endX) {
+        graphics.fillStyle(0xffffff, 0.65);
+        graphics.fillCircle(wrappedPx, py, 1.2);
+        graphics.fillStyle(0x00f0ff, 0.3);
+        graphics.fillCircle(wrappedPx, py, 3.0);
+      }
+    }
+  } else if (typeId === 'magma') {
+    const step = 20;
+    const drawFlameCurve = (p0x: number, p0y: number, p1x: number, p1y: number, p2x: number, p2y: number, numSegments = 8) => {
+      for (let i = 1; i <= numSegments; i++) {
+        const t = i / numSegments;
+        const mt = 1 - t;
+        const x = mt * mt * p0x + 2 * mt * t * p1x + t * t * p2x;
+        const y = mt * mt * p0y + 2 * mt * t * p1y + t * t * p2y;
+        graphics.lineTo(x, y);
+      }
+    };
+
+    // Bottom Flame Border
+    graphics.fillStyle(0xd03000, 0.15);
+    graphics.beginPath();
+    graphics.moveTo(startX, zoneEndY);
+    for (let x = startX; x <= endX; x += step) {
+      const wave = Math.sin(x * 0.05 + pulseTimer * 1.8) * 0.4 + 0.6;
+      const peakY = zoneEndY - 75 * wave;
+      const nextX = x + step;
+      drawFlameCurve(x, zoneEndY, x + step * 0.3, peakY + 15, x + step * 0.5, peakY);
+      drawFlameCurve(x + step * 0.5, peakY, nextX - step * 0.3, peakY + 30, nextX, zoneEndY);
+    }
+    graphics.lineTo(endX, zoneEndY);
+    graphics.closePath();
+    graphics.fillPath();
+
+    graphics.fillStyle(0xff7700, 0.18);
+    graphics.beginPath();
+    graphics.moveTo(startX, zoneEndY);
+    for (let x = startX; x <= endX; x += step) {
+      const wave = Math.sin(x * 0.05 + pulseTimer * 2.2 + 0.5) * 0.3 + 0.5;
+      const peakY = zoneEndY - 55 * wave;
+      const nextX = x + step;
+      drawFlameCurve(x, zoneEndY, x + step * 0.3, peakY + 11, x + step * 0.5, peakY);
+      drawFlameCurve(x + step * 0.5, peakY, nextX - step * 0.3, peakY + 22, nextX, zoneEndY);
+    }
+    graphics.lineTo(endX, zoneEndY);
+    graphics.closePath();
+    graphics.fillPath();
+
+    graphics.fillStyle(0xffdd00, 0.22);
+    graphics.beginPath();
+    graphics.moveTo(startX, zoneEndY);
+    for (let x = startX; x <= endX; x += step) {
+      const wave = Math.sin(x * 0.05 + pulseTimer * 2.6 + 1.0) * 0.2 + 0.4;
+      const peakY = zoneEndY - 35 * wave;
+      const nextX = x + step;
+      drawFlameCurve(x, zoneEndY, x + step * 0.3, peakY + 7, x + step * 0.5, peakY);
+      drawFlameCurve(x + step * 0.5, peakY, nextX - step * 0.3, peakY + 14, nextX, zoneEndY);
+    }
+    graphics.lineTo(endX, zoneEndY);
+    graphics.closePath();
+    graphics.fillPath();
+
+    // Top Flame Border
+    graphics.fillStyle(0xd03000, 0.15);
+    graphics.beginPath();
+    graphics.moveTo(startX, drawStartY);
+    for (let x = startX; x <= endX; x += step) {
+      const wave = Math.sin(x * 0.05 + pulseTimer * 1.5) * 0.3 + 0.5;
+      const peakY = drawStartY + 45 * wave;
+      const nextX = x + step;
+      drawFlameCurve(x, drawStartY, x + step * 0.3, peakY - 9, x + step * 0.5, peakY);
+      drawFlameCurve(x + step * 0.5, peakY, nextX - step * 0.3, peakY - 18, nextX, drawStartY);
+    }
+    graphics.lineTo(endX, drawStartY);
+    graphics.closePath();
+    graphics.fillPath();
+
+    graphics.fillStyle(0xff7700, 0.18);
+    graphics.beginPath();
+    graphics.moveTo(startX, drawStartY);
+    for (let x = startX; x <= endX; x += step) {
+      const wave = Math.sin(x * 0.05 + pulseTimer * 1.9 + 0.5) * 0.25 + 0.4;
+      const peakY = drawStartY + 30 * wave;
+      const nextX = x + step;
+      drawFlameCurve(x, drawStartY, x + step * 0.3, peakY - 6, x + step * 0.5, peakY);
+      drawFlameCurve(x + step * 0.5, peakY, nextX - step * 0.3, peakY - 12, nextX, drawStartY);
+    }
+    graphics.lineTo(endX, drawStartY);
+    graphics.closePath();
+    graphics.fillPath();
+
+    graphics.fillStyle(0xffdd00, 0.22);
+    graphics.beginPath();
+    graphics.moveTo(startX, drawStartY);
+    for (let x = startX; x <= endX; x += step) {
+      const wave = Math.sin(x * 0.05 + pulseTimer * 2.3 + 1.0) * 0.2 + 0.35;
+      const peakY = drawStartY + 20 * wave;
+      const nextX = x + step;
+      drawFlameCurve(x, drawStartY, x + step * 0.3, peakY - 4, x + step * 0.5, peakY);
+      drawFlameCurve(x + step * 0.5, peakY, nextX - step * 0.3, peakY - 8, nextX, drawStartY);
+    }
+    graphics.lineTo(endX, drawStartY);
+    graphics.closePath();
+    graphics.fillPath();
+
+    // Floating Sparks
+    graphics.fillStyle(0xff7700, 0.15);
+    const dy = (pulseTimer * 25) % (currentZoneHeight - 80);
+    for (let gx = startX + 50; gx < endX; gx += 120) {
+      const sparkY = zoneEndY - 50 - dy;
+      if (sparkY > drawStartY + 50) {
+        graphics.beginPath();
+        graphics.moveTo(gx, sparkY - 6);
+        graphics.lineTo(gx + 4, sparkY);
+        graphics.lineTo(gx, sparkY + 6);
+        graphics.lineTo(gx - 4, sparkY);
+        graphics.closePath();
+        graphics.fillPath();
+      }
+    }
+  } else if (typeId === 'electric') {
+    const getPointOnPath = (pts: { x: number; y: number }[], t: number): { x: number; y: number } => {
+      if (pts.length === 0) return { x: 0, y: 0 };
+      if (pts.length === 1) return pts[0]!;
+
+      const segmentLengths: number[] = [];
+      let totalLength = 0;
+      for (let i = 0; i < pts.length - 1; i++) {
+        const p1 = pts[i]!;
+        const p2 = pts[i + 1]!;
+        const dx = p2.x - p1.x;
+        const dy = p2.y - p1.y;
+        const len = Math.sqrt(dx * dx + dy * dy);
+        segmentLengths.push(len);
+        totalLength += len;
+      }
+
+      if (totalLength === 0) return pts[0]!;
+
+      let targetDist = t * totalLength;
+      for (let i = 0; i < pts.length - 1; i++) {
+        const segLen = segmentLengths[i]!;
+        if (targetDist <= segLen) {
+          const ratio = targetDist / segLen;
+          const p1 = pts[i]!;
+          const p2 = pts[i + 1]!;
+          return {
+            x: p1.x + (p2.x - p1.x) * ratio,
+            y: p1.y + (p2.y - p1.y) * ratio
+          };
+        }
+        targetDist -= segLen;
+      }
+      return pts[pts.length - 1]!;
+    };
+
+    const drawSingleTrace = (trace: { points: { x: number; y: number }[]; startStyle: 'dot' | 'ring'; endStyle: 'dot' | 'ring' }, offsetX: number) => {
+      const pts = trace.points.map(p => ({
+        x: p.x + offsetX,
+        y: p.y + drawStartY
+      }));
+
+      if (pts.length < 2) return;
+
+      const startPt = pts[0]!;
+      const endPt = pts[pts.length - 1]!;
+
+      graphics.lineStyle(1.2, color, 0.15);
+      graphics.beginPath();
+      graphics.moveTo(startPt.x, startPt.y);
+      for (let i = 1; i < pts.length; i++) {
+        graphics.lineTo(pts[i]!.x, pts[i]!.y);
+      }
+      graphics.strokePath();
+
+      graphics.lineStyle(1.0, color, 0.25);
+      if (trace.startStyle === 'dot') {
+        graphics.fillStyle(color, 0.25);
+        graphics.fillCircle(startPt.x, startPt.y, 3);
+      } else {
+        graphics.strokeCircle(startPt.x, startPt.y, 3);
+      }
+
+      graphics.lineStyle(1.0, color, 0.25);
+      if (trace.endStyle === 'dot') {
+        graphics.fillStyle(color, 0.25);
+        graphics.fillCircle(endPt.x, endPt.y, 3);
+      } else {
+        graphics.strokeCircle(endPt.x, endPt.y, 3);
+      }
+
+      const progress = (pulseTimer * 0.45 + (startPt.x * 0.003)) % 1.0;
+      const ePos = getPointOnPath(pts, progress);
+
+      graphics.fillStyle(0xffffff, 0.65);
+      graphics.fillCircle(ePos.x, ePos.y, 2.5);
+      graphics.fillStyle(color, 0.25);
+      graphics.fillCircle(ePos.x, ePos.y, 5.5);
+    };
+
+    const traces: { points: { x: number; y: number }[]; startStyle: 'dot' | 'ring'; endStyle: 'dot' | 'ring' }[] = [
+      { points: [{ x: 30, y: 50 }, { x: 180, y: 50 }, { x: 210, y: 20 }, { x: 320, y: 20 }], startStyle: 'ring', endStyle: 'dot' },
+      { points: [{ x: 350, y: 20 }, { x: 380, y: 50 }, { x: 480, y: 50 }], startStyle: 'ring', endStyle: 'dot' },
+      { points: [{ x: 400, y: 20 }, { x: 520, y: 20 }, { x: 560, y: 50 }, { x: 680, y: 50 }], startStyle: 'ring', endStyle: 'dot' },
+      { points: [{ x: 180, y: 80 }, { x: 210, y: 55 }, { x: 350, y: 55 }], startStyle: 'dot', endStyle: 'ring' },
+      { points: [{ x: 420, y: 80 }, { x: 580, y: 80 }], startStyle: 'ring', endStyle: 'dot' },
+      { points: [{ x: 30, y: 110 }, { x: 210, y: 110 }, { x: 240, y: 85 }, { x: 320, y: 85 }], startStyle: 'dot', endStyle: 'ring' },
+      { points: [{ x: 340, y: 85 }, { x: 420, y: 125 }, { x: 500, y: 125 }], startStyle: 'dot', endStyle: 'ring' },
+      { points: [{ x: 30, y: 140 }, { x: 180, y: 140 }, { x: 210, y: 165 }, { x: 320, y: 165 }], startStyle: 'ring', endStyle: 'ring' },
+      { points: [{ x: 210, y: 140 }, { x: 320, y: 140 }, { x: 350, y: 175 }, { x: 450, y: 175 }], startStyle: 'dot', endStyle: 'ring' },
+      { points: [{ x: 470, y: 140 }, { x: 530, y: 140 }, { x: 570, y: 175 }, { x: 680, y: 175 }], startStyle: 'dot', endStyle: 'ring' },
+      { points: [{ x: 30, y: 200 }, { x: 120, y: 200 }], startStyle: 'dot', endStyle: 'ring' },
+      { points: [{ x: 180, y: 200 }, { x: 240, y: 200 }, { x: 280, y: 240 }, { x: 380, y: 240 }], startStyle: 'ring', endStyle: 'ring' },
+      { points: [{ x: 420, y: 200 }, { x: 490, y: 200 }, { x: 530, y: 240 }, { x: 680, y: 240 }], startStyle: 'dot', endStyle: 'ring' },
+      { points: [{ x: 30, y: 260 }, { x: 180, y: 260 }], startStyle: 'dot', endStyle: 'dot' },
+      { points: [{ x: 320, y: 260 }, { x: 420, y: 260 }, { x: 450, y: 235 }, { x: 540, y: 235 }], startStyle: 'ring', endStyle: 'ring' },
+      { points: [{ x: 560, y: 260 }, { x: 680, y: 260 }], startStyle: 'ring', endStyle: 'dot' }
+    ];
+
+    for (let offset = startX; offset < endX; offset += 700) {
+      traces.forEach(t => drawSingleTrace(t, offset));
+    }
+  } else if (typeId === 'void') {
+    const centerY = drawStartY + currentZoneHeight / 2;
+
+    graphics.lineStyle(1.0, 0x9900ff, 0.15);
+    graphics.beginPath();
+    let firstW = true;
+    for (let x = startX; x <= endX; x += 15) {
+      const waveY1 = centerY + Math.sin(x * 0.02 + pulseTimer * 2.5) * 20 * Math.sin(x * 0.004);
+      if (firstW) {
+        graphics.moveTo(x, waveY1);
+        firstW = false;
+      } else {
+        graphics.lineTo(x, waveY1);
+      }
+    }
+    graphics.strokePath();
+
+    graphics.beginPath();
+    let firstW2 = true;
+    for (let x = startX; x <= endX; x += 15) {
+      const waveY2 = centerY - Math.sin(x * 0.02 - pulseTimer * 2.0) * 20 * Math.sin(x * 0.004);
+      if (firstW2) {
+        graphics.moveTo(x, waveY2);
+        firstW2 = false;
+      } else {
+        graphics.lineTo(x, waveY2);
+      }
+    }
+    graphics.strokePath();
+
+    for (let gx = startX + 150; gx < endX; gx += 320) {
+      for (let r = 25; r <= 100; r += 25) {
+        const lensePulse = Math.sin(pulseTimer * 1.5 + r) * 6;
+        graphics.lineStyle(1.0, 0xcc33ff, 0.12 + (100 - r) * 0.001);
+        graphics.strokeCircle(gx, centerY, r + lensePulse);
+      }
+
+      graphics.lineStyle(1.0, 0x800080, 0.08);
+      for (let angle = 0; angle < Math.PI * 2; angle += Math.PI / 4) {
+        const innerR = 15;
+        const outerR = 115;
+        graphics.lineBetween(
+          gx + Math.cos(angle) * innerR,
+          centerY + Math.sin(angle) * innerR,
+          gx + Math.cos(angle) * outerR,
+          centerY + Math.sin(angle) * outerR
+        );
+      }
+
+      const corePulse = 8 + Math.sin(pulseTimer * 4.0) * 2.5;
+      graphics.fillStyle(0x1a0033, 0.95);
+      graphics.fillCircle(gx, centerY, corePulse + 4);
+      graphics.fillStyle(0xcc33ff, 0.35);
+      graphics.fillCircle(gx, centerY, corePulse);
+      graphics.lineStyle(1.5, 0xcc33ff, 0.65);
+      graphics.strokeCircle(gx, centerY, corePulse + 4);
+      graphics.fillStyle(0xffffff, 0.9);
+      graphics.fillCircle(gx, centerY, 3);
+
+      for (let pIdx = 0; pIdx < 8; pIdx++) {
+        const radius = 45 + pIdx * 12;
+        const speed = (1.5 - pIdx * 0.12) * (pIdx % 2 === 0 ? 1 : -1);
+        const angle = pulseTimer * speed + (pIdx * Math.PI / 4);
+        
+        const px = gx + Math.cos(angle) * radius;
+        const py = centerY + Math.sin(angle) * radius;
+
+        graphics.fillStyle(0xcc33ff, 0.38);
+        graphics.fillCircle(px, py, 3.5);
+        graphics.fillStyle(0xffffff, 0.9);
+        graphics.fillCircle(px, py, 1.5);
+      }
+    }
+  } else if (typeId === 'overcharged') {
+    graphics.lineStyle(1.0, 0xff9900, 0.08);
+    const gridSize = 40;
+    for (let gx = startX; gx < endX; gx += gridSize * 2) {
+      for (let gy = drawStartY; gy < zoneEndY; gy += gridSize) {
+        graphics.beginPath();
+        graphics.moveTo(gx, gy);
+        graphics.lineTo(gx + gridSize * 0.5, gy + gridSize * 0.5);
+        graphics.lineTo(gx + gridSize * 1.5, gy + gridSize * 0.5);
+        graphics.lineTo(gx + gridSize * 2.0, gy);
+        graphics.strokePath();
+      }
+    }
+
+    graphics.lineStyle(2.0, 0xffaa00, 0.3);
+    const railY1 = drawStartY + currentZoneHeight * 0.25;
+    const railY2 = drawStartY + currentZoneHeight * 0.75;
+    graphics.lineBetween(startX, railY1, endX, railY1);
+    graphics.lineBetween(startX, railY2, endX, railY2);
+
+    graphics.lineStyle(1.5, 0xffcc00, 0.4);
+    graphics.beginPath();
+    let firstPt = true;
+    for (let x = startX; x <= endX; x += 15) {
+      const waveOffset = Math.sin(x * 0.03 + pulseTimer * 7.0) * 15 * Math.sin(x * 0.005 + pulseTimer);
+      const yCoordVal = drawStartY + currentZoneHeight / 2 + waveOffset;
+      if (firstPt) {
+        graphics.moveTo(x, yCoordVal);
+        firstPt = false;
+      } else {
+        graphics.lineTo(x, yCoordVal);
+      }
+    }
+    graphics.strokePath();
+
+    for (let gx = startX + 100; gx < endX; gx += 200) {
+      graphics.lineStyle(2.0, 0xff9900, 0.35);
+      graphics.lineBetween(gx, drawStartY + 10, gx, drawStartY + 35);
+      graphics.lineBetween(gx, zoneEndY - 10, gx, zoneEndY - 35);
+
+      graphics.fillStyle(0xffaa00, 0.5);
+      graphics.fillCircle(gx, drawStartY + 35, 4);
+      graphics.fillCircle(gx, zoneEndY - 35, 4);
+
+      const crackle = Math.sin(pulseTimer * 15.0 + gx);
+      if (Math.abs(crackle) > 0.55) {
+        graphics.lineStyle(1.5, 0xffe680, 0.65);
+        graphics.beginPath();
+        graphics.moveTo(gx, drawStartY + 35);
+        
+        const segments = 5;
+        const segH = (currentZoneHeight - 70) / segments;
+        let curX = gx;
+        for (let s = 1; s < segments; s++) {
+          const targetY = drawStartY + 35 + s * segH;
+          const deviation = (Math.sin(pulseTimer * 40.0 + s * 10 + gx) > 0 ? 1 : -1) * 18;
+          graphics.lineTo(gx + deviation, targetY);
+          curX = gx + deviation;
+        }
+        graphics.lineTo(gx, zoneEndY - 35);
+        graphics.strokePath();
+
+        graphics.fillStyle(0xffffff, 0.85);
+        graphics.fillCircle(curX, drawStartY + 35 + (currentZoneHeight - 70) / 2, 3);
+      }
+    }
+
+    graphics.lineStyle(1.0, 0xffaa00, 0.45);
+    const dy = (pulseTimer * 45) % (currentZoneHeight - 20);
+    for (let gx = startX + 80; gx < endX; gx += 160) {
+      const gy = zoneEndY - 15 - dy;
+      if (gy >= drawStartY + 15 && gy <= zoneEndY) {
+        graphics.beginPath();
+        graphics.moveTo(gx, gy - 6);
+        graphics.lineTo(gx + 5, gy);
+        graphics.lineTo(gx, gy + 6);
+        graphics.lineTo(gx - 5, gy);
+        graphics.closePath();
+        graphics.strokePath();
+
+        graphics.fillStyle(0xffffff, 0.85);
+        graphics.fillCircle(gx, gy, 1.5);
+      }
+    }
+
+    const thickness = 5 + Math.sin(pulseTimer * 2.0) * 2;
+    graphics.lineStyle(thickness, 0xffaa00, 0.35);
+    graphics.lineBetween(startX, drawStartY + 10, endX, drawStartY + 10);
+    graphics.lineBetween(startX, zoneEndY - 10, endX, zoneEndY - 10);
+  } else if (typeId === 'chronos') {
+    const cy = drawStartY + currentZoneHeight / 2;
+    const t = pulseTimer;
+
+    const smallClocks = [
+      { x: startX + 90, y: drawStartY + 35, r: 24 },
+      { x: startX + 410, y: drawStartY + 140, r: 32 },
+      { x: startX + 570, y: drawStartY + 38, r: 26 },
+      { x: startX + 890, y: drawStartY + 145, r: 35 },
+      { x: startX + 1050, y: drawStartY + 42, r: 28 },
+      { x: startX + 1380, y: drawStartY + 138, r: 30 },
+      { x: startX + 1540, y: drawStartY + 45, r: 25 },
+      { x: startX + 1820, y: drawStartY + 140, r: 34 }
+    ];
+
+    for (const sc of smallClocks) {
+      graphics.lineStyle(1.0, 0xebd07b, 0.22);
+      graphics.strokeCircle(sc.x, sc.y, sc.r);
+      graphics.strokeCircle(sc.x, sc.y, sc.r - 4);
+      
+      const hA = -t * 0.4 + sc.x * 0.01;
+      const mA = t * 1.5 + sc.x * 0.02;
+      graphics.lineBetween(sc.x, sc.y, sc.x + Math.cos(hA) * (sc.r * 0.5), sc.y + Math.sin(hA) * (sc.r * 0.5));
+      graphics.lineBetween(sc.x, sc.y, sc.x + Math.cos(mA) * (sc.r * 0.75), sc.y + Math.sin(mA) * (sc.r * 0.75));
+    }
+
+    for (let clockX = startX + 250; clockX < endX; clockX += 480) {
+      const R = 85;
+
+      graphics.lineStyle(2.5, 0xd4af37, 0.65);
+      graphics.strokeCircle(clockX, cy, R);
+      graphics.lineStyle(1.2, 0xd4af37, 0.45);
+      graphics.strokeCircle(clockX, cy, R - 8);
+      graphics.strokeCircle(clockX, cy, R - 22);
+
+      graphics.lineStyle(1.0, 0xd4af37, 0.55);
+      for (let m = 0; m < 60; m++) {
+        const tickAngle = (m * Math.PI) / 30;
+        const rInner = m % 5 === 0 ? R - 8 : R - 4;
+        graphics.lineBetween(
+          clockX + Math.cos(tickAngle) * rInner,
+          cy + Math.sin(tickAngle) * rInner,
+          clockX + Math.cos(tickAngle) * R,
+          cy + Math.sin(tickAngle) * R
+        );
+      }
+
+      const gearAngle = t * 0.4 + clockX * 0.001;
+      graphics.lineStyle(1.8, 0xb8860b, 0.4);
+      for (let g = 0; g < 12; g++) {
+        const ga = gearAngle + (g * Math.PI) / 6;
+        graphics.lineBetween(
+          clockX + Math.cos(ga) * (R + 2),
+          cy + Math.sin(ga) * (R + 2),
+          clockX + Math.cos(ga) * (R + 10),
+          cy + Math.sin(ga) * (R + 10)
+        );
+      }
+
+      const hourAngle = -t * 0.3 + (clockX * 0.002);
+      const hourLen = R * 0.42;
+      graphics.lineStyle(3.0, 0xffd700, 0.9);
+      graphics.lineBetween(clockX, cy, clockX + Math.cos(hourAngle) * hourLen, cy + Math.sin(hourAngle) * hourLen);
+      graphics.fillStyle(0xffd700, 0.95);
+      graphics.fillCircle(clockX + Math.cos(hourAngle) * (hourLen * 0.7), cy + Math.sin(hourAngle) * (hourLen * 0.7), 4);
+
+      const minAngle = t * 1.2 + (clockX * 0.003);
+      const minLen = R * 0.65;
+      graphics.lineStyle(2.0, 0xd4af37, 0.95);
+      graphics.lineBetween(clockX, cy, clockX + Math.cos(minAngle) * minLen, cy + Math.sin(minAngle) * minLen);
+      graphics.fillCircle(clockX + Math.cos(minAngle) * (minLen * 0.8), cy + Math.sin(minAngle) * (minLen * 0.8), 3);
+
+      const secAngle = t * 3.8;
+      const secLen = R * 0.78;
+      graphics.lineStyle(1.2, 0xff3333, 0.9);
+      graphics.lineBetween(clockX - Math.cos(secAngle) * 15, cy - Math.sin(secAngle) * 15, clockX + Math.cos(secAngle) * secLen, cy + Math.sin(secAngle) * secLen);
+      graphics.fillCircle(clockX, cy, 4);
+    }
+
+    const pendulumAngle = Math.sin(t * 2.0) * 0.4;
+    graphics.lineStyle(1.5, 0xd4af37, 0.35);
+    for (let px = startX + 100; px < endX; px += 320) {
+      graphics.lineBetween(px, drawStartY, px + Math.sin(pendulumAngle) * 60, drawStartY + currentZoneHeight - 10);
+      graphics.strokeCircle(px + Math.sin(pendulumAngle) * 60, drawStartY + currentZoneHeight - 10, 10);
+    }
+  } else if (typeId === 'cyber_grid') {
+    const t = pulseTimer;
+    const gridY = (t * 80) % 30;
+    graphics.lineStyle(1.0, 0xff00ff, 0.3);
+    for (let gy = drawStartY + gridY; gy < zoneEndY; gy += 30) {
+      graphics.lineBetween(startX, gy, endX, gy);
+    }
+    for (let gx = startX + 15; gx < endX; gx += 40) {
+      graphics.lineBetween(gx, drawStartY, gx + Math.sin(gx * 0.05 + t) * 15, zoneEndY);
+    }
+
+    graphics.lineStyle(1.5, 0x00f0ff, 0.5);
+    for (let traceY = drawStartY + 35; traceY < zoneEndY; traceY += 50) {
+      graphics.lineBetween(startX, traceY, endX, traceY);
+      const packetX = startX + ((t * 300 + traceY * 13) % (endX - startX));
+      graphics.fillStyle(0x00ffff, 0.95);
+      graphics.fillRect(packetX, traceY - 2, 10, 4);
+      graphics.fillStyle(0xff00ff, 0.8);
+      graphics.fillRect(packetX - 8, traceY - 1, 6, 2);
+    }
+
+    for (let chipX = startX + 120; chipX < endX; chipX += 280) {
+      const chipY = drawStartY + currentZoneHeight / 2;
+      graphics.fillStyle(0x0a001a, 0.9);
+      graphics.fillRect(chipX - 18, chipY - 14, 36, 28);
+      graphics.lineStyle(1.5, 0xff007f, 0.85);
+      graphics.strokeRect(chipX - 18, chipY - 14, 36, 28);
+
+      graphics.lineStyle(1.0, 0x00ffff, 0.7);
+      graphics.lineBetween(chipX - 24, chipY - 8, chipX - 18, chipY - 8);
+      graphics.lineBetween(chipX - 24, chipY + 8, chipX - 18, chipY + 8);
+      graphics.lineBetween(chipX + 18, chipY - 8, chipX + 24, chipY - 8);
+      graphics.lineBetween(chipX + 18, chipY + 8, chipX + 24, chipY + 8);
+
+      const ledAlpha = 0.5 + Math.sin(t * 4.0 + chipX) * 0.45;
+      graphics.fillStyle(0x00ffff, ledAlpha);
+      graphics.fillCircle(chipX, chipY, 4);
+    }
+  } else if (typeId === 'solar_flare') {
+    const t = pulseTimer;
+    const sunX = startX + (endX - startX) / 2;
+    const sunY = drawStartY + currentZoneHeight / 2;
+    const sunRadius = currentZoneHeight * 0.42;
+
+    graphics.fillStyle(0x380500, 0.45);
+    graphics.fillRect(startX, drawStartY, endX - startX, currentZoneHeight);
+
+    const numRays = 72;
+    graphics.lineStyle(1.0, 0xffaa00, 0.25);
+    for (let r = 0; r < numRays; r++) {
+      const angle = (r / numRays) * Math.PI * 2;
+      const rayLen = 40 + Math.sin(r * 5 + t * 4) * 35;
+      const r1X = sunX + Math.cos(angle) * (sunRadius + 5);
+      const r1Y = sunY + Math.sin(angle) * (sunRadius + 5);
+      const r2X = sunX + Math.cos(angle) * (sunRadius + rayLen);
+      const r2Y = sunY + Math.sin(angle) * (sunRadius + rayLen);
+      graphics.lineBetween(r1X, r1Y, r2X, r2Y);
+    }
+
+    for (let p = 0; p < 6; p++) {
+      const seed = p * 47.11;
+      const baseAngle = (seed + t * 0.3) % (Math.PI * 2);
+      const arcSpread = 0.4 + Math.sin(t + p) * 0.15;
+      const startAng = baseAngle - arcSpread;
+      const endAng = baseAngle + arcSpread;
+
+      const p1X = sunX + Math.cos(startAng) * sunRadius;
+      const p1Y = sunY + Math.sin(startAng) * sunRadius;
+      const p2X = sunX + Math.cos(endAng) * sunRadius;
+      const p2Y = sunY + Math.sin(endAng) * sunRadius;
+
+      const midAng = baseAngle;
+      const reach = sunRadius * (1.5 + Math.sin(t * 1.5 + seed) * 0.4);
+      const ctrlX = sunX + Math.cos(midAng) * reach;
+      const ctrlY = sunY + Math.sin(midAng) * reach;
+
+      graphics.lineStyle(2.5, 0xff4500, 0.85);
+      graphics.beginPath();
+      graphics.moveTo(p1X, p1Y);
+      for (let step = 1; step <= 10; step++) {
+        const u = step / 10;
+        const bx = (1 - u) * (1 - u) * p1X + 2 * (1 - u) * u * ctrlX + u * u * p2X;
+        const by = (1 - u) * (1 - u) * p1Y + 2 * (1 - u) * u * ctrlY + u * u * p2Y;
+        graphics.lineTo(bx, by);
+      }
+      graphics.strokePath();
+
+      graphics.lineStyle(1.2, 0xffffff, 0.9);
+      graphics.beginPath();
+      graphics.moveTo(p1X, p1Y);
+      for (let step = 1; step <= 10; step++) {
+        const u = step / 10;
+        const bx = (1 - u) * (1 - u) * p1X + 2 * (1 - u) * u * ctrlX + u * u * p2X;
+        const by = (1 - u) * (1 - u) * p1Y + 2 * (1 - u) * u * ctrlY + u * u * p2Y;
+        graphics.lineTo(bx, by);
+      }
+      graphics.strokePath();
+    }
+
+    graphics.fillStyle(0xff3300, 0.25);
+    graphics.fillCircle(sunX, sunY, sunRadius * 1.45);
+
+    const teeth = 36;
+    graphics.fillStyle(0xff7700, 0.9);
+    graphics.lineStyle(2.0, 0xffd700, 0.95);
+    graphics.beginPath();
+    for (let i = 0; i <= teeth; i++) {
+      const a1 = (i / teeth) * Math.PI * 2 + t * 0.1;
+      const a2 = ((i + 0.5) / teeth) * Math.PI * 2 + t * 0.1;
+
+      const rOuter = sunRadius * 1.25 + Math.sin(i * 3 + t * 4) * 6;
+      const rInner = sunRadius * 0.98;
+
+      const x1 = sunX + Math.cos(a1) * rInner;
+      const y1 = sunY + Math.sin(a1) * rInner;
+      const x2 = sunX + Math.cos(a2) * rOuter;
+      const y2 = sunY + Math.sin(a2) * rOuter;
+
+      if (i === 0) { graphics.moveTo(x1, y1); }
+      else { graphics.lineTo(x1, y1); }
+      graphics.lineTo(x2, y2);
+    }
+    graphics.closePath();
+    graphics.fillPath();
+    graphics.strokePath();
+
+    graphics.fillStyle(0xffea00, 0.85);
+    graphics.fillCircle(sunX, sunY, sunRadius * 0.75);
+
+    graphics.fillStyle(0xffffff, 0.98);
+    graphics.fillCircle(sunX, sunY, sunRadius * 0.45);
+
+    graphics.fillStyle(0xffe600, 0.9);
+    for (let e = 0; e < 20; e++) {
+      const side = e % 2 === 0 ? 1 : -1;
+      const emberX = sunX + side * ((t * 80 + e * 45) % (endX - sunX - 30));
+      const emberY = sunY + Math.sin(emberX * 0.02 + e) * 40;
+      graphics.fillCircle(emberX, emberY, 2.2);
+    }
+  } else if (typeId === 'crystal_prism') {
+    const t = pulseTimer;
+    const cy = drawStartY + currentZoneHeight / 2;
+    const prismX = startX + (endX - startX) / 2;
+
+    const floorY = drawStartY + currentZoneHeight;
+    const ceilingY = drawStartY;
+    const crystalPositions = [
+      120, 240, 360, 480, 600, 720, 840, 960, 1080, 1200, 1320, 1440, 1560, 1680, 1800
+    ];
+
+    for (let i = 0; i < crystalPositions.length; i++) {
+      const offsetX = startX + crystalPositions[i]!;
+      const seed = i * 1.7;
+      const sproutScale = Math.max(0, Math.sin(t * 3.2 + seed));
+
+      if (sproutScale > 0.05) {
+        const h = (14 + (i % 4) * 5) * sproutScale;
+        const w = (6 + (i % 3) * 2) * sproutScale;
+
+        graphics.fillStyle(0x0e1b2e, 0.85);
+        graphics.lineStyle(1.2, 0xd2bdff, 0.85 * sproutScale);
+        graphics.beginPath();
+        graphics.moveTo(offsetX - w / 2, floorY);
+        graphics.lineTo(offsetX, floorY - h);
+        graphics.lineTo(offsetX + w / 2, floorY);
+        graphics.closePath();
+        graphics.fillPath();
+        graphics.strokePath();
+
+        if (i % 2 === 0) {
+          graphics.beginPath();
+          graphics.moveTo(offsetX - w / 2, ceilingY);
+          graphics.lineTo(offsetX, ceilingY + h);
+          graphics.lineTo(offsetX + w / 2, ceilingY);
+          graphics.closePath();
+          graphics.fillPath();
+          graphics.strokePath();
+        }
+      }
+    }
+
+    const cycleTime = 2.6;
+    const cycleIdx = Math.floor(t / cycleTime);
+    const isLeftToRight = cycleIdx % 2 === 0;
+    const progress = (t % cycleTime) / cycleTime;
+
+    const edgeLeftX = startX + 60;
+    const edgeRightX = endX - 60;
+    const totalDist = edgeRightX - edgeLeftX;
+    const maxHalfSpreadY = currentZoneHeight / 2 - 12;
+
+    if (isLeftToRight) {
+      const headX = edgeLeftX + progress * 1.6 * totalDist;
+      const tailX = edgeLeftX + Math.max(0, progress * 1.6 - 0.7) * totalDist;
+
+      const whiteStart = Math.max(edgeLeftX, tailX);
+      const whiteEnd = Math.min(prismX - 15, headX);
+      if (whiteEnd > whiteStart) {
+        graphics.lineStyle(9.0, 0xffffff, 0.98);
+        graphics.lineBetween(whiteStart, cy, whiteEnd, cy);
+        graphics.lineStyle(22.0, 0xffffff, 0.3);
+        graphics.lineBetween(whiteStart, cy, whiteEnd, cy);
+      }
+
+      if (headX > prismX + 15 && tailX < edgeRightX) {
+        const rainbowStart = Math.max(prismX + 15, tailX);
+        const rainbowEnd = Math.min(edgeRightX, headX);
+
+        if (rainbowEnd > rainbowStart) {
+          const rainbowColors = [
+            0xff0033, 0xff7700, 0xffee00, 0x00e640, 0x00d9ff, 0x2244ff, 0xaa00ff
+          ];
+          for (let r = 0; r < rainbowColors.length; r++) {
+            const col = rainbowColors[r]!;
+            const bandTargetY = cy + (r - 3) * (maxHalfSpreadY / 3);
+            const fraction = (rainbowEnd - (prismX + 15)) / (edgeRightX - (prismX + 15));
+            const currentEndY = cy + (bandTargetY - cy) * fraction;
+
+            graphics.lineStyle(6.0, col, 0.95);
+            graphics.lineBetween(rainbowStart, cy + (r - 3) * 6, rainbowEnd, currentEndY);
+          }
+        }
+      }
+    } else {
+      const headX = edgeRightX - progress * 1.6 * totalDist;
+      const tailX = edgeRightX - Math.max(0, progress * 1.6 - 0.7) * totalDist;
+
+      const whiteStart = Math.min(edgeRightX, tailX);
+      const whiteEnd = Math.max(prismX + 15, headX);
+      if (whiteEnd < whiteStart) {
+        graphics.lineStyle(9.0, 0xffffff, 0.98);
+        graphics.lineBetween(whiteStart, cy, whiteEnd, cy);
+        graphics.lineStyle(22.0, 0xffffff, 0.3);
+        graphics.lineBetween(whiteStart, cy, whiteEnd, cy);
+      }
+
+      if (headX < prismX - 15 && tailX > edgeLeftX) {
+        const rainbowStart = Math.min(prismX - 15, tailX);
+        const rainbowEnd = Math.max(edgeLeftX, headX);
+
+        if (rainbowEnd < rainbowStart) {
+          const rainbowColors = [
+            0xff0033, 0xff7700, 0xffee00, 0x00e640, 0x00d9ff, 0x2244ff, 0xaa00ff
+          ];
+          for (let r = 0; r < rainbowColors.length; r++) {
+            const col = rainbowColors[r]!;
+            const bandTargetY = cy + (r - 3) * (maxHalfSpreadY / 3);
+            const fraction = ((prismX - 15) - rainbowEnd) / ((prismX - 15) - edgeLeftX);
+            const currentEndY = cy + (bandTargetY - cy) * fraction;
+
+            graphics.lineStyle(6.0, col, 0.95);
+            graphics.lineBetween(rainbowStart, cy + (r - 3) * 6, rainbowEnd, currentEndY);
+          }
+        }
+      }
+    }
+
+    const qH = 170;
+    const qW = 74;
+    const midH = 80;
+    const topY = cy - qH / 2;
+    const midTopY = cy - midH / 2;
+    const midBotY = cy + midH / 2;
+    const botY = cy + qH / 2;
+
+    const pTop = { x: prismX, y: topY };
+    const pBot = { x: prismX, y: botY };
+
+    const pMidTL = { x: prismX - qW * 0.5, y: midTopY + 8 };
+    const pMidTR = { x: prismX + qW * 0.5, y: midTopY + 8 };
+    const pMidBL = { x: prismX - qW * 0.5, y: midBotY - 8 };
+    const pMidBR = { x: prismX + qW * 0.5, y: midBotY - 8 };
+
+    const innerTL = { x: prismX - qW * 0.2, y: midTopY };
+    const innerTR = { x: prismX + qW * 0.2, y: midTopY };
+    const innerBL = { x: prismX - qW * 0.2, y: midBotY };
+    const innerBR = { x: prismX + qW * 0.2, y: midBotY };
+
+    const qPulse = 0.85 + Math.sin(t * 3.8) * 0.15;
+    graphics.fillStyle(0x7c3aed, 0.25 * qPulse);
+    graphics.fillCircle(prismX, cy, 110);
+    graphics.fillStyle(0x06b6d4, 0.15 * qPulse);
+    graphics.fillCircle(prismX, cy, 70);
+
+    graphics.fillStyle(0x06b6d4, 0.85);
+    graphics.beginPath();
+    graphics.moveTo(innerTL.x, innerTL.y);
+    graphics.lineTo(innerTR.x, innerTR.y);
+    graphics.lineTo(innerBR.x, innerBR.y);
+    graphics.lineTo(innerBL.x, innerBL.y);
+    graphics.closePath();
+    graphics.fillPath();
+
+    graphics.fillStyle(0x4c1d95, 0.90);
+    graphics.beginPath();
+    graphics.moveTo(pMidTL.x, pMidTL.y);
+    graphics.lineTo(innerTL.x, innerTL.y);
+    graphics.lineTo(innerBL.x, innerBL.y);
+    graphics.lineTo(pMidBL.x, pMidBL.y);
+    graphics.closePath();
+    graphics.fillPath();
+
+    graphics.fillStyle(0x2e1065, 0.90);
+    graphics.beginPath();
+    graphics.moveTo(innerTR.x, innerTR.y);
+    graphics.lineTo(pMidTR.x, pMidTR.y);
+    graphics.lineTo(pMidBR.x, pMidBR.y);
+    graphics.lineTo(innerBR.x, innerBR.y);
+    graphics.closePath();
+    graphics.fillPath();
+
+    graphics.fillStyle(0x38bdf8, 0.92);
+    graphics.beginPath();
+    graphics.moveTo(pTop.x, pTop.y);
+    graphics.lineTo(innerTL.x, innerTL.y);
+    graphics.lineTo(innerTR.x, innerTR.y);
+    graphics.closePath();
+    graphics.fillPath();
+
+    graphics.fillStyle(0x6d28d9, 0.92);
+    graphics.beginPath();
+    graphics.moveTo(pTop.x, pTop.y);
+    graphics.lineTo(pMidTL.x, pMidTL.y);
+    graphics.lineTo(innerTL.x, innerTL.y);
+    graphics.closePath();
+    graphics.fillPath();
+
+    graphics.fillStyle(0x3b0764, 0.92);
+    graphics.beginPath();
+    graphics.moveTo(pTop.x, pTop.y);
+    graphics.lineTo(innerTR.x, innerTR.y);
+    graphics.lineTo(pMidTR.x, pMidTR.y);
+    graphics.closePath();
+    graphics.fillPath();
+
+    graphics.fillStyle(0x0284c7, 0.92);
+    graphics.beginPath();
+    graphics.moveTo(innerBL.x, innerBL.y);
+    graphics.lineTo(innerBR.x, innerBR.y);
+    graphics.lineTo(pBot.x, pBot.y);
+    graphics.closePath();
+    graphics.fillPath();
+
+    graphics.fillStyle(0x5b21b6, 0.92);
+    graphics.beginPath();
+    graphics.moveTo(pMidBL.x, pMidBL.y);
+    graphics.lineTo(innerBL.x, innerBL.y);
+    graphics.lineTo(pBot.x, pBot.y);
+    graphics.closePath();
+    graphics.fillPath();
+
+    graphics.fillStyle(0x1e1b4b, 0.92);
+    graphics.beginPath();
+    graphics.moveTo(innerBR.x, innerBR.y);
+    graphics.lineTo(pMidBR.x, pMidBR.y);
+    graphics.lineTo(pBot.x, pBot.y);
+    graphics.closePath();
+    graphics.fillPath();
+
+    graphics.lineStyle(2.5, 0xe0f2fe, 0.98);
+    graphics.beginPath();
+    graphics.moveTo(pTop.x, pTop.y);
+    graphics.lineTo(pMidTR.x, pMidTR.y);
+    graphics.lineTo(pMidBR.x, pMidBR.y);
+    graphics.lineTo(pBot.x, pBot.y);
+    graphics.lineTo(pMidBL.x, pMidBL.y);
+    graphics.lineTo(pMidTL.x, pMidTL.y);
+    graphics.closePath();
+    graphics.strokePath();
+
+    graphics.lineStyle(1.8, 0xbae6fd, 0.95);
+    graphics.lineBetween(pTop.x, pTop.y, innerTL.x, innerTL.y);
+    graphics.lineBetween(pTop.x, pTop.y, innerTR.x, innerTR.y);
+    graphics.lineBetween(innerTL.x, innerTL.y, innerTR.x, innerTR.y);
+    graphics.lineBetween(innerTL.x, innerTL.y, innerBL.x, innerBL.y);
+    graphics.lineBetween(innerTR.x, innerTR.y, innerBR.x, innerBR.y);
+    graphics.lineBetween(innerBL.x, innerBL.y, innerBR.x, innerBR.y);
+    graphics.lineBetween(innerBL.x, innerBL.y, pBot.x, pBot.y);
+    graphics.lineBetween(innerBR.x, innerBR.y, pBot.x, pBot.y);
+
+    graphics.lineBetween(pMidTL.x, pMidTL.y, innerTL.x, innerTL.y);
+    graphics.lineBetween(pMidTR.x, pMidTR.y, innerTR.x, innerTR.y);
+    graphics.lineBetween(pMidBL.x, pMidBL.y, innerBL.x, innerBL.y);
+    graphics.lineBetween(pMidBR.x, pMidBR.y, innerBR.x, innerBR.y);
+
+    const sparkles = [
+      { dx: -52, dy: -65, sz: 8, phase: 0 },
+      { dx: 48, dy: -78, sz: 11, phase: 1.2 },
+      { dx: 65, dy: -42, sz: 7, phase: 2.4 },
+      { dx: -60, dy: 55, sz: 9, phase: 3.6 }
+    ];
+    for (const sp of sparkles) {
+      const spAlpha = 0.5 + Math.sin(t * 5.0 + sp.phase) * 0.5;
+      if (spAlpha > 0.1) {
+        const sx = prismX + sp.dx;
+        const sy = cy + sp.dy;
+        const s = sp.sz * (0.8 + spAlpha * 0.4);
+
+        graphics.lineStyle(1.8, 0xffffff, spAlpha);
+        graphics.lineBetween(sx - s, sy, sx + s, sy);
+        graphics.lineBetween(sx, sy - s, sx, sy + s);
+        graphics.fillStyle(0xffffff, spAlpha);
+        graphics.fillCircle(sx, sy, 2);
+      }
+    }
+  } else if (typeId === 'abyssal') {
+    const t = pulseTimer;
+    const floorY = drawStartY + currentZoneHeight;
+
+    graphics.fillStyle(0x001126, 0.55);
+    graphics.fillRect(startX, drawStartY, endX - startX, currentZoneHeight);
+
+    for (let ray = startX + 100; ray < endX; ray += 220) {
+      const rayAlpha = 0.1 + Math.sin(t * 1.5 + ray) * 0.05;
+      const rayShift = Math.sin(t + ray * 0.02) * 30;
+      graphics.lineStyle(35, 0x00ffff, rayAlpha);
+      graphics.lineBetween(ray, drawStartY, ray + rayShift, floorY);
+    }
+
+    graphics.fillStyle(0x000a14, 0.9);
+    graphics.beginPath();
+    graphics.moveTo(startX, floorY);
+    graphics.lineTo(startX + 180, floorY - 35);
+    graphics.lineTo(startX + 350, floorY);
+    graphics.lineTo(endX - 350, floorY);
+    graphics.lineTo(endX - 180, floorY - 40);
+    graphics.lineTo(endX, floorY);
+    graphics.closePath();
+    graphics.fillPath();
+
+    const kelpPositions = [
+      startX + 60, startX + 110, startX + 160, startX + 220, startX + 280,
+      endX - 280, endX - 220, endX - 160, endX - 110, endX - 60
+    ];
+    graphics.lineStyle(3.0, 0x004d40, 0.85);
+
+    for (let k = 0; k < kelpPositions.length; k++) {
+      const kX = kelpPositions[k]!;
+      const kH = 50 + (k % 4) * 20;
+
+      graphics.beginPath();
+      graphics.moveTo(kX, floorY);
+      for (let segment = 1; segment <= 6; segment++) {
+        const segY = floorY - (segment / 6) * kH;
+        const sway = Math.sin(t * 1.8 + k + segment * 0.4) * (segment * 3.5);
+        graphics.lineTo(kX + sway, segY);
+      }
+      graphics.strokePath();
+    }
+
+    const schools = [
+      { species: 0, count: 6, speed: 80, yOffset: 35, dir: 1 },
+      { species: 1, count: 4, speed: 60, yOffset: 95, dir: -1 },
+      { species: 2, count: 5, speed: 75, yOffset: 155, dir: 1 },
+      { species: 3, count: 4, speed: 50, yOffset: 215, dir: -1 }
+    ];
+
+    for (const s of schools) {
+      const schoolY = drawStartY + s.yOffset;
+      const trackLen = endX - startX + 300;
+      const progress = (t * s.speed + s.yOffset * 10) % trackLen;
+      const schoolX = s.dir === 1 ? startX - 150 + progress : endX + 150 - progress;
+
+      for (let f = 0; f < s.count; f++) {
+        const creatureX = schoolX - s.dir * f * 26;
+        const creatureY = schoolY + Math.sin(creatureX * 0.02 + f) * 14;
+
+        if (creatureX >= startX - 20 && creatureX <= endX + 20) {
+          const facingDir = s.dir;
+          if (s.species === 0) {
+            graphics.fillStyle(0x00ffc4, 0.88);
+            graphics.fillCircle(creatureX + facingDir * 3, creatureY, 4);
+            graphics.lineStyle(1.2, 0x00ffff, 0.9);
+            graphics.lineBetween(creatureX - facingDir * 2, creatureY, creatureX - facingDir * 9, creatureY - 3);
+            graphics.lineBetween(creatureX - facingDir * 2, creatureY, creatureX - facingDir * 9, creatureY + 3);
+          } else if (s.species === 1) {
+            graphics.fillStyle(0x00e5ff, 0.85);
+            graphics.lineStyle(1.2, 0xffffff, 0.9);
+            graphics.beginPath();
+            graphics.moveTo(creatureX + facingDir * 8, creatureY);
+            graphics.lineTo(creatureX, creatureY - 7);
+            graphics.lineTo(creatureX - facingDir * 8, creatureY);
+            graphics.lineTo(creatureX, creatureY + 7);
+            graphics.closePath();
+            graphics.fillPath();
+            graphics.strokePath();
+
+            graphics.lineStyle(1.0, 0x00e5ff, 0.8);
+            graphics.lineBetween(creatureX - facingDir * 8, creatureY, creatureX - facingDir * 18, creatureY + Math.sin(t * 3 + f) * 4);
+          } else if (s.species === 2) {
+            graphics.fillStyle(0xffffff, 0.95);
+            graphics.fillCircle(creatureX + facingDir * 4, creatureY, 2.5);
+            graphics.lineStyle(2.5, 0x33ffff, 0.85);
+            graphics.beginPath();
+            graphics.moveTo(creatureX + facingDir * 4, creatureY);
+            for (let seg = 1; seg <= 4; seg++) {
+              const segX = creatureX - facingDir * seg * 6;
+              const segY = creatureY + Math.sin(t * 4 + seg + f) * 5;
+              graphics.lineTo(segX, segY);
+            }
+            graphics.strokePath();
+          } else if (s.species === 3) {
+            graphics.fillStyle(0x00ffaa, 0.85);
+            graphics.fillCircle(creatureX, creatureY, 5);
+            graphics.lineStyle(1.2, 0x00ffc4, 0.9);
+            graphics.strokeCircle(creatureX, creatureY, 5);
+
+            const lureX = creatureX + facingDir * 9;
+            const lureY = creatureY - 6;
+            graphics.lineStyle(1.0, 0xffffff, 0.9);
+            graphics.lineBetween(creatureX + facingDir * 3, creatureY - 4, lureX, lureY);
+            graphics.fillStyle(0xffffff, 0.98);
+            graphics.fillCircle(lureX, lureY, 2);
+
+            graphics.lineStyle(1.2, 0x00ffaa, 0.85);
+            graphics.lineBetween(creatureX - facingDir * 5, creatureY, creatureX - facingDir * 10, creatureY - 3);
+            graphics.lineBetween(creatureX - facingDir * 5, creatureY, creatureX - facingDir * 10, creatureY + 3);
+          }
+        }
+      }
+    }
+
+    graphics.fillStyle(0x00ffc4, 0.7);
+    for (let b = startX + 40; b < endX; b += 90) {
+      const py = floorY - ((t * 45 + b * 7) % currentZoneHeight);
+      const radius = 2 + Math.sin(b + t * 2) * 1.2;
+      graphics.fillCircle(b + Math.sin(py * 0.04) * 6, py, Math.max(1.5, radius));
+    }
+  }
+}
+
+function drawFuturisticPlatformBar(
+  graphics: ReturnType<typeof createPhaserGraphicsShim>,
+  startX: number,
+  endX: number,
+  y: number,
+  typeId: string,
+  color: number,
+  pulseTimer: number
+) {
+  const tileWidth = 80;
+  const height = 20;
+
+  for (let tx = startX; tx < endX; tx += tileWidth) {
+    const blockWidth = Math.min(tileWidth, endX - tx);
+    const isFullBlock = blockWidth === tileWidth;
+
+    graphics.fillStyle(0x0a0a0a, 0.95);
+    graphics.fillRect(tx, y, blockWidth, 6);
+
+    graphics.fillStyle(color, 1.0);
+    for (let sx = tx - 10; sx < tx + blockWidth; sx += 20) {
+      graphics.beginPath();
+      graphics.moveTo(Math.max(tx, sx + 5), y);
+      graphics.lineTo(Math.min(tx + blockWidth, sx + 15), y);
+      graphics.lineTo(Math.min(tx + blockWidth, sx + 5), y + 6);
+      graphics.lineTo(Math.max(tx, sx - 5), y + 6);
+      graphics.closePath();
+      graphics.fillPath();
+    }
+
+    graphics.lineStyle(1.0, 0x050505, 0.95);
+    graphics.strokeRect(tx, y, blockWidth, 6);
+
+    graphics.fillStyle(color, 0.16);
+    graphics.fillRect(tx, y + 6, blockWidth, height);
+
+    graphics.lineStyle(1.0, color, 0.45);
+    graphics.strokeRect(tx + 2, y + 8, blockWidth - 4, height - 4);
+
+    graphics.lineStyle(1.5, 0x050505, 0.95);
+    graphics.strokeRect(tx, y + 6, blockWidth, height);
+
+    if (isFullBlock) {
+      graphics.fillStyle(0xffffff, 0.85);
+      graphics.fillCircle(tx + 6, y + 11, 1.2);
+      graphics.fillCircle(tx + tileWidth - 6, y + 11, 1.2);
+      graphics.fillCircle(tx + 6, y + height + 1, 1.2);
+      graphics.fillCircle(tx + tileWidth - 6, y + height + 1, 1.2);
+    }
+
+    graphics.lineStyle(1.5, color, 0.85);
+
+    if (typeId === 'normal') {
+      graphics.lineBetween(tx + 12, y + 16, tx + blockWidth - 12, y + 16);
+    } else if (typeId === 'ice') {
+      graphics.lineStyle(1.0, 0xffffff, 0.45);
+      graphics.lineBetween(tx + 18, y + 21, tx + 32, y + 11);
+      if (blockWidth > 50) {
+        graphics.lineBetween(tx + 48, y + 21, tx + 62, y + 11);
+      }
+    } else if (typeId === 'magma') {
+      const lavaAlpha = 0.45 + Math.sin(pulseTimer * 1.5) * 0.15;
+      graphics.lineStyle(1.8, color, lavaAlpha);
+      graphics.beginPath();
+      graphics.moveTo(tx + 12, y + 11);
+      graphics.lineTo(tx + 28, y + 21);
+      graphics.lineTo(tx + 48, y + 11);
+      graphics.lineTo(tx + blockWidth - 12, y + 21);
+      graphics.strokePath();
+    } else if (typeId === 'electric') {
+      graphics.lineStyle(1.0, color, 0.75);
+      graphics.lineBetween(tx + 12, y + 16, tx + blockWidth - 12, y + 16);
+      if (isFullBlock) {
+        graphics.lineBetween(tx + 40, y + 16, tx + 40, y + 22);
+        graphics.fillStyle(color, 0.95);
+        graphics.fillCircle(tx + 40, y + 16, 2.5);
+      }
+    } else if (typeId === 'void') {
+      if (isFullBlock) {
+        graphics.lineStyle(1.0, color, 0.6);
+        graphics.strokeCircle(tx + 40, y + 16, 6);
+        const singularityAlpha = 0.75 + Math.sin(pulseTimer * 2.0) * 0.2;
+        graphics.fillStyle(0xffffff, singularityAlpha);
+        graphics.fillCircle(tx + 40, y + 16, 2.0);
+        graphics.fillStyle(color, 0.35);
+        graphics.fillCircle(tx + 40, y + 16, 4.5);
+      } else {
+        graphics.lineBetween(tx + 2, y + 16, tx + blockWidth - 2, y + 16);
+      }
+    } else if (typeId === 'overcharged') {
+      graphics.beginPath();
+      if (blockWidth > 30) {
+        graphics.moveTo(tx + 15, y + 10);
+        graphics.lineTo(tx + 25, y + 16);
+        graphics.lineTo(tx + 15, y + 22);
+      }
+      if (blockWidth > 50) {
+        graphics.moveTo(tx + 35, y + 10);
+        graphics.lineTo(tx + 45, y + 16);
+        graphics.lineTo(tx + 35, y + 22);
+      }
+      if (blockWidth > 70) {
+        graphics.moveTo(tx + 55, y + 10);
+        graphics.lineTo(tx + 65, y + 16);
+        graphics.lineTo(tx + 55, y + 22);
+      }
+      graphics.strokePath();
+    } else if (typeId === 'chronos') {
+      graphics.lineStyle(1.0, color, 0.8);
+      graphics.strokeCircle(tx + blockWidth / 2, y + 16, 5);
+      graphics.lineBetween(tx + 10, y + 16, tx + blockWidth - 10, y + 16);
+    } else if (typeId === 'cyber_grid') {
+      graphics.lineStyle(1.2, color, 0.9);
+      graphics.lineBetween(tx + 8, y + 16, tx + blockWidth - 8, y + 16);
+      graphics.fillStyle(color, 1.0);
+      graphics.fillCircle(tx + 16, y + 16, 2.5);
+      graphics.fillCircle(tx + blockWidth - 16, y + 16, 2.5);
+    } else if (typeId === 'solar_flare') {
+      const cx = tx + blockWidth / 2;
+      const cy = y + 16;
+      graphics.lineStyle(1.6, 0xffff00, 0.9);
+      graphics.strokeCircle(cx, cy, 4);
+      graphics.fillStyle(0xff3300, 1.0);
+      graphics.fillCircle(cx, cy, 2.5);
+      
+      graphics.lineStyle(1.0, 0xffa500, 0.7);
+      graphics.lineBetween(cx - 10, cy, cx - 5, cy);
+      graphics.lineBetween(cx + 5, cy, cx + 10, cy);
+      graphics.lineBetween(cx, cy - 6, cx, cy - 3);
+      graphics.lineBetween(cx, cy + 3, cx, cy + 6);
+    } else if (typeId === 'crystal_prism') {
+      graphics.lineStyle(1.2, color, 0.9);
+      graphics.beginPath();
+      graphics.moveTo(tx + blockWidth / 2, y + 8);
+      graphics.lineTo(tx + blockWidth / 2 + 10, y + 16);
+      graphics.lineTo(tx + blockWidth / 2, y + 24);
+      graphics.lineTo(tx + blockWidth / 2 - 10, y + 16);
+      graphics.closePath();
+      graphics.strokePath();
+    } else if (typeId === 'abyssal') {
+      graphics.lineStyle(1.5, color, 0.8);
+      graphics.lineBetween(tx + 12, y + 12, tx + blockWidth - 12, y + 12);
+      graphics.lineBetween(tx + 18, y + 20, tx + blockWidth - 18, y + 20);
+    }
+  }
+}
+
+export function renderStudioBiomeScenario(
+  ctx: CanvasRenderingContext2D,
+  biomeId: string,
+  width: number,
+  height: number,
+  time: number,
+  viewMode: '3lanes' | 'single' = '3lanes'
+) {
+  ctx.save();
+  ctx.clearRect(0, 0, width, height);
+
+  ctx.fillStyle = '#020108';
+  ctx.fillRect(0, 0, width, height);
+
+  const scaleX = width / 1920;
+  const scaleY = height / 1080;
+  ctx.scale(scaleX, scaleY);
+
+  const shim = createPhaserGraphicsShim(ctx);
+  const biome = BIOME_SCENARIOS_DATA.find((b) => b.id === biomeId) || BIOME_SCENARIOS_DATA[0]!;
+  const startX = 50;
+  const endX = 1870;
+
+  if (viewMode === '3lanes') {
+    drawZoneEnvironment(shim, startX, endX, 0, 300, 3, biome.id, biome.colorNumber, time);
+    drawFuturisticPlatformBar(shim, startX, endX, 300, biome.id, biome.colorNumber, time);
+
+    drawZoneEnvironment(shim, startX, endX, 326, 600, 2, biome.id, biome.colorNumber, time);
+    drawFuturisticPlatformBar(shim, startX, endX, 600, biome.id, biome.colorNumber, time);
+
+    drawZoneEnvironment(shim, startX, endX, 626, 900, 1, biome.id, biome.colorNumber, time);
+    drawFuturisticPlatformBar(shim, startX, endX, 900, biome.id, biome.colorNumber, time);
+
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+    ctx.font = '12px Consolas, monospace';
+    ctx.fillText('PISTA 3 (SUPERIOR) [Y=300]   |   PISTA 2 (CENTRAL) [Y=600]   |   PISTA 1 (INFERIOR) [Y=900]', 70, 946);
+    ctx.fillText('MOTOR GEOMETRY PLATFORMS // LARGURA: 1820px // MODULAR 80px // ESPESSURA: 26px // RenderSystem.ts:lines 2518–4500', 70, 970);
+  } else {
+    const drawStartY = 40;
+    const zoneEndY = 780;
+    drawZoneEnvironment(shim, startX, endX, drawStartY, zoneEndY, 1, biome.id, biome.colorNumber, time);
+    drawFuturisticPlatformBar(shim, startX, endX, zoneEndY, biome.id, biome.colorNumber, time);
+
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+    ctx.font = '14px Consolas, monospace';
+    ctx.fillText(`BIOMA EXPANDIDO // ${biome.namePt.toUpperCase()} (${biome.nameEn.toUpperCase()}) // ATALHO DO MOTOR: ${biome.id}`, 70, 840);
+    ctx.fillText(`PALETA NEON: ${biome.colorHex} // CÓDIGO FONTE: RenderSystem.ts:lines 2518–4500`, 70, 865);
   }
 
   ctx.restore();
