@@ -5585,9 +5585,25 @@ export function renderStudioBiomeScenario(
   ctx.fillStyle = '#020108';
   ctx.fillRect(0, 0, width, height);
 
-  const scaleX = width / 1920;
-  const scaleY = height / 1080;
-  ctx.scale(scaleX, scaleY);
+  const baseW = 1920;
+  const baseH = 1080;
+
+  if (Math.abs(width / height - baseW / baseH) < 0.02) {
+    // 16:9 Standard
+    ctx.scale(width / baseW, height / baseH);
+  } else if (width > height) {
+    // 21:9 Ultrawide (e.g. 2560x1080) - Uniform scale based on height, centered horizontally
+    const s = height / baseH;
+    const offsetX = (width - baseW * s) / 2;
+    ctx.translate(offsetX, 0);
+    ctx.scale(s, s);
+  } else {
+    // 9:16 Vertical Mobile (e.g. 1080x1920) - Uniform scale based on width, centered vertically
+    const s = width / baseW;
+    const offsetY = (height - baseH * s) / 2;
+    ctx.translate(0, offsetY);
+    ctx.scale(s, s);
+  }
 
   const shim = createPhaserGraphicsShim(ctx);
   const biome = BIOME_SCENARIOS_DATA.find((b) => b.id === biomeId) || BIOME_SCENARIOS_DATA[0]!;

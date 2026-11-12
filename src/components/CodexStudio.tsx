@@ -100,40 +100,49 @@ export const CodexStudio: React.FC = () => {
     platformViewMode
   ]);
 
-  // Download 1080p Crystal Clear PNG
-  const handleDownload = () => {
+  type AspectRatioFormat = '21:9' | '16:9' | '9:16';
+
+  const FORMAT_CONFIG: Record<AspectRatioFormat, { width: number; height: number; tag: string }> = {
+    '21:9': { width: 2560, height: 1080, tag: '21x9_ultrawide' },
+    '16:9': { width: 1920, height: 1080, tag: '16x9_fhd' },
+    '9:16': { width: 1080, height: 1920, tag: '9x16_mobile' }
+  };
+
+  // Download Crystal Clear PNG in 21:9, 16:9 or 9:16
+  const handleDownload = (format: AspectRatioFormat = '16:9') => {
+    const { width, height, tag } = FORMAT_CONFIG[format];
     const offCanvas = document.createElement('canvas');
-    offCanvas.width = 1920;
-    offCanvas.height = 1080;
+    offCanvas.width = width;
+    offCanvas.height = height;
     const offCtx = offCanvas.getContext('2d');
     if (!offCtx) return;
 
-    let filename = 'AC3GAMES_render.png';
+    let filename = `AC3GAMES_${tag}.png`;
 
     if (activeTab === 'player') {
-      renderStudioPlayer(offCtx, playerForm, playerRarity, 1920, 1080, 0);
-      filename = `player_forma_${playerForm}_raridade_${playerRarity}.png`;
+      renderStudioPlayer(offCtx, playerForm, playerRarity, width, height, 0);
+      filename = `player_forma_${playerForm}_raridade_${playerRarity}_${tag}.png`;
     } else if (activeTab === 'enemy') {
-      renderStudioEnemy(offCtx, enemyForm, enemyRarity, 1920, 1080, 0);
-      filename = `inimigo_forma_${enemyForm}_raridade_${enemyRarity}.png`;
+      renderStudioEnemy(offCtx, enemyForm, enemyRarity, width, height, 0);
+      filename = `inimigo_forma_${enemyForm}_raridade_${enemyRarity}_${tag}.png`;
     } else if (activeTab === 'wave_boss') {
-      renderStudioWaveBoss(offCtx, waveBossForm, waveBossRarity, 1920, 1080, 0);
-      filename = `wave_boss_forma_${waveBossForm}_raridade_${waveBossRarity}.png`;
+      renderStudioWaveBoss(offCtx, waveBossForm, waveBossRarity, width, height, 0);
+      filename = `wave_boss_forma_${waveBossForm}_raridade_${waveBossRarity}_${tag}.png`;
     } else if (activeTab === 'arena_boss') {
-      renderStudioArenaBoss(offCtx, arenaBossIdx, arenaBossRarity, 1920, 1080, 0);
-      filename = `arena_boss_${arenaBossIdx}_raridade_${arenaBossRarity}.png`;
+      renderStudioArenaBoss(offCtx, arenaBossIdx, arenaBossRarity, width, height, 0);
+      filename = `arena_boss_${arenaBossIdx}_raridade_${arenaBossRarity}_${tag}.png`;
     } else if (activeTab === 'drone') {
-      renderStudioDrone(offCtx, droneId, 1920, 1080, 0);
-      filename = `drone_${droneId}.png`;
+      renderStudioDrone(offCtx, droneId, width, height, 0);
+      filename = `drone_${droneId}_${tag}.png`;
     } else if (activeTab === 'hero_class') {
-      renderStudioHeroClassWeapon(offCtx, heroClassId, 1920, 1080, 0, isEvolved);
-      filename = `classe_heroi_${heroClassId}${isEvolved ? '_evolucao_reliquia' : '_base'}.png`;
+      renderStudioHeroClassWeapon(offCtx, heroClassId, width, height, 0, isEvolved);
+      filename = `classe_heroi_${heroClassId}${isEvolved ? '_evolucao_reliquia' : '_base'}_${tag}.png`;
     } else if (activeTab === 'biome_aura') {
-      renderStudioBiomeAura(offCtx, biomeAuraId, 1920, 1080, 0);
-      filename = `codex_aura_${biomeAuraId}_1080p.png`;
+      renderStudioBiomeAura(offCtx, biomeAuraId, width, height, 0);
+      filename = `codex_aura_${biomeAuraId}_${tag}.png`;
     } else if (activeTab === 'biome_platform') {
-      renderStudioBiomeScenario(offCtx, biomePlatformId, 1920, 1080, 0, platformViewMode);
-      filename = `cenario_plataforma_${biomePlatformId}_${platformViewMode}_1080p.png`;
+      renderStudioBiomeScenario(offCtx, biomePlatformId, width, height, 0, platformViewMode);
+      filename = `cenario_plataforma_${biomePlatformId}_${platformViewMode}_${tag}.png`;
     }
 
     const link = document.createElement('a');
@@ -295,17 +304,46 @@ export const CodexStudio: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex items-center justify-between mt-4">
-            <span className="font-mono text-xs text-slate-400">
-              Render vetorial nítido oficial em 1920 × 1080 PNG
-            </span>
-            <button
-              onClick={handleDownload}
-              className="px-4 py-2 rounded-xl bg-cyber-darker border border-cyber-cyan/40 hover:border-cyber-cyan text-cyber-cyan hover:bg-cyber-cyan/10 font-mono text-xs font-bold transition-all flex items-center gap-2"
-            >
-              <Download className="w-4 h-4" />
-              <span>Baixar Render PNG</span>
-            </button>
+          {/* Formatos de Download Oficial: 21:9 / 16:9 / 9:16 */}
+          <div className="mt-4 p-3.5 rounded-2xl bg-cyber-darker border border-cyber-cardBorder/80 flex flex-col md:flex-row md:items-center justify-between gap-3">
+            <div className="flex flex-col">
+              <span className="font-mono text-xs font-bold text-white flex items-center gap-1.5">
+                <Download className="w-3.5 h-3.5 text-cyber-cyan" />
+                <span>BAIXAR RENDER VETORIAL HD:</span>
+              </span>
+              <span className="font-mono text-[11px] text-slate-400">
+                Selecione o formato para wallpaper ou celular
+              </span>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2 font-mono text-xs">
+              {/* 21:9 Ultrawide */}
+              <button
+                onClick={() => handleDownload('21:9')}
+                className="px-3 py-2 rounded-xl bg-purple-950/40 border border-purple-500/40 hover:border-purple-400 text-purple-200 hover:text-white hover:bg-purple-900/50 font-bold transition-all flex items-center gap-1.5 shadow-sm hover:shadow-neon-purple/20"
+                title="Download 21:9 Ultrawide (2560 × 1080)"
+              >
+                <span>🖥️ 21:9 Ultrawide</span>
+              </button>
+
+              {/* 16:9 Widescreen */}
+              <button
+                onClick={() => handleDownload('16:9')}
+                className="px-3.5 py-2 rounded-xl bg-cyber-cyan text-black font-extrabold hover:bg-cyan-300 transition-all flex items-center gap-1.5 shadow-neon-cyan"
+                title="Download 16:9 Widescreen Full HD (1920 × 1080)"
+              >
+                <span>📺 16:9 Padrão</span>
+              </button>
+
+              {/* 9:16 Mobile */}
+              <button
+                onClick={() => handleDownload('9:16')}
+                className="px-3 py-2 rounded-xl bg-pink-950/40 border border-pink-500/40 hover:border-pink-400 text-pink-200 hover:text-white hover:bg-pink-900/50 font-bold transition-all flex items-center gap-1.5 shadow-sm hover:shadow-neon-pink/20"
+                title="Download 9:16 Vertical Mobile / Stories / Celular (1080 × 1920)"
+              >
+                <span>📱 9:16 Mobile</span>
+              </button>
+            </div>
           </div>
         </div>
 
