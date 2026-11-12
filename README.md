@@ -18,7 +18,7 @@ Inspirado na arquitetura e estética de portais de jogos modernos como o **Amazo
 - **Renderização Gráfica**: HTML5 Canvas 2D Procedural (fórmulas vetoriais fiéis do jogo)
 - **Banco de Dados**: Supabase (PostgreSQL + RLS + API REST)
 - **Hospedagem & CI/CD**: Vercel (Hobby Tier 100% gratuito)
-- **Controle de Versão**: Git & GitHub (`ac3games-dev/ac3games`)
+- **Controle de Versão**: Git & GitHub (`manoelbpm/ac3games` ou `ac3games/ac3games`)
 
 ---
 
@@ -61,7 +61,7 @@ Inspirado na arquitetura e estética de portais de jogos modernos como o **Amazo
 ## 🌐 Como Fazer Deploy na Vercel (100% Gratuito)
 
 1. Acesse [vercel.com](https://vercel.com) e conecte com seu GitHub.
-2. Clique em **"Add New Project"** e selecione o repositório `ac3games-dev/ac3games`.
+2. Clique em **"Add New Project"** e selecione o repositório **`manoelbpm/ac3games`** (ou `ac3games/ac3games`).
 3. Mantenha as configurações padrão (Framework Preset: **Vite**).
 4. *(Opcional)* Em **Environment Variables**, adicione `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY`.
 5. Clique em **"Deploy"**. Seu site estará no ar em menos de 1 minuto com link `https://ac3games.vercel.app`!
