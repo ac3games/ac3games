@@ -1882,14 +1882,15 @@ export function renderStudioDrone(
 
 /**
  * 6. HERO CLASS WEAPON & PROJECTILE RENDERER
- * Authentic renders from catalog-scene.ts (lines 3535-3645) & RenderSystem.ts
+ * Renders the exact procedural projectiles from codex_biblioteca_16_9.html:drawProceduralProjectileFromCode
+ * and in-game RenderSystem.ts:lines 860-1420
  */
 export function renderStudioHeroClassWeapon(
   ctx: CanvasRenderingContext2D,
   classId: string,
   width: number,
   height: number,
-  time: number
+  _time: number
 ) {
   ctx.save();
   ctx.clearRect(0, 0, width, height);
@@ -1899,199 +1900,18 @@ export function renderStudioHeroClassWeapon(
 
   const cx = width / 2;
   const cy = height / 2;
-  const s = Math.min(width, height) / 28;
-  const pulse = Math.sin(time * 3.5) * 0.5 + 0.5;
+  // Authentic 16:9 scale factor matching codex_biblioteca_16_9.html: 6.5 at 960x540, 13.0 at 1920x1080
+  const s = (Math.min(width, height) / 540) * 6.5;
 
-  const id = classId.toLowerCase();
+  let projId = classId.toLowerCase();
+  if (projId === 'vanguard' || projId === 'fighter') projId = 'rocket_missile';
+  else if (projId === 'interceptor' || projId === 'rogue') projId = 'phase_flechette';
+  else if (projId === 'disruptor' || projId === 'mage') projId = 'plasma_vortex';
+  else if (projId === 'resonator' || projId === 'bard') projId = 'sonic_shockwave';
+  else if (projId === 'bastion' || projId === 'paladin') projId = 'photon_lance';
+  else if (projId === 'marksman' || projId === 'ranger') projId = 'kinetic_dart';
 
-  if (id === 'vanguard' || id === 'fighter' || id === 'weapon_bazooka') {
-    // Plasma Bazooka: Heavy concussive thermodynamic warhead + plasma exhaust
-    ctx.strokeStyle = '#f97316';
-    ctx.lineWidth = 2.2 * (s / 4);
-    ctx.fillStyle = '#431407';
-    ctx.beginPath();
-    ctx.moveTo(cx + 18 * s, cy);
-    ctx.lineTo(cx + 4 * s, cy - 8 * s);
-    ctx.lineTo(cx - 14 * s, cy - 8 * s);
-    ctx.lineTo(cx - 14 * s, cy + 8 * s);
-    ctx.lineTo(cx + 4 * s, cy + 8 * s);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
-
-    // Incandescent core
-    ctx.fillStyle = '#ffedd5';
-    ctx.beginPath();
-    ctx.arc(cx + 8 * s, cy, 3.5 * s, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Concussive shockwave exhaust
-    ctx.strokeStyle = '#f97316';
-    ctx.lineWidth = 1.8 * (s / 4);
-    ctx.beginPath();
-    ctx.arc(cx - 18 * s, cy, (5 + pulse * 2) * s, 0, Math.PI * 2);
-    ctx.stroke();
-
-    ctx.fillStyle = '#ff4400';
-    ctx.beginPath();
-    ctx.arc(cx - 18 * s, cy, 3 * s, 0, Math.PI * 2);
-    ctx.fill();
-
-  } else if (id === 'interceptor' || id === 'rogue' || id === 'weapon_daggers') {
-    // Twin Cyber Daggers: Parallel undulating sinusoidal plasma wave
-    ctx.strokeStyle = '#38bdf8';
-    ctx.lineWidth = 2.0 * (s / 4);
-
-    // Sinusoidal wave trail
-    ctx.beginPath();
-    for (let x = -24; x <= 24; x += 1) {
-      const y = Math.sin(x * 0.25 + time * 6.0) * 8 * s;
-      if (x === -24) ctx.moveTo(cx + x * s, cy + y);
-      else ctx.lineTo(cx + x * s, cy + y);
-    }
-    ctx.stroke();
-
-    // Twin Daggers
-    for (const offY of [-7 * s, 7 * s]) {
-      ctx.fillStyle = '#031a24';
-      ctx.strokeStyle = '#00f0ff';
-      ctx.lineWidth = 1.8 * (s / 4);
-      ctx.beginPath();
-      ctx.moveTo(cx + 18 * s, cy + offY);
-      ctx.lineTo(cx + 4 * s, cy + offY - 4 * s);
-      ctx.lineTo(cx - 12 * s, cy + offY);
-      ctx.lineTo(cx + 4 * s, cy + offY + 4 * s);
-      ctx.closePath();
-      ctx.fill();
-      ctx.stroke();
-
-      ctx.fillStyle = '#ffffff';
-      ctx.beginPath();
-      ctx.arc(cx + 6 * s, cy + offY, 2.0 * s, 0, Math.PI * 2);
-      ctx.fill();
-    }
-
-  } else if (id === 'disruptor' || id === 'mage' || id === 'weapon_fireball') {
-    // Solar Flare Staff: Blazing coronal plasma orb with orbiting solar flares
-    const orbR = (12 + pulse * 2) * s;
-    ctx.fillStyle = 'rgba(255, 69, 0, 0.25)';
-    ctx.beginPath();
-    ctx.arc(cx, cy, orbR + 6 * s, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.fillStyle = 'rgba(255, 140, 0, 0.6)';
-    ctx.beginPath();
-    ctx.arc(cx, cy, orbR, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.fillStyle = '#ffffcc';
-    ctx.beginPath();
-    ctx.arc(cx, cy, orbR * 0.45, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Orbiting flares
-    for (let f = 0; f < 4; f++) {
-      const fa = time * 4.0 + (f * Math.PI) / 2;
-      ctx.fillStyle = '#ffa500';
-      ctx.beginPath();
-      ctx.arc(cx + Math.cos(fa) * (orbR + 7 * s), cy + Math.sin(fa) * (orbR + 7 * s), 2.5 * s, 0, Math.PI * 2);
-      ctx.fill();
-    }
-
-  } else if (id === 'resonator' || id === 'bard' || id === 'weapon_musical_notes') {
-    // Harmonic Synthesizer: Vibrating musical treble notes + expanding soundwave rings
-    ctx.strokeStyle = '#a855f7';
-    ctx.lineWidth = 2.0 * (s / 4);
-    ctx.fillStyle = '#3b0764';
-    ctx.beginPath();
-    ctx.arc(cx - 6 * s, cy + 4 * s, 5 * s, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.stroke();
-
-    ctx.lineWidth = 2.2 * (s / 4);
-    ctx.beginPath();
-    ctx.moveTo(cx - 1 * s, cy + 4 * s);
-    ctx.lineTo(cx - 1 * s, cy - 10 * s);
-    ctx.lineTo(cx + 7 * s, cy - 8 * s);
-    ctx.stroke();
-
-    // Acoustic concentric ripples
-    const rip = ((time * 25) % 18) * s;
-    ctx.strokeStyle = 'rgba(216, 180, 254, 0.7)';
-    ctx.lineWidth = 1.5 * (s / 4);
-    ctx.beginPath();
-    ctx.arc(cx + 8 * s, cy, rip, 0, Math.PI * 2);
-    ctx.stroke();
-
-  } else if (id === 'bastion' || id === 'paladin' || id === 'weapon_holy_beam') {
-    // Divine Radiance: Focused collimated ray with diamond refraction prism
-    ctx.strokeStyle = 'rgba(250, 204, 21, 0.4)';
-    ctx.lineWidth = 4.5 * (s / 4);
-    ctx.beginPath();
-    ctx.moveTo(cx - 26 * s, cy);
-    ctx.lineTo(cx + 26 * s, cy);
-    ctx.stroke();
-
-    ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = 2.0 * (s / 4);
-    ctx.beginPath();
-    ctx.moveTo(cx - 26 * s, cy);
-    ctx.lineTo(cx + 26 * s, cy);
-    ctx.stroke();
-
-    // Diamond Prism Lens
-    ctx.strokeStyle = '#fef08a';
-    ctx.lineWidth = 1.8 * (s / 4);
-    ctx.fillStyle = '#713f12';
-    ctx.beginPath();
-    ctx.moveTo(cx + 12 * s, cy);
-    ctx.lineTo(cx, cy - 9 * s);
-    ctx.lineTo(cx - 12 * s, cy);
-    ctx.lineTo(cx, cy + 9 * s);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
-
-    ctx.fillStyle = '#ffffff';
-    ctx.beginPath();
-    ctx.arc(cx, cy, 3 * s, 0, Math.PI * 2);
-    ctx.fill();
-
-  } else if (id === 'marksman' || id === 'ranger' || id === 'weapon_bow_arrows') {
-    // Cyber Composite Bow: Aerodynamic vector flechette with kinetic tip
-    ctx.strokeStyle = '#10b981';
-    ctx.lineWidth = 2.2 * (s / 4);
-    ctx.beginPath();
-    ctx.moveTo(cx - 18 * s, cy);
-    ctx.lineTo(cx + 18 * s, cy);
-    ctx.stroke();
-
-    ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = 1.4 * (s / 4);
-    ctx.beginPath();
-    ctx.moveTo(cx - 14 * s, cy);
-    ctx.lineTo(cx + 14 * s, cy);
-    ctx.stroke();
-
-    // Arrow head
-    ctx.fillStyle = '#10b981';
-    ctx.beginPath();
-    ctx.moveTo(cx + 22 * s, cy);
-    ctx.lineTo(cx + 14 * s, cy - 6 * s);
-    ctx.lineTo(cx + 14 * s, cy + 6 * s);
-    ctx.closePath();
-    ctx.fill();
-
-    // Fletching fins
-    ctx.strokeStyle = '#34d399';
-    ctx.lineWidth = 1.6 * (s / 4);
-    ctx.beginPath();
-    ctx.moveTo(cx - 16 * s, cy);
-    ctx.lineTo(cx - 21 * s, cy - 5 * s);
-    ctx.moveTo(cx - 16 * s, cy);
-    ctx.lineTo(cx - 21 * s, cy + 5 * s);
-    ctx.stroke();
-  }
+  drawProceduralProjectile(ctx, projId, cx, cy, s);
 
   ctx.restore();
 }
@@ -2114,6 +1934,7 @@ export function drawProceduralProjectile(
   const s = scale;
 
   switch (id) {
+    case 'vanguard':
     case 'rocket_missile':
     case 'fighter': {
       // 1. Fighter: Rocket Missile (Bazooka)
@@ -2165,6 +1986,7 @@ export function drawProceduralProjectile(
       ctx.stroke();
       break;
     }
+    case 'interceptor':
     case 'phase_flechette':
     case 'rogue': {
       // 2. Rogue: Phase Flechette (Daggers)
@@ -2193,6 +2015,7 @@ export function drawProceduralProjectile(
       ctx.stroke();
       break;
     }
+    case 'disruptor':
     case 'plasma_vortex':
     case 'mage': {
       // 3. Mage: Plasma Vortex (Fireball)
@@ -2216,6 +2039,7 @@ export function drawProceduralProjectile(
       ctx.fill();
       break;
     }
+    case 'marksman':
     case 'kinetic_dart':
     case 'ranger': {
       // 4. Ranger: Kinetic Dart (Bow)
@@ -2240,6 +2064,7 @@ export function drawProceduralProjectile(
       ctx.stroke();
       break;
     }
+    case 'bastion':
     case 'photon_lance':
     case 'paladin': {
       // 5. Paladin: Photon Lance (Holy Beam)
@@ -2270,6 +2095,7 @@ export function drawProceduralProjectile(
       ctx.stroke();
       break;
     }
+    case 'resonator':
     case 'sonic_shockwave':
     case 'bard': {
       // 6. Bard: Sonic Shockwave (Harmonic Pulse)
