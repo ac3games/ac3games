@@ -823,6 +823,15 @@ export interface HeroClassData {
   weaponName: string;
   munitionName: string;
   munitionDetails: string;
+  evolutionWeaponId: string;
+  evolutionWeaponName: string;
+  evolutionRelicId: string;
+  evolutionRelicName: string;
+  evolutionColor: string;
+  evolutionGlow: string;
+  evolutionMunitionName: string;
+  evolutionDetails: string;
+  evolutionNumericalBonus: string;
   activeSkillName: string;
   activeSkillDetails: string;
   numericalBonuses: {
@@ -850,6 +859,15 @@ export const HERO_CLASSES_DATA: HeroClassData[] = [
     weaponName: 'Bazuca de Plasma (Vanguarda)',
     munitionName: 'Ogiva Balística Concussiva Termodinâmica',
     munitionDetails: 'Projéteis balísticos pesados que geram onda de choque expansiva de 140px com empurrão e desintegração de blindagens.',
+    evolutionWeaponId: 'evolution_nuclear_nuke',
+    evolutionWeaponName: 'Ogiva Termonuclear Quântica (Arma Evoluída)',
+    evolutionRelicId: 'relic_fusion_core',
+    evolutionRelicName: 'Núcleo de Fusão Cósmica (Fusion Core)',
+    evolutionColor: '#22c55e',
+    evolutionGlow: '#84cc16',
+    evolutionMunitionName: 'Torpedo Atômico de Radioatividade Esmeralda (Nuke)',
+    evolutionDetails: 'Transmuta para projétil balístico esmeralda de escala aumentada (+25%), casco obsidiana tóxico, ogiva de fusão nuclear e raio de explosão titânico de 240px (contra 140px da base) com desintegração de blindagens.',
+    evolutionNumericalBonus: '+71% Raio de Explosão em Área (240px), 35 partículas quânticas de choque e dano cinético triplo instantâneo.',
     activeSkillName: 'Barreira Reativa Hexagonal (Kinetic Shield Blast)',
     activeSkillDetails: 'Aciona barreira reativa com onda de choque cinético que repele projéteis hostis e inflige 180 de dano em área (140px).',
     numericalBonuses: [
@@ -880,6 +898,15 @@ export const HERO_CLASSES_DATA: HeroClassData[] = [
     weaponName: 'Adagas Cibernéticas (Interceptador)',
     munitionName: 'Dupla de Lâminas Ondulatórias de Fase',
     munitionDetails: '2 adagas paralelas ondulatórias em frequência senoidal cruzando o centro (±16px) com alta perfuração e taxa crítica.',
+    evolutionWeaponId: 'evolution_phantom_blades',
+    evolutionWeaponName: 'Lâminas Fantasma de Fase Espectral (Arma Evoluída)',
+    evolutionRelicId: 'relic_lucky_clover',
+    evolutionRelicName: 'Trevo Quântico de Probabilidade (Lucky Clover)',
+    evolutionColor: '#a855f7',
+    evolutionGlow: '#34d399',
+    evolutionMunitionName: 'Adagas Nanomoleculares de Interferência Espectral',
+    evolutionDetails: 'Transmuta para lâminas violeta espectrais (+20% escala) com rastro duplo senoidal esmeralda brilhante. Ignora completamente colisões com o terreno, penetra alvos ilimitados e garante acertos críticos quânticos.',
+    evolutionNumericalBonus: 'Perfuração infinita de obstáculos e alvos, +25% velocidade de projétil e dano crítico garantido em alvos em fase.',
     activeSkillName: 'Campo de Estase Temporal (Chronos Stasis Field)',
     activeSkillDetails: 'Projeta mostrador cronométrico holográfico sci-fi que desacelera tempo, naves e disparos inimigos em 60% por 4 segundos.',
     numericalBonuses: [
@@ -910,6 +937,15 @@ export const HERO_CLASSES_DATA: HeroClassData[] = [
     weaponName: 'Cajado Solar (Disruptor)',
     munitionName: 'Esfera de Plasma Coronal Incandescente',
     munitionDetails: 'Esferas térmicas incandescentes com labaredas orbitais que aplicam Queimadura contínua (Burn DoT) e desestabilização de escudos.',
+    evolutionWeaponId: 'evolution_inferno_meteor',
+    evolutionWeaponName: 'Meteoro Supernova Estelar (Arma Evoluída)',
+    evolutionRelicId: 'relic_overcharge_battery',
+    evolutionRelicName: 'Capacitor Coronal de Sobrecarga (Overcharge Battery)',
+    evolutionColor: '#ff0044',
+    evolutionGlow: '#ffaa00',
+    evolutionMunitionName: 'Singularidade Coronal Carmesim com Labaredas Triplas',
+    evolutionDetails: 'Transmuta para vórtice estelar carmesim de escala massiva (+25%, raio 11px), 3 labaredas giratórias superaquecidas e núcleo de fusão estelar branca. Deixa uma trilha contínua de fogo no chão que derrete blindagens.',
+    evolutionNumericalBonus: 'Aura solar permanente de dano contínuo (Burn DoT), +60% área de toróide e destruição automática de projéteis inimigos leves.',
     activeSkillName: 'Singularidade Quântica (Vector Pulse Nova)',
     activeSkillDetails: 'Colapsa hipercubo 4D Tesseract que detona ondas espirais de plasma quântico causando 320 de dano térmico com queima contínua (Burn DoT).',
     numericalBonuses: [
@@ -940,6 +976,15 @@ export const HERO_CLASSES_DATA: HeroClassData[] = [
     weaponName: 'Sintetizador Harmônico (Ressonador)',
     munitionName: 'Pulsos de Choque Acústico & Notas Harmônicas',
     munitionDetails: 'Ondas acústicas oscilatórias e notas sônicas perfurantes que causam cavitação estrutural, desorientação e estase nos inimigos.',
+    evolutionWeaponId: 'evolution_harmonic_resonance',
+    evolutionWeaponName: 'Sinfonia Nova Harmônica (Arma Evoluída)',
+    evolutionRelicId: 'relic_tuning_fork',
+    evolutionRelicName: 'Diapasão de Cristal Ressonante (Resonance Tuning Fork)',
+    evolutionColor: '#00f0ff',
+    evolutionGlow: '#ffd700',
+    evolutionMunitionName: 'Frente de Cavitação Hiper-Sônica Quântica',
+    evolutionDetails: 'Transmuta para ondas de choque holográficas ciano/douradas com 4 arcos de cavitação ressonante e nó central estroboscópico. Reflete projéteis inimigos e causa estase vibracional em 360 graus.',
+    evolutionNumericalBonus: 'Reflexão de 100% dos projéteis hostis que tocam as ondas e atordoamento harmônico de 1.5s em hordas.',
     activeSkillName: 'Onda de Choque Acústica (Acoustic Disruptor Wave)',
     activeSkillDetails: 'Emite osciloscópio de ondas senoidais fluorescentes com anéis de ressonância acústica que empurram hordas, quebram escudos e desaceleram em 45%.',
     numericalBonuses: [
@@ -970,6 +1015,15 @@ export const HERO_CLASSES_DATA: HeroClassData[] = [
     weaponName: 'Prisma de Luz Sagrada (Bastião)',
     munitionName: 'Feixe Colimado de Luz Divina Táquion',
     munitionDetails: 'Feixe colimado direcional de longo alcance com prisma de refração em diamante, incineração contínua e nanites de reparo.',
+    evolutionWeaponId: 'evolution_prismatic_laser',
+    evolutionWeaponName: 'Laser Prismático Refletivo Táquion (Arma Evoluída)',
+    evolutionRelicId: 'relic_shield_generator',
+    evolutionRelicName: 'Gerador de Escudo Táquion (Tachyon Shield Generator)',
+    evolutionColor: '#00ffff',
+    evolutionGlow: '#d946ef',
+    evolutionMunitionName: 'Raio Contínuo Refratário com Prisma Diamante Magenta',
+    evolutionDetails: 'Transmuta para feixe laser prismático ciano ultra-espesso (largura 4.5px, escala 1.25x) com prisma frontal refratário em magenta fluorescente. Atravessa a tela inteira instantaneamente incinerando linhas inteiras de inimigos e restaurando o casco a cada acerto.',
+    evolutionNumericalBonus: 'Feixe de tela inteira contínuo, perfuração total de alvos e cura de 2% do dano causado convertida em casco.',
     activeSkillName: 'Matriz Sagrada de Auto-Reparo (Aegis Repair Matrix)',
     activeSkillDetails: 'Manifesta domo geodésico de 3 prismas de ouro orbitais com nanites que curam 25 HP/s e bloqueiam 80% do dano sofrido por 5 segundos.',
     numericalBonuses: [
@@ -998,8 +1052,17 @@ export const HERO_CLASSES_DATA: HeroClassData[] = [
     combatProfile: 'Dardos Flechette: Alta penetração, múltiplos disparos em leque e precisão.',
     weaponId: 'weapon_bow_arrows',
     weaponName: 'Arco Cibernético (Atirador)',
-    munitionName: 'Flechas Flechette Hipersônicas de Precisão',
-    munitionDetails: 'Flechas vetoriais hipersônicas disparadas com precisão cirúrgica de longo alcance e multiplicador extremo de dano crítico.',
+    munitionName: 'Dardo Cinético Sabot Penetrador APFSDS',
+    munitionDetails: 'Haste hipersônica alongada de tungstênio (18px × 4px) com núcleo de alta densidade e aletas cinéticas de Mach. Sem penas medievais.',
+    evolutionWeaponId: 'evolution_volley_rain',
+    evolutionWeaponName: 'Chuva de Dardos Táquion em Leque (Arma Evoluída)',
+    evolutionRelicId: 'relic_adrenaline_gland',
+    evolutionRelicName: 'Injetor Cinético de Adrenalina (Adrenaline Gland)',
+    evolutionColor: '#00f0ff',
+    evolutionGlow: '#38bdf8',
+    evolutionMunitionName: 'Dardo Hipersônico Quântico de Plasma Ciano (APFSDS Táquion)',
+    evolutionDetails: 'Transmuta para dardo penetrador de plasma ciano brilhante (#00f0ff) com núcleo obsidiana escura (#031a24), espinha central branca incandescente e escala aumentada (+20%). Disparado em salva quádrupla em leque com penetração infinita que atravessa todas as colunas da tela sem perder velocidade.',
+    evolutionNumericalBonus: 'Salva quádrupla em leque contínuo, perfuração infinita de inimigos e +40% de multiplicador de crítico cirúrgico.',
     activeSkillName: 'Barragem Flechette de Precisão (Tactical Barrage Shots)',
     activeSkillDetails: 'Dispara leque cirúrgico de 5 flechettes hipersônicas perfurantes de altíssima penetração crítica com multiplicador de 2.5x dano crítico.',
     numericalBonuses: [
@@ -1969,7 +2032,8 @@ export function renderStudioHeroClassWeapon(
   classId: string,
   width: number,
   height: number,
-  _time: number
+  _time: number,
+  isEvolved: boolean = false
 ) {
   ctx.save();
   ctx.clearRect(0, 0, width, height);
@@ -1990,7 +2054,7 @@ export function renderStudioHeroClassWeapon(
   else if (projId === 'bastion' || projId === 'paladin') projId = 'photon_lance';
   else if (projId === 'marksman' || projId === 'ranger') projId = 'kinetic_dart';
 
-  drawProceduralProjectile(ctx, projId, cx, cy, s);
+  drawProceduralProjectile(ctx, projId, cx, cy, s, isEvolved);
 
   ctx.restore();
 }
@@ -2001,36 +2065,44 @@ export function renderStudioHeroClassWeapon(
 /**
  * 6. PROCEDURAL WEAPON PROJECTILES / CLASS AMMUNITIONS
  * Verbatim from in-game RenderSystem.ts and codex_biblioteca_16_9.html:drawProceduralProjectileFromCode
+ * Fully supports Base and Evolved (Relic Fusion) states.
  */
 export function drawProceduralProjectile(
   ctx: CanvasRenderingContext2D,
   id: string,
   cx: number,
   cy: number,
-  scale: number = 4.0
+  scale: number = 4.0,
+  isEvolved: boolean = false
 ) {
   ctx.save();
-  const s = scale;
+  const s = scale * (isEvolved ? 1.22 : 1.0);
 
   switch (id) {
     case 'vanguard':
     case 'rocket_missile':
     case 'fighter': {
-      // 1. Fighter: Rocket Missile (Bazooka)
-      ctx.fillStyle = '#ffaa00';
+      // 1. Fighter / Vanguard: Rocket Missile (Bazooka) -> Evolution: Nuclear Nuke (Radioactive Emerald)
+      const mainColor = isEvolved ? '#22c55e' : '#ff3300';
+      const glowColor = isEvolved ? '#84cc16' : '#ffaa00';
+      const hullFill = isEvolved ? '#05240f' : '#1c0707';
+
+      // Rocket Exhaust Flame
+      ctx.fillStyle = glowColor;
       ctx.beginPath();
       ctx.moveTo(cx - 10 * s, cy - 2.5 * s);
-      ctx.lineTo(cx - 22 * s, cy);
+      ctx.lineTo(cx - 24 * s, cy);
       ctx.lineTo(cx - 10 * s, cy + 2.5 * s);
       ctx.closePath();
       ctx.fill();
 
-      ctx.fillStyle = '#ff2200';
-      ctx.strokeStyle = '#ffaa00';
+      // Rear Stabilizer Fins
+      ctx.fillStyle = mainColor;
+      ctx.strokeStyle = glowColor;
       ctx.lineWidth = 1.2 * (s / 4);
       ctx.beginPath();
       ctx.moveTo(cx - 6 * s, cy - 2.5 * s);
-      ctx.lineTo(cx - 11 * s, cy - 6.5 * s);
+      ctx.lineTo(cx - 12 * s, cy - 6.5 * s);
       ctx.lineTo(cx - 8 * s, cy - 2.5 * s);
       ctx.closePath();
       ctx.fill();
@@ -2038,93 +2110,147 @@ export function drawProceduralProjectile(
 
       ctx.beginPath();
       ctx.moveTo(cx - 6 * s, cy + 2.5 * s);
-      ctx.lineTo(cx - 11 * s, cy + 6.5 * s);
+      ctx.lineTo(cx - 12 * s, cy + 6.5 * s);
       ctx.lineTo(cx - 8 * s, cy + 2.5 * s);
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
 
+      // Fuselage Body
       ctx.beginPath();
-      ctx.moveTo(cx - 10 * s, cy - 2.8 * s);
-      ctx.lineTo(cx + 2 * s, cy - 2.8 * s);
-      ctx.quadraticCurveTo(cx + 8 * s, cy - 2.5 * s, cx + 14 * s, cy);
-      ctx.quadraticCurveTo(cx + 8 * s, cy + 2.5 * s, cx + 2 * s, cy + 2.8 * s);
-      ctx.lineTo(cx - 10 * s, cy + 2.8 * s);
+      ctx.moveTo(cx - 10 * s, cy - 3.0 * s);
+      ctx.lineTo(cx + 2 * s, cy - 3.0 * s);
+      ctx.quadraticCurveTo(cx + 9 * s, cy - 2.8 * s, cx + 15 * s, cy);
+      ctx.quadraticCurveTo(cx + 9 * s, cy + 2.8 * s, cx + 2 * s, cy + 3.0 * s);
+      ctx.lineTo(cx - 10 * s, cy + 3.0 * s);
       ctx.closePath();
-      ctx.fillStyle = '#1c0707';
+      ctx.fillStyle = hullFill;
       ctx.fill();
-      ctx.strokeStyle = '#ff3300';
-      ctx.lineWidth = 1.5 * (s / 4);
+      ctx.strokeStyle = mainColor;
+      ctx.lineWidth = 1.6 * (s / 4);
       ctx.stroke();
 
+      // Center Core Spine
       ctx.strokeStyle = '#ffffff';
       ctx.lineWidth = 1.0 * (s / 4);
       ctx.beginPath();
       ctx.moveTo(cx - 7 * s, cy);
-      ctx.lineTo(cx + 11 * s, cy);
+      ctx.lineTo(cx + 12 * s, cy);
       ctx.stroke();
       break;
     }
     case 'interceptor':
     case 'phase_flechette':
     case 'rogue': {
-      // 2. Rogue: Phase Flechette (Daggers)
-      ctx.strokeStyle = 'rgba(0, 240, 255, 0.45)';
-      ctx.lineWidth = 1.2 * (s / 4);
+      // 2. Rogue / Interceptor: Phase Flechette (Daggers) -> Evolution: Phantom Blades (Spectral Violet & Emerald)
+      const waveColor = isEvolved ? 'rgba(52, 211, 153, 0.75)' : 'rgba(0, 240, 255, 0.45)';
+      const bladeColor = isEvolved ? '#a855f7' : '#00f0ff';
+      const bladeFill = isEvolved ? '#1a062e' : '#031a24';
+
+      // Sinusoidal Phase Wave Trail
+      ctx.strokeStyle = waveColor;
+      ctx.lineWidth = (isEvolved ? 1.6 : 1.2) * (s / 4);
       ctx.beginPath();
-      for (let x = -20; x <= -6; x += 1) {
-        const y = Math.sin(x * 0.3) * 4 * s;
-        if (x === -20) ctx.moveTo(cx + x * s, cy + y);
+      for (let x = -24; x <= -6; x += 1) {
+        const y = Math.sin(x * 0.3) * (isEvolved ? 5.5 : 4) * s;
+        if (x === -24) ctx.moveTo(cx + x * s, cy + y);
         else ctx.lineTo(cx + x * s, cy + y);
       }
       ctx.stroke();
 
-      ctx.fillStyle = '#031a24';
-      ctx.strokeStyle = '#00f0ff';
-      ctx.lineWidth = 1.5 * (s / 4);
+      if (isEvolved) {
+        // Mirrored Phase Trail for interference resonance
+        ctx.beginPath();
+        for (let x = -24; x <= -6; x += 1) {
+          const y = -Math.sin(x * 0.3) * 5.5 * s;
+          if (x === -24) ctx.moveTo(cx + x * s, cy + y);
+          else ctx.lineTo(cx + x * s, cy + y);
+        }
+        ctx.stroke();
+      }
+
+      // Faceted Nanomolecular Blade
+      ctx.fillStyle = bladeFill;
+      ctx.strokeStyle = bladeColor;
+      ctx.lineWidth = 1.6 * (s / 4);
       ctx.beginPath();
-      ctx.moveTo(cx + 12 * s, cy);
-      ctx.lineTo(cx, cy - 4.5 * s);
-      ctx.lineTo(cx - 8 * s, cy - 2 * s);
+      ctx.moveTo(cx + 14 * s, cy);
+      ctx.lineTo(cx + 1 * s, cy - 5 * s);
+      ctx.lineTo(cx - 9 * s, cy - 2.2 * s);
       ctx.lineTo(cx - 4 * s, cy);
-      ctx.lineTo(cx - 8 * s, cy + 2 * s);
-      ctx.lineTo(cx, cy + 4.5 * s);
+      ctx.lineTo(cx - 9 * s, cy + 2.2 * s);
+      ctx.lineTo(cx + 1 * s, cy + 5 * s);
       ctx.closePath();
       ctx.fill();
+      ctx.stroke();
+
+      // Sharp central ridge
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.0 * (s / 4);
+      ctx.beginPath();
+      ctx.moveTo(cx - 4 * s, cy);
+      ctx.lineTo(cx + 13 * s, cy);
       ctx.stroke();
       break;
     }
     case 'disruptor':
     case 'plasma_vortex':
     case 'mage': {
-      // 3. Mage: Plasma Vortex (Fireball)
-      ctx.strokeStyle = '#ff6600';
-      ctx.lineWidth = 2.0 * (s / 4);
+      // 3. Mage / Disruptor: Plasma Vortex (Fireball) -> Evolution: Inferno Meteor (Supernova Stellar Crimson)
+      const outerColor = isEvolved ? '#ff0044' : '#ff6600';
+      const flareColor = isEvolved ? '#ffaa00' : '#ff0055';
+      const coreR = isEvolved ? 10 * s : 7 * s;
+
+      // Outer Toroidal Plasma Ring
+      ctx.strokeStyle = outerColor;
+      ctx.lineWidth = (isEvolved ? 2.4 : 2.0) * (s / 4);
       ctx.beginPath();
-      ctx.arc(cx, cy, 7 * s, 0, Math.PI * 2);
+      ctx.arc(cx, cy, coreR, 0, Math.PI * 2);
       ctx.stroke();
 
-      for (let i = 0; i < 3; i++) {
-        const rot = (i * Math.PI * 2) / 3;
-        ctx.strokeStyle = i === 0 ? '#ffffff' : '#ff0055';
-        ctx.lineWidth = 1.5 * (s / 4);
+      // Rotating Coronal Plasma Flares
+      const flareCount = isEvolved ? 4 : 3;
+      for (let i = 0; i < flareCount; i++) {
+        const rot = (i * Math.PI * 2) / flareCount;
+        ctx.strokeStyle = i % 2 === 0 ? '#ffffff' : flareColor;
+        ctx.lineWidth = 1.6 * (s / 4);
         ctx.beginPath();
-        ctx.arc(cx, cy, 5 * s, rot, rot + 1.2);
+        ctx.arc(cx, cy, coreR * 0.72, rot, rot + 1.25);
         ctx.stroke();
       }
+
+      // Central Singularity White-Hot Core
       ctx.fillStyle = '#ffffff';
       ctx.beginPath();
-      ctx.arc(cx, cy, 2.5 * s, 0, Math.PI * 2);
+      ctx.arc(cx, cy, (isEvolved ? 3.5 : 2.5) * s, 0, Math.PI * 2);
       ctx.fill();
       break;
     }
     case 'marksman':
     case 'kinetic_dart':
     case 'ranger': {
-      // 4. Ranger: Kinetic Dart (Bow)
-      ctx.fillStyle = '#1c1404';
-      ctx.strokeStyle = '#ffcc00';
-      ctx.lineWidth = 1.2 * (s / 4);
+      // 4. Ranger / Marksman: Kinetic Dart (Bow) -> Evolution: Volley Rain (Quantum Tachyon Cyan)
+      // Authentic sleek APFSDS tungsten flechette penetrator sabot (NO medieval arrow feathers!)
+      const strokeColor = isEvolved ? '#00f0ff' : '#ffcc00';
+      const glowColor = isEvolved ? '#38bdf8' : '#ffaa00';
+      const fillColor = isEvolved ? '#031a24' : '#1c1404';
+
+      // Mach Shock Glow
+      ctx.strokeStyle = glowColor;
+      ctx.lineWidth = 2.4 * (s / 4);
+      ctx.beginPath();
+      ctx.moveTo(cx - 11 * s, cy - 2.0 * s);
+      ctx.lineTo(cx + 8 * s, cy - 2.0 * s);
+      ctx.lineTo(cx + 15 * s, cy);
+      ctx.lineTo(cx + 8 * s, cy + 2.0 * s);
+      ctx.lineTo(cx - 11 * s, cy + 2.0 * s);
+      ctx.closePath();
+      ctx.stroke();
+
+      // Slender Tungsten APFSDS Hull Fill & Outline
+      ctx.fillStyle = fillColor;
+      ctx.strokeStyle = strokeColor;
+      ctx.lineWidth = 1.4 * (s / 4);
       ctx.beginPath();
       ctx.moveTo(cx - 10 * s, cy - 1.5 * s);
       ctx.lineTo(cx + 8 * s, cy - 1.5 * s);
@@ -2135,6 +2261,7 @@ export function drawProceduralProjectile(
       ctx.fill();
       ctx.stroke();
 
+      // Pure White-Hot Kinetic Spine
       ctx.strokeStyle = '#ffffff';
       ctx.lineWidth = 1.0 * (s / 4);
       ctx.beginPath();
@@ -2146,50 +2273,63 @@ export function drawProceduralProjectile(
     case 'bastion':
     case 'photon_lance':
     case 'paladin': {
-      // 5. Paladin: Photon Lance (Holy Beam)
-      ctx.strokeStyle = 'rgba(255, 215, 0, 0.4)';
-      ctx.lineWidth = 4.0 * (s / 4);
+      // 5. Paladin / Bastion: Photon Lance (Holy Beam) -> Evolution: Prismatic Laser (Cyan with Magenta Refraction)
+      const beamColor = isEvolved ? '#00ffff' : '#ffd700';
+      const coronaColor = isEvolved ? '#d946ef' : 'rgba(255, 215, 0, 0.4)';
+      const beamThickness = (isEvolved ? 5.5 : 4.0) * (s / 4);
+
+      // Collimated Ray Outer Halo
+      ctx.strokeStyle = coronaColor;
+      ctx.lineWidth = beamThickness;
       ctx.beginPath();
-      ctx.moveTo(cx - 16 * s, cy);
-      ctx.lineTo(cx + 16 * s, cy);
+      ctx.moveTo(cx - 24 * s, cy);
+      ctx.lineTo(cx + 24 * s, cy);
       ctx.stroke();
 
-      ctx.fillStyle = '#ffffff';
-      ctx.strokeStyle = '#ffd700';
-      ctx.lineWidth = 1.5 * (s / 4);
+      // Diamond Prism Head
+      ctx.fillStyle = isEvolved ? '#2e0838' : '#ffffff';
+      ctx.strokeStyle = beamColor;
+      ctx.lineWidth = 1.6 * (s / 4);
       ctx.beginPath();
-      ctx.moveTo(cx + 18 * s, cy);
-      ctx.lineTo(cx + 12 * s, cy - 3.5 * s);
+      ctx.moveTo(cx + 20 * s, cy);
+      ctx.lineTo(cx + 13 * s, cy - 4.5 * s);
       ctx.lineTo(cx + 6 * s, cy);
-      ctx.lineTo(cx + 12 * s, cy + 3.5 * s);
+      ctx.lineTo(cx + 13 * s, cy + 4.5 * s);
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
 
+      // Inner Laser Core Ray
       ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 1.8 * (s / 4);
+      ctx.lineWidth = (isEvolved ? 2.2 : 1.8) * (s / 4);
       ctx.beginPath();
-      ctx.moveTo(cx - 16 * s, cy);
-      ctx.lineTo(cx + 17 * s, cy);
+      ctx.moveTo(cx - 24 * s, cy);
+      ctx.lineTo(cx + 19 * s, cy);
       ctx.stroke();
       break;
     }
     case 'resonator':
     case 'sonic_shockwave':
     case 'bard': {
-      // 6. Bard: Sonic Shockwave (Harmonic Pulse)
-      for (let i = 1; i <= 3; i++) {
-        ctx.strokeStyle = '#d946ef';
-        ctx.lineWidth = 2.0 * (s / 4);
+      // 6. Bard / Resonator: Sonic Shockwave (Harmonic Pulse) -> Evolution: Symphonic Nova (Hyper-Sonic Cyan & Gold)
+      const waveColor = isEvolved ? '#00f0ff' : '#d946ef';
+      const nodeColor = isEvolved ? '#ffd700' : '#ff00ff';
+      const waveCount = isEvolved ? 4 : 3;
+
+      for (let i = 1; i <= waveCount; i++) {
+        ctx.strokeStyle = i === waveCount && isEvolved ? '#ffd700' : waveColor;
+        ctx.lineWidth = (isEvolved ? 2.2 : 2.0) * (s / 4);
         ctx.beginPath();
         ctx.arc(cx - 2 * s, cy, i * 4 * s, -Math.PI * 0.55, Math.PI * 0.55);
         ctx.stroke();
       }
+
+      // Central Harmonic Resonator Node
       ctx.fillStyle = '#ffffff';
-      ctx.strokeStyle = '#ff00ff';
-      ctx.lineWidth = 1.5 * (s / 4);
+      ctx.strokeStyle = nodeColor;
+      ctx.lineWidth = 1.6 * (s / 4);
       ctx.beginPath();
-      ctx.arc(cx + 4 * s, cy, 3 * s, 0, Math.PI * 2);
+      ctx.arc(cx + 4 * s, cy, (isEvolved ? 3.6 : 3.0) * s, 0, Math.PI * 2);
       ctx.fill();
       ctx.stroke();
       break;

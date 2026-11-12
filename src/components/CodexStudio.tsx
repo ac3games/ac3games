@@ -34,6 +34,7 @@ export const CodexStudio: React.FC = () => {
 
   const [droneId, setDroneId] = useState<string>('missiles');
   const [heroClassId, setHeroClassId] = useState<string>('vanguard');
+  const [isEvolved, setIsEvolved] = useState<boolean>(false);
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -61,7 +62,7 @@ export const CodexStudio: React.FC = () => {
       } else if (activeTab === 'drone') {
         renderStudioDrone(ctx, droneId, canvas.width, canvas.height, elapsed);
       } else if (activeTab === 'hero_class') {
-        renderStudioHeroClassWeapon(ctx, heroClassId, canvas.width, canvas.height, elapsed);
+        renderStudioHeroClassWeapon(ctx, heroClassId, canvas.width, canvas.height, elapsed, isEvolved);
       }
 
       animId = requestAnimationFrame(render);
@@ -81,7 +82,8 @@ export const CodexStudio: React.FC = () => {
     arenaBossIdx,
     arenaBossRarity,
     droneId,
-    heroClassId
+    heroClassId,
+    isEvolved
   ]);
 
   // Download 1080p Crystal Clear PNG
@@ -110,8 +112,8 @@ export const CodexStudio: React.FC = () => {
       renderStudioDrone(offCtx, droneId, 1920, 1080, 0);
       filename = `drone_${droneId}.png`;
     } else if (activeTab === 'hero_class') {
-      renderStudioHeroClassWeapon(offCtx, heroClassId, 1920, 1080, 0);
-      filename = `classe_heroi_${heroClassId}.png`;
+      renderStudioHeroClassWeapon(offCtx, heroClassId, 1920, 1080, 0, isEvolved);
+      filename = `classe_heroi_${heroClassId}${isEvolved ? '_evolucao_reliquia' : '_base'}.png`;
     }
 
     const link = document.createElement('a');
@@ -664,9 +666,9 @@ export const CodexStudio: React.FC = () => {
           {/* TAB 6: CLASSES & ARMAS DE HERÓIS */}
           {activeTab === 'hero_class' && (
             <div>
-              <div className="mb-6">
+              <div className="mb-4">
                 <label className="block text-xs font-mono text-cyber-cyan font-bold uppercase mb-1.5">
-                  Escolha a Classe do Herói (6 Arquétipos Canônicos):
+                  1. Escolha a Classe do Herói (6 Arquétipos Canônicos):
                 </label>
                 <select
                   value={heroClassId}
@@ -681,14 +683,52 @@ export const CodexStudio: React.FC = () => {
                 </select>
               </div>
 
+              {/* Weapon State Toggle: Base Weapon vs Relic-Fused Evolution */}
+              <div className="mb-5">
+                <label className="block text-xs font-mono text-slate-300 font-bold uppercase mb-1.5">
+                  2. Estado Balístico da Arma:
+                </label>
+                <div className="grid grid-cols-2 gap-2 p-1 bg-cyber-card/80 rounded-xl border border-cyber-cardBorder">
+                  <button
+                    type="button"
+                    onClick={() => setIsEvolved(false)}
+                    className={`py-2 px-3 rounded-lg font-mono text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+                      !isEvolved
+                        ? 'bg-cyber-cyan text-black shadow-neon-cyan'
+                        : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    <span>⚔️ Disparo Base</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsEvolved(true)}
+                    className={`py-2 px-3 rounded-lg font-mono text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+                      isEvolved
+                        ? 'bg-gradient-to-r from-purple-500 to-cyber-cyan text-white shadow-neon-cyan font-extrabold'
+                        : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    <span>⚡ Fusão com Relíquia</span>
+                  </button>
+                </div>
+              </div>
+
               {/* Explanatory Legend */}
               <div className="pt-4 border-t border-cyber-cardBorder/60">
-                <span
-                  className="font-mono text-xs font-bold px-2.5 py-1 rounded inline-block mb-2"
-                  style={{ backgroundColor: `${selectedHeroClass.color}22`, color: selectedHeroClass.color }}
-                >
-                  ARQUÉTIPO DE HERÓI // CÓDIGO {selectedHeroClass.code.toUpperCase()}
-                </span>
+                <div className="flex items-center gap-2 mb-2">
+                  <span
+                    className="font-mono text-xs font-bold px-2.5 py-1 rounded inline-block"
+                    style={{ backgroundColor: `${selectedHeroClass.color}22`, color: selectedHeroClass.color }}
+                  >
+                    ARQUÉTIPO // {selectedHeroClass.code.toUpperCase()}
+                  </span>
+                  {isEvolved && (
+                    <span className="font-mono text-[10px] font-extrabold px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-400/40 animate-pulse">
+                      ⚡ ARMA EVOLUÍDA
+                    </span>
+                  )}
+                </div>
 
                 <h4 className="font-orbitron font-bold text-xl text-white mb-1">
                   {selectedHeroClass.name}
@@ -730,14 +770,45 @@ export const CodexStudio: React.FC = () => {
                     </p>
                   </div>
 
-                  <div className="p-2.5 rounded bg-cyan-950/30 border border-cyan-500/40">
-                    <span className="text-cyber-cyan block mb-0.5 font-bold">ARMA PRIMÁRIA & MUNIÇÃO:</span>
-                    <span className="text-white font-bold block mb-1">{selectedHeroClass.weaponName}</span>
-                    <span className="text-cyan-200 block text-[11px] mb-1 font-semibold">{selectedHeroClass.munitionName}</span>
-                    <p className="font-outfit text-xs text-slate-300 leading-relaxed">
-                      {selectedHeroClass.munitionDetails}
-                    </p>
-                  </div>
+                  {/* Dynamic Weapon & Munition Card: Base vs Evolved */}
+                  {!isEvolved ? (
+                    <div className="p-2.5 rounded bg-cyan-950/30 border border-cyan-500/40">
+                      <span className="text-cyber-cyan block mb-0.5 font-bold">⚔️ ARMA PRIMÁRIA & MUNIÇÃO PADRÃO:</span>
+                      <span className="text-white font-bold block mb-1">{selectedHeroClass.weaponName}</span>
+                      <span className="text-cyan-200 block text-[11px] mb-1 font-semibold">{selectedHeroClass.munitionName}</span>
+                      <p className="font-outfit text-xs text-slate-300 leading-relaxed">
+                        {selectedHeroClass.munitionDetails}
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="p-3 rounded-xl bg-purple-950/40 border border-purple-500/50 shadow-lg shadow-purple-500/10">
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="text-purple-300 block font-bold text-xs uppercase tracking-wider">
+                          ⚡ FUSÃO COM RELÍQUIA (ARMA EVOLUÍDA):
+                        </span>
+                        <span className="text-[10px] px-2 py-0.5 rounded bg-purple-400/20 text-purple-200 font-bold">
+                          SYNERGY EVOLUTION
+                        </span>
+                      </div>
+                      <span className="text-white font-extrabold text-sm block mb-1">
+                        {selectedHeroClass.evolutionWeaponName}
+                      </span>
+                      <div className="p-1.5 mb-2 rounded bg-purple-900/40 border border-purple-400/30 text-[11px]">
+                        <span className="text-purple-200 font-bold block">🧩 Relíquia Exigida na Partida:</span>
+                        <span className="text-white font-semibold">{selectedHeroClass.evolutionRelicName}</span>
+                      </div>
+                      <span className="text-cyan-200 block text-[11px] mb-1 font-bold">
+                        {selectedHeroClass.evolutionMunitionName}
+                      </span>
+                      <p className="font-outfit text-xs text-slate-200 leading-relaxed mb-2">
+                        {selectedHeroClass.evolutionDetails}
+                      </p>
+                      <div className="p-2 rounded bg-black/40 border border-purple-500/30 text-[11px]">
+                        <span className="text-emerald-400 font-bold block mb-0.5">💥 Impacto Físico no Motor:</span>
+                        <span className="text-slate-300">{selectedHeroClass.evolutionNumericalBonus}</span>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Active Skill */}
                   <div className="p-2.5 rounded bg-purple-950/30 border border-purple-500/40">
