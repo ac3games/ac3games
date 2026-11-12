@@ -3200,38 +3200,6 @@ export function renderStudioBiomeAura(
     }
   }
   ctx.restore();
-
-  // 4. Draw Center Player Ship (Vector-01 Interceptor)
-  const shipScale = s * 0.85;
-  ctx.fillStyle = '#ff0055';
-  ctx.beginPath();
-  ctx.moveTo(cx - 5 * shipScale, cy + 12 * shipScale);
-  ctx.lineTo(cx, cy + (22 + Math.sin(time * 18) * 5) * shipScale);
-  ctx.lineTo(cx + 5 * shipScale, cy + 12 * shipScale);
-  ctx.closePath();
-  ctx.fill();
-
-  ctx.fillStyle = '#060f1c';
-  ctx.strokeStyle = aura.colorHex;
-  ctx.lineWidth = 2.4 * shipScale;
-  ctx.beginPath();
-  ctx.moveTo(cx, cy - 22 * shipScale);
-  ctx.lineTo(cx + 16 * shipScale, cy + 14 * shipScale);
-  ctx.lineTo(cx, cy + 8 * shipScale);
-  ctx.lineTo(cx - 16 * shipScale, cy + 14 * shipScale);
-  ctx.closePath();
-  ctx.fill();
-  ctx.stroke();
-
-  ctx.fillStyle = '#ffffff';
-  ctx.beginPath();
-  ctx.moveTo(cx, cy - 12 * shipScale);
-  ctx.lineTo(cx + 5 * shipScale, cy + 2 * shipScale);
-  ctx.lineTo(cx - 5 * shipScale, cy + 2 * shipScale);
-  ctx.closePath();
-  ctx.fill();
-
-  ctx.restore();
 }
 
 /**
