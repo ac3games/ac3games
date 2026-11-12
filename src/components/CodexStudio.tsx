@@ -2,12 +2,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   CATALOG_FORMS,
   RARITIES_DATA,
+  CYBER_EXPRESSIONS,
   ARENA_BOSSES_DATA,
   DRONES_DATA,
   HERO_CLASSES_DATA,
   BIOME_AURAS_DATA,
   BIOME_SCENARIOS_DATA,
   renderStudioPlayer,
+  renderStudioExpression,
   renderStudioEnemy,
   renderStudioWaveBoss,
   renderStudioArenaBoss,
@@ -16,9 +18,9 @@ import {
   renderStudioBiomeAura,
   renderStudioBiomeScenario
 } from '../utils/vectorRenderers';
-import { User, Skull, ShieldAlert, Award, Crosshair, Zap, Compass, Download, Sparkles, Layers } from 'lucide-react';
+import { User, Skull, ShieldAlert, Award, Crosshair, Zap, Compass, Download, Sparkles, Layers, Eye } from 'lucide-react';
 
-type StudioTab = 'player' | 'enemy' | 'wave_boss' | 'arena_boss' | 'drone' | 'hero_class' | 'biome_aura' | 'biome_platform';
+type StudioTab = 'player' | 'hud_expression' | 'enemy' | 'wave_boss' | 'arena_boss' | 'drone' | 'hero_class' | 'biome_aura' | 'biome_platform';
 
 export const CodexStudio: React.FC = () => {
   const [activeTab, setActiveTab] = useState<StudioTab>('player');
@@ -26,6 +28,8 @@ export const CodexStudio: React.FC = () => {
   // Selectors State
   const [playerForm, setPlayerForm] = useState<number>(1);
   const [playerRarity, setPlayerRarity] = useState<number>(1);
+  const [playerExpression, setPlayerExpression] = useState<string>('none');
+  const [hudExpressionId, setHudExpressionId] = useState<string>('Happy');
 
   const [enemyForm, setEnemyForm] = useState<number>(1);
   const [enemyRarity, setEnemyRarity] = useState<number>(1);
@@ -59,7 +63,9 @@ export const CodexStudio: React.FC = () => {
       const elapsed = (performance.now() - startTime) / 1000;
 
       if (activeTab === 'player') {
-        renderStudioPlayer(ctx, playerForm, playerRarity, canvas.width, canvas.height, elapsed);
+        renderStudioPlayer(ctx, playerForm, playerRarity, canvas.width, canvas.height, elapsed, playerExpression);
+      } else if (activeTab === 'hud_expression') {
+        renderStudioExpression(ctx, hudExpressionId, canvas.width, canvas.height, elapsed);
       } else if (activeTab === 'enemy') {
         renderStudioEnemy(ctx, enemyForm, enemyRarity, canvas.width, canvas.height, elapsed);
       } else if (activeTab === 'wave_boss') {
@@ -86,6 +92,8 @@ export const CodexStudio: React.FC = () => {
     activeTab,
     playerForm,
     playerRarity,
+    playerExpression,
+    hudExpressionId,
     enemyForm,
     enemyRarity,
     waveBossForm,
@@ -120,8 +128,11 @@ export const CodexStudio: React.FC = () => {
     let filename = `AC3GAMES_${tag}.png`;
 
     if (activeTab === 'player') {
-      renderStudioPlayer(offCtx, playerForm, playerRarity, width, height, 0);
-      filename = `player_forma_${playerForm}_raridade_${playerRarity}_${tag}.png`;
+      renderStudioPlayer(offCtx, playerForm, playerRarity, width, height, 0, playerExpression);
+      filename = `player_forma_${playerForm}_raridade_${playerRarity}_expr_${playerExpression}_${tag}.png`;
+    } else if (activeTab === 'hud_expression') {
+      renderStudioExpression(offCtx, hudExpressionId, width, height, 0);
+      filename = `expressao_hud_${hudExpressionId}_${tag}.png`;
     } else if (activeTab === 'enemy') {
       renderStudioEnemy(offCtx, enemyForm, enemyRarity, width, height, 0);
       filename = `inimigo_forma_${enemyForm}_raridade_${enemyRarity}_${tag}.png`;
@@ -152,9 +163,19 @@ export const CodexStudio: React.FC = () => {
   };
 
   // Helper data getters
-  const selectedPlayerForm = CATALOG_FORMS[playerForm - 1] || CATALOG_FORMS[0]!;
-  const selectedPlayerRarity = RARITIES_DATA[playerRarity - 1] || RARITIES_DATA[0]!;
-  const playerCombinedMult = selectedPlayerForm.mult * selectedPlayerRarity.multiplier;
+  const isPlayerFormNone = playerForm === 0;
+  const isPlayerRarityNone = playerRarity === 0;
+  const isPlayerExprNone = playerExpression === 'none';
+
+  const selectedPlayerForm = isPlayerFormNone ? null : (CATALOG_FORMS[playerForm - 1] || CATALOG_FORMS[0]!);
+  const selectedPlayerRarity = isPlayerRarityNone ? null : (RARITIES_DATA[playerRarity - 1] || RARITIES_DATA[0]!);
+  const selectedPlayerExpr = isPlayerExprNone ? null : (CYBER_EXPRESSIONS.find(e => e.id === playerExpression) || CYBER_EXPRESSIONS[0]!);
+
+  const playerFormMult = selectedPlayerForm ? selectedPlayerForm.mult : 1.0;
+  const playerRarityMult = selectedPlayerRarity ? selectedPlayerRarity.multiplier : 1.0;
+  const playerCombinedMult = playerFormMult * playerRarityMult;
+
+  const selectedStandaloneExpr = CYBER_EXPRESSIONS.find(e => e.id === hudExpressionId) || CYBER_EXPRESSIONS[0]!;
 
   const selectedEnemyForm = CATALOG_FORMS[enemyForm - 1] || CATALOG_FORMS[0]!;
   const selectedEnemyRarity = RARITIES_DATA[enemyRarity - 1] || RARITIES_DATA[0]!;
@@ -197,6 +218,18 @@ export const CodexStudio: React.FC = () => {
           >
             <User className="w-4 h-4" />
             <span>Jogador (Vector-01)</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('hud_expression')}
+            className={`px-3 py-2 rounded-xl flex items-center gap-2 transition-all ${
+              activeTab === 'hud_expression'
+                ? 'bg-cyber-cyan text-black font-bold shadow-neon-cyan'
+                : 'bg-cyber-darker text-slate-300 hover:text-white border border-cyber-cardBorder'
+            }`}
+          >
+            <Eye className="w-4 h-4" />
+            <span>Matriz Sensorial HUD (20)</span>
           </button>
 
           <button
@@ -350,36 +383,50 @@ export const CodexStudio: React.FC = () => {
         {/* Right: Technical Explanation & Complete Dynamic Legend (5 Cols) */}
         <div className="lg:col-span-5 bg-cyber-darker/90 rounded-2xl p-6 border border-cyber-cardBorder flex flex-col">
           
-          {/* TAB 1: JOGADOR (VECTOR-01) */}
+          {/* TAB 1: JOGADOR (VECTOR-01) - FORMAS + RARIDADES + EXPRESSÕES */}
           {activeTab === 'player' && (
             <div>
               <div className="mb-6 space-y-4">
+                {/* 1. SELETOR DE FORMA */}
                 <div>
-                  <label className="block text-xs font-mono text-cyber-cyan font-bold uppercase mb-1.5">
-                    1. Escolha a Forma do Jogador (Formas 1 a 12):
+                  <label className="block text-xs font-mono text-cyber-cyan font-bold uppercase mb-1.5 flex items-center justify-between">
+                    <span>1. Forma do Jogador (Chassi 1 a 12 ou None):</span>
+                    <span className="text-[11px] text-slate-400 font-normal">
+                      {isPlayerFormNone ? 'Chassi Desacoplado' : `${selectedPlayerForm?.mult.toFixed(2)}x Casco`}
+                    </span>
                   </label>
                   <select
                     value={playerForm}
                     onChange={(e) => setPlayerForm(Number(e.target.value))}
                     className="w-full bg-cyber-card border border-cyber-cardBorder rounded-xl px-3 py-2 text-sm text-white font-mono focus:outline-none focus:border-cyber-cyan"
                   >
+                    <option value={0} className="text-amber-400 font-bold">
+                      0. Nenhuma Forma (Chassi Vazio / Base 1.00x)
+                    </option>
                     {CATALOG_FORMS.map((f, idx) => (
                       <option key={f.key} value={idx + 1}>
-                        Forma #{idx + 1}: {f.name}
+                        Forma #{idx + 1}: {f.name} ({f.mult.toFixed(2)}x) — {f.sides} Lados
                       </option>
                     ))}
                   </select>
                 </div>
 
+                {/* 2. SELETOR DE RARIDADE */}
                 <div>
-                  <label className="block text-xs font-mono text-cyber-cyan font-bold uppercase mb-1.5">
-                    2. Escolha a Raridade do Jogador (1 a 12):
+                  <label className="block text-xs font-mono text-emerald-400 font-bold uppercase mb-1.5 flex items-center justify-between">
+                    <span>2. Raridade do Jogador (Sintonia 1 a 12 ou None):</span>
+                    <span className="text-[11px] text-slate-400 font-normal">
+                      {isPlayerRarityNone ? 'Neutro (1.00x)' : `${selectedPlayerRarity?.multiplier.toFixed(2)}x Reator`}
+                    </span>
                   </label>
                   <select
                     value={playerRarity}
                     onChange={(e) => setPlayerRarity(Number(e.target.value))}
-                    className="w-full bg-cyber-card border border-cyber-cardBorder rounded-xl px-3 py-2 text-sm text-white font-mono focus:outline-none focus:border-cyber-cyan"
+                    className="w-full bg-cyber-card border border-cyber-cardBorder rounded-xl px-3 py-2 text-sm text-white font-mono focus:outline-none focus:border-emerald-400"
                   >
+                    <option value={0} className="text-amber-400 font-bold">
+                      0. Nenhuma Raridade (Neutro / 1.00x Base)
+                    </option>
                     {RARITIES_DATA.map((r) => (
                       <option key={r.index} value={r.index}>
                         Raridade #{r.index}: {r.namePt} ({r.multiplier.toFixed(2)}x)
@@ -387,44 +434,148 @@ export const CodexStudio: React.FC = () => {
                     ))}
                   </select>
                 </div>
+
+                {/* 3. SELETOR DE EXPRESSÃO HUD */}
+                <div>
+                  <label className="block text-xs font-mono text-pink-400 font-bold uppercase mb-1.5 flex items-center justify-between">
+                    <span>3. Expressão Cibernética HUD (Sensor 1 a 20 ou None):</span>
+                    <span className="text-[11px] text-slate-400 font-normal">
+                      {isPlayerExprNone ? 'Sem Sensor HUD' : selectedPlayerExpr?.namePt}
+                    </span>
+                  </label>
+                  <select
+                    value={playerExpression}
+                    onChange={(e) => setPlayerExpression(e.target.value)}
+                    className="w-full bg-cyber-card border border-cyber-cardBorder rounded-xl px-3 py-2 text-sm text-white font-mono focus:outline-none focus:border-pink-400"
+                  >
+                    <option value="none" className="text-amber-400 font-bold">
+                      0. Nenhuma Expressão (Sem Sensor HUD)
+                    </option>
+                    {CYBER_EXPRESSIONS.map((ex, idx) => (
+                      <option key={ex.id} value={ex.id}>
+                        Sensor #{idx + 1}: {ex.namePt} ({ex.nameEn}) — {ex.descPt}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
-              {/* Explanatory Legend */}
+              {/* Badges de Status das 3 Dimensões */}
               <div className="pt-4 border-t border-cyber-cardBorder/60">
-                <span
-                  className="font-mono text-xs font-bold px-2.5 py-1 rounded inline-block mb-2"
-                  style={{ backgroundColor: `${selectedPlayerRarity.color}22`, color: selectedPlayerRarity.color }}
-                >
-                  NÍVEL DE SINTONIA // {selectedPlayerRarity.namePt.toUpperCase()}
-                </span>
+                <div className="flex flex-wrap items-center gap-2 mb-3">
+                  <span
+                    className="font-mono text-[11px] font-bold px-2.5 py-1 rounded inline-block"
+                    style={{
+                      backgroundColor: selectedPlayerRarity ? `${selectedPlayerRarity.color}22` : '#64748b22',
+                      color: selectedPlayerRarity ? selectedPlayerRarity.color : '#94a3b8',
+                      border: `1px solid ${selectedPlayerRarity ? selectedPlayerRarity.color : '#64748b'}55`
+                    }}
+                  >
+                    REATOR: {selectedPlayerRarity ? selectedPlayerRarity.namePt.toUpperCase() : 'NEUTRO (1.00x)'}
+                  </span>
+
+                  <span
+                    className="font-mono text-[11px] font-bold px-2.5 py-1 rounded inline-block"
+                    style={{
+                      backgroundColor: selectedPlayerExpr ? `${selectedPlayerExpr.color}22` : '#64748b22',
+                      color: selectedPlayerExpr ? selectedPlayerExpr.color : '#94a3b8',
+                      border: `1px solid ${selectedPlayerExpr ? selectedPlayerExpr.color : '#64748b'}55`
+                    }}
+                  >
+                    HUD: {selectedPlayerExpr ? selectedPlayerExpr.namePt.toUpperCase() : 'DESATIVADO'}
+                  </span>
+                </div>
 
                 <h4 className="font-orbitron font-bold text-xl text-white mb-1">
-                  Vector-01 • {selectedPlayerForm.name}
+                  Vector-01 • {selectedPlayerForm ? selectedPlayerForm.name : 'Chassi Neutro / Calibração'}
                 </h4>
-                <p className="font-mono text-xs text-cyber-cyan mb-3">
-                  FORMA #{playerForm} // {selectedPlayerForm.sides} Lados Poligonais
+                <p className="font-mono text-xs text-cyber-cyan mb-4">
+                  {selectedPlayerForm
+                    ? `FORMA #${playerForm} // ${selectedPlayerForm.sides} Lados Poligonais`
+                    : 'SEM FUSELAGEM ACOPLADA // Isolamento Analítico de Componentes'}
                 </p>
 
+                {/* 3 CARDS ISOLADOS DE BÔNUS + CARD COMBINADO */}
                 <div className="space-y-3 font-mono text-xs mb-4">
-                  <div className="p-2.5 rounded bg-cyber-card border border-cyber-cardBorder/40">
-                    <span className="text-slate-400 block mb-0.5">BÔNUS PASSIVO DO CHASSI:</span>
-                    <span className="text-white font-bold block">{selectedPlayerForm.bonus}</span>
+                  {/* CARD 1: BÔNUS DA FORMA */}
+                  <div className="p-3 rounded-xl bg-cyber-card border border-cyber-cyan/30">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-cyber-cyan font-bold">🔷 1. BÔNUS DO CHASSI (FORMA):</span>
+                      <span className="text-white font-bold bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-500/40">
+                        {playerFormMult.toFixed(2)}x Casco
+                      </span>
+                    </div>
+                    <span className="text-slate-200 block font-semibold mb-1">
+                      {selectedPlayerForm ? selectedPlayerForm.bonus : 'Nenhum Chassi Equipado (Base 1.00x - Sem bônus de casco)'}
+                    </span>
+                    <span className="text-[11px] text-slate-400 block font-outfit">
+                      {selectedPlayerForm ? selectedPlayerForm.behavior : 'Simulação Pura: Casco desativado para medição isolada dos sensores e reator.'}
+                    </span>
                   </div>
 
-                  <div className="p-2.5 rounded bg-emerald-950/30 border border-emerald-500/40">
-                    <span className="text-emerald-400 block mb-0.5 font-bold">BÔNUS DA RARIDADE CONCEDIDO AO JOGADOR:</span>
-                    <span className="text-emerald-200 font-bold block">{selectedPlayerRarity.playerBonus}</span>
+                  {/* CARD 2: BÔNUS DA RARIDADE */}
+                  <div className="p-3 rounded-xl bg-emerald-950/20 border border-emerald-500/30">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-emerald-400 font-bold">⚡ 2. BÔNUS DO REATOR (RARIDADE):</span>
+                      <span className="text-emerald-200 font-bold bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-500/40">
+                        {playerRarityMult.toFixed(2)}x Reator
+                      </span>
+                    </div>
+                    <span className="text-emerald-200 block font-semibold">
+                      {selectedPlayerRarity
+                        ? selectedPlayerRarity.playerBonus
+                        : 'Reator Neutro (1.00x Stats Base - Sem bônus elemental ou amplificação)'}
+                    </span>
                   </div>
 
-                  <div className="flex justify-between p-2 rounded bg-cyber-card border border-cyber-cardBorder/40">
-                    <span className="text-slate-400">Poder Combinado da Nave:</span>
-                    <span className="text-cyber-cyan font-bold">{playerCombinedMult.toFixed(2)}x Multiplicador</span>
+                  {/* CARD 3: BÔNUS DA EXPRESSÃO HUD */}
+                  <div className="p-3 rounded-xl bg-pink-950/20 border border-pink-500/30">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-pink-400 font-bold">👁️ 3. BÔNUS DO SENSOR HUD (EXPRESSÃO):</span>
+                      <span
+                        className="font-bold px-2 py-0.5 rounded text-[11px]"
+                        style={{
+                          backgroundColor: selectedPlayerExpr ? `${selectedPlayerExpr.color}22` : '#33415544',
+                          color: selectedPlayerExpr ? selectedPlayerExpr.color : '#94a3b8',
+                          border: `1px solid ${selectedPlayerExpr ? selectedPlayerExpr.color : '#64748b'}44`
+                        }}
+                      >
+                        {selectedPlayerExpr ? selectedPlayerExpr.namePt : 'Nenhum'}
+                      </span>
+                    </div>
+                    <span className="text-pink-200 block font-semibold mb-1">
+                      {selectedPlayerExpr
+                        ? selectedPlayerExpr.descPt
+                        : 'Nenhum Sensor HUD Equipado (0% Bônus Sensorial - Operação binária padrão)'}
+                    </span>
+                    {selectedPlayerExpr && (
+                      <div className="text-[11px] text-pink-300/80 font-outfit">
+                        <strong>Sinergia Tática:</strong> {selectedPlayerExpr.synergyPt}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* CARD 4: RESULTADO COMBINADO */}
+                  <div className="p-3 rounded-xl bg-gradient-to-r from-cyan-950/40 via-purple-950/30 to-pink-950/40 border border-cyber-cardBorder">
+                    <div className="flex justify-between items-center mb-1.5">
+                      <span className="text-slate-300 font-bold">📊 MULTIPLICADOR DE PODER GLOBAL:</span>
+                      <span className="text-cyber-cyan font-bold text-sm bg-black/60 px-2.5 py-0.5 rounded border border-cyber-cyan/50 shadow-neon-cyan/20">
+                        {playerCombinedMult.toFixed(2)}x Total
+                      </span>
+                    </div>
+                    <div className="text-[11px] text-slate-300 font-mono space-y-0.5">
+                      <div>• Chassi: {isPlayerFormNone ? 'Nenhum (1.00x)' : `${selectedPlayerForm?.name} (${playerFormMult.toFixed(2)}x)`}</div>
+                      <div>• Reator: {isPlayerRarityNone ? 'Neutro (1.00x)' : `${selectedPlayerRarity?.namePt} (${playerRarityMult.toFixed(2)}x)`}</div>
+                      <div>• Sensor HUD: {isPlayerExprNone ? 'Nenhum (0% Bônus)' : `${selectedPlayerExpr?.namePt} (${selectedPlayerExpr?.descPt})`}</div>
+                    </div>
                   </div>
                 </div>
 
                 <div className="text-[11px] font-outfit text-slate-300 leading-relaxed border-t border-cyber-cardBorder/40 pt-3">
-                  <strong className="text-white font-mono block mb-1">COMPORTAMENTO EM VOO:</strong>
-                  {selectedPlayerForm.behavior}
+                  <strong className="text-white font-mono block mb-1">TELEMETRIA DO PILOTO:</strong>
+                  {selectedPlayerForm
+                    ? selectedPlayerForm.lore
+                    : 'Modo de laboratório ativado: fuselagem desacoplada para calibrar o impacto matemático individual de cada raridade e sensor HUD nas equações de dano e sustentação.'}
                 </div>
               </div>
             </div>
@@ -1043,6 +1194,75 @@ export const CodexStudio: React.FC = () => {
                     <strong className="text-white font-mono block mb-0.5">LORE DO BIOMA:</strong>
                     {selectedBiomeAura.lorePt}
                   </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          
+          {/* TAB 9: MATRIZ SENSORIAL HUD (20 EXPRESSÕES) */}
+          {activeTab === 'hud_expression' && (
+            <div>
+              <div className="mb-6 space-y-4">
+                <div>
+                  <label className="block text-xs font-mono text-cyber-cyan font-bold uppercase mb-1.5 flex items-center justify-between">
+                    <span>Escolha o Sensor HUD da Matriz (1 a 20):</span>
+                    <span className="text-[11px] text-slate-400 font-normal">
+                      {selectedStandaloneExpr.namePt} ({selectedStandaloneExpr.nameEn})
+                    </span>
+                  </label>
+                  <select
+                    value={hudExpressionId}
+                    onChange={(e) => setHudExpressionId(e.target.value)}
+                    className="w-full bg-cyber-card border border-cyber-cardBorder rounded-xl px-3 py-2 text-sm text-white font-mono focus:outline-none focus:border-cyber-cyan"
+                  >
+                    {CYBER_EXPRESSIONS.map((ex, idx) => (
+                      <option key={ex.id} value={ex.id}>
+                        Sensor #{idx + 1}: {ex.namePt} ({ex.nameEn}) — {ex.descPt}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Explanatory Legend for Standalone HUD Expression */}
+              <div className="pt-4 border-t border-cyber-cardBorder/60">
+                <span
+                  className="font-mono text-xs font-bold px-2.5 py-1 rounded inline-block mb-2"
+                  style={{ backgroundColor: `${selectedStandaloneExpr.color}22`, color: selectedStandaloneExpr.color }}
+                >
+                  SENSOR ÓPTICO // {selectedStandaloneExpr.nameEn}
+                </span>
+
+                <h4 className="font-orbitron font-bold text-xl text-white mb-1">
+                  Matriz HUD • {selectedStandaloneExpr.namePt}
+                </h4>
+                <p className="font-mono text-xs text-cyber-cyan mb-3">
+                  CÂMARA HOLOGRÁFICA // Linhas Vetoriais Diretas no Cockpit
+                </p>
+
+                <div className="space-y-3 font-mono text-xs mb-4">
+                  <div className="p-2.5 rounded bg-pink-950/30 border border-pink-500/40">
+                    <span className="text-pink-400 block mb-0.5 font-bold">BÔNUS TÁTICO CONCEDIDO:</span>
+                    <span className="text-pink-200 font-bold block">{selectedStandaloneExpr.descPt}</span>
+                  </div>
+
+                  <div className="p-2.5 rounded bg-cyan-950/30 border border-cyan-500/40">
+                    <span className="text-cyber-cyan block mb-0.5 font-bold">SINERGIA DE COMBATE RECOMENDADA:</span>
+                    <span className="text-slate-200 font-bold block">{selectedStandaloneExpr.synergyPt}</span>
+                  </div>
+
+                  <div className="flex justify-between p-2 rounded bg-cyber-card border border-cyber-cardBorder/40">
+                    <span className="text-slate-400">Canal Óptico & Matriz:</span>
+                    <span className="font-bold" style={{ color: selectedStandaloneExpr.color }}>
+                      {selectedStandaloneExpr.color.toUpperCase()} Hex
+                    </span>
+                  </div>
+                </div>
+
+                <div className="text-[11px] font-outfit text-slate-300 leading-relaxed border-t border-cyber-cardBorder/40 pt-3">
+                  <strong className="text-white font-mono block mb-1">ARQUIVO DE TELEMETRIA:</strong>
+                  {selectedStandaloneExpr.lore}
                 </div>
               </div>
             </div>

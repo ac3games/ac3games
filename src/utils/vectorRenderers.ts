@@ -1279,13 +1279,124 @@ export const FORMS_DATA = CATALOG_FORMS;
 /**
  * 1. PLAYER RENDERER (Clean Hull + Stern Plasma Flame, ZERO internal lines)
  */
+
+export type PhaserGraphicsShim = {
+  clear(): void;
+  fillStyle(color: number | string, alpha?: number): void;
+  lineStyle(width: number, color: number | string, alpha?: number): void;
+  fillRect(x: number, y: number, w: number, h: number): void;
+  strokeRect(x: number, y: number, w: number, h: number): void;
+  fillCircle(x: number, y: number, r: number): void;
+  strokeCircle(x: number, y: number, r: number): void;
+  lineBetween(x1: number, y1: number, x2: number, y2: number): void;
+  beginPath(): void;
+  moveTo(x: number, y: number): void;
+  lineTo(x: number, y: number): void;
+  arc(cx: number, cy: number, r: number, sAng: number, eAng: number, anticlockwise?: boolean): void;
+  closePath(): void;
+  fillPath(): void;
+  strokePath(): void;
+};
+
+export function createPhaserGraphicsShim(c: CanvasRenderingContext2D, lineScaleFactor: number = 1.0): PhaserGraphicsShim {
+  let curFill = 'rgba(0,0,0,1)';
+  let curStroke = 'rgba(0,0,0,1)';
+  let curLineWidth = 1;
+
+  function toRgba(val: number | string, alpha = 1): string {
+    if (typeof val === 'string') {
+      if (val.startsWith('#')) {
+        const num = parseInt(val.slice(1), 16);
+        const r = (num >> 16) & 255;
+        const g = (num >> 8) & 255;
+        const b = num & 255;
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+      }
+      return val;
+    }
+    const r = (val >> 16) & 255;
+    const g = (val >> 8) & 255;
+    const b = val & 255;
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  }
+
+  return {
+    clear() {},
+    fillStyle(color: number | string, alpha = 1) {
+      curFill = toRgba(color, alpha);
+      c.fillStyle = curFill;
+    },
+    lineStyle(width: number, color: number | string, alpha = 1) {
+      curLineWidth = Math.max(0.75, width * lineScaleFactor);
+      curStroke = toRgba(color, alpha);
+      c.lineWidth = curLineWidth;
+      c.strokeStyle = curStroke;
+    },
+    fillRect(x: number, y: number, w: number, h: number) {
+      c.fillStyle = curFill;
+      c.fillRect(x, y, w, h);
+    },
+    strokeRect(x: number, y: number, w: number, h: number) {
+      c.strokeStyle = curStroke;
+      c.lineWidth = curLineWidth;
+      c.strokeRect(x, y, w, h);
+    },
+    fillCircle(x: number, y: number, r: number) {
+      c.fillStyle = curFill;
+      c.beginPath();
+      c.arc(x, y, Math.max(0, r), 0, Math.PI * 2);
+      c.fill();
+    },
+    strokeCircle(x: number, y: number, r: number) {
+      c.strokeStyle = curStroke;
+      c.lineWidth = curLineWidth;
+      c.beginPath();
+      c.arc(x, y, Math.max(0, r), 0, Math.PI * 2);
+      c.stroke();
+    },
+    lineBetween(x1: number, y1: number, x2: number, y2: number) {
+      c.strokeStyle = curStroke;
+      c.lineWidth = curLineWidth;
+      c.beginPath();
+      c.moveTo(x1, y1);
+      c.lineTo(x2, y2);
+      c.stroke();
+    },
+    beginPath() {
+      c.beginPath();
+    },
+    moveTo(x: number, y: number) {
+      c.moveTo(x, y);
+    },
+    lineTo(x: number, y: number) {
+      c.lineTo(x, y);
+    },
+    arc(cx: number, cy: number, r: number, sAng: number, eAng: number, anticlockwise = false) {
+      c.arc(cx, cy, Math.max(0, r), sAng, eAng, anticlockwise);
+    },
+    closePath() {
+      c.closePath();
+    },
+    fillPath() {
+      c.fillStyle = curFill;
+      c.fill();
+    },
+    strokePath() {
+      c.strokeStyle = curStroke;
+      c.lineWidth = curLineWidth;
+      c.stroke();
+    }
+  };
+}
+
 export function renderStudioPlayer(
   ctx: CanvasRenderingContext2D,
   formIdx: number,
   rarityIdx: number,
   width: number,
   height: number,
-  time: number
+  time: number,
+  expressionId: string = 'none'
 ) {
   ctx.save();
   ctx.clearRect(0, 0, width, height);
@@ -1296,31 +1407,69 @@ export function renderStudioPlayer(
   const cx = width / 2;
   const cy = height / 2;
   const s = Math.min(width, height) / 100;
-  const form = CATALOG_FORMS[formIdx - 1] || CATALOG_FORMS[0]!;
-  const rarity = RARITIES_DATA[rarityIdx - 1] || RARITIES_DATA[0]!;
   const radius = 32 * s;
 
-  // Stern Plasma Flame
-  const flameLen = (14 + Math.sin(time * 16) * 4) * s;
-  const flameY = cy + radius * 0.65;
-  ctx.fillStyle = rarity.flameColor;
-  ctx.beginPath();
-  ctx.moveTo(cx - 6 * s, flameY);
-  ctx.lineTo(cx, flameY + flameLen);
-  ctx.lineTo(cx + 6 * s, flameY);
-  ctx.closePath();
-  ctx.fill();
+  const isFormNone = formIdx === 0;
+  const isRarityNone = rarityIdx === 0;
 
-  ctx.fillStyle = '#ffffff';
-  ctx.beginPath();
-  ctx.moveTo(cx - 2.5 * s, flameY);
-  ctx.lineTo(cx, flameY + flameLen * 0.5);
-  ctx.lineTo(cx + 2.5 * s, flameY);
-  ctx.closePath();
-  ctx.fill();
+  // 1. Stern Plasma Flame & Hull Shape
+  if (!isFormNone) {
+    const form = CATALOG_FORMS[formIdx - 1] || CATALOG_FORMS[0]!;
+    const rarity = isRarityNone ? null : (RARITIES_DATA[rarityIdx - 1] || RARITIES_DATA[0]!);
+    const flameColor = rarity ? rarity.flameColor : '#00f0ff';
+    const hullColor = rarity ? rarity.color : '#94a3b8';
 
-  // Draw pure player shape (isPlayer = true -> no reticle, clean contour)
-  drawInGameCatalogShape(ctx, cx, cy, radius, form, rarity.color, true);
+    // Stern Plasma Flame
+    const flameLen = (14 + Math.sin(time * 16) * 4) * s;
+    const flameY = cy + radius * 0.65;
+    ctx.fillStyle = flameColor;
+    ctx.beginPath();
+    ctx.moveTo(cx - 6 * s, flameY);
+    ctx.lineTo(cx, flameY + flameLen);
+    ctx.lineTo(cx + 6 * s, flameY);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.moveTo(cx - 2.5 * s, flameY);
+    ctx.lineTo(cx, flameY + flameLen * 0.5);
+    ctx.lineTo(cx + 2.5 * s, flameY);
+    ctx.closePath();
+    ctx.fill();
+
+    // Draw pure player shape (isPlayer = true -> no reticle, clean contour)
+    drawInGameCatalogShape(ctx, cx, cy, radius, form, hullColor, true);
+  } else {
+    // Subtle cockpit coordinate calibration brackets when hull is None
+    ctx.strokeStyle = 'rgba(0, 240, 255, 0.25)';
+    ctx.lineWidth = 1.2;
+    const chSize = 18 * s;
+    ctx.beginPath();
+    ctx.moveTo(cx - chSize, cy); ctx.lineTo(cx - chSize * 0.4, cy);
+    ctx.moveTo(cx + chSize * 0.4, cy); ctx.lineTo(cx + chSize, cy);
+    ctx.moveTo(cx, cy - chSize); ctx.lineTo(cx, cy - chSize * 0.4);
+    ctx.moveTo(cx, cy + chSize * 0.4); ctx.lineTo(cx, cy + chSize);
+    ctx.stroke();
+
+    // Corner brackets
+    const bSize = 24 * s;
+    const cArm = 6 * s;
+    ctx.strokeStyle = 'rgba(0, 240, 255, 0.15)';
+    ctx.beginPath();
+    ctx.moveTo(cx - bSize, cy - bSize + cArm); ctx.lineTo(cx - bSize, cy - bSize); ctx.lineTo(cx - bSize + cArm, cy - bSize);
+    ctx.moveTo(cx + bSize - cArm, cy - bSize); ctx.lineTo(cx + bSize, cy - bSize); ctx.lineTo(cx + bSize, cy - bSize + cArm);
+    ctx.moveTo(cx - bSize, cy + bSize - cArm); ctx.lineTo(cx - bSize, cy + bSize); ctx.lineTo(cx - bSize + cArm, cy + bSize);
+    ctx.moveTo(cx + bSize - cArm, cy + bSize); ctx.lineTo(cx + bSize, cy + bSize); ctx.lineTo(cx + bSize, cy + bSize - cArm);
+    ctx.stroke();
+  }
+
+  // 2. Cyber HUD Expression directly inside cockpit
+  if (expressionId && expressionId !== 'none') {
+    const shim = createPhaserGraphicsShim(ctx, 0.55);
+    // Matching RenderSystem.ts:line 1775: drawCyberHUDExpression(graphics, expression, pos.x, pos.y, render.scale * 1.35)
+    drawCyberHUDExpression(shim, expressionId, cx, cy, s * 1.35);
+  }
 
   ctx.restore();
 }
@@ -3484,6 +3633,347 @@ export const CYBER_EXPRESSIONS: CyberExpression[] = [
   }
 ];
 
+
+
+export function drawCyberHUDExpression(
+  graphics: PhaserGraphicsShim,
+  expression: string,
+  x: number,
+  y: number,
+  scale: number = 1.0,
+  colorOverride?: number | string
+) {
+  if (!expression || expression === 'none') return;
+  const found = CYBER_EXPRESSIONS.find(e => e.id === expression);
+  const baseColor = colorOverride !== undefined ? colorOverride : (found ? found.color : '#00f0ff');
+
+  if (expression === 'Happy') {
+    // 01. Happy: Dual upturned glowing laser visors & digital smile notch
+    graphics.lineStyle(2.2 * scale, baseColor, 1.0);
+    graphics.beginPath();
+    graphics.moveTo(x - 9 * scale, y - 4 * scale);
+    graphics.lineTo(x - 5 * scale, y - 7 * scale);
+    graphics.lineTo(x - 2 * scale, y - 4 * scale);
+    graphics.moveTo(x + 2 * scale, y - 4 * scale);
+    graphics.lineTo(x + 5 * scale, y - 7 * scale);
+    graphics.lineTo(x + 9 * scale, y - 4 * scale);
+    graphics.moveTo(x - 5 * scale, y + 4 * scale);
+    graphics.lineTo(x, y + 7 * scale);
+    graphics.lineTo(x + 5 * scale, y + 4 * scale);
+    graphics.strokePath();
+    graphics.fillStyle('#ffffff', 0.95);
+    graphics.fillCircle(x - 5.5 * scale, y - 3.5 * scale, 1.2 * scale);
+    graphics.fillCircle(x + 5.5 * scale, y - 3.5 * scale, 1.2 * scale);
+  } else if (expression === 'Excited') {
+    // 02. Excited: Wide radiant sensor lenses with open acoustic exhaust
+    graphics.lineStyle(2.0 * scale, baseColor, 1.0);
+    graphics.strokeRect(x - 9 * scale, y - 7 * scale, 6 * scale, 5 * scale);
+    graphics.strokeRect(x + 3 * scale, y - 7 * scale, 6 * scale, 5 * scale);
+    graphics.fillStyle('#ffffff', 0.9);
+    graphics.fillRect(x - 7.5 * scale, y - 5.5 * scale, 3 * scale, 2 * scale);
+    graphics.fillRect(x + 4.5 * scale, y - 5.5 * scale, 3 * scale, 2 * scale);
+    graphics.beginPath();
+    graphics.moveTo(x - 5 * scale, y + 3 * scale);
+    graphics.lineTo(x + 5 * scale, y + 3 * scale);
+    graphics.lineTo(x + 3 * scale, y + 8 * scale);
+    graphics.lineTo(x - 3 * scale, y + 8 * scale);
+    graphics.closePath();
+    graphics.fillStyle(baseColor, 0.3);
+    graphics.fillPath();
+    graphics.strokePath();
+  } else if (expression === 'Joyful') {
+    // 03. Joyful: Sleek inverted-V chevron optics with soft pulse bar
+    graphics.lineStyle(2.2 * scale, baseColor, 1.0);
+    graphics.beginPath();
+    graphics.moveTo(x - 9 * scale, y - 2 * scale);
+    graphics.lineTo(x - 5 * scale, y - 7 * scale);
+    graphics.lineTo(x - 1 * scale, y - 2 * scale);
+    graphics.moveTo(x + 1 * scale, y - 2 * scale);
+    graphics.lineTo(x + 5 * scale, y - 7 * scale);
+    graphics.lineTo(x + 9 * scale, y - 2 * scale);
+    graphics.moveTo(x - 4 * scale, y + 4 * scale);
+    graphics.lineTo(x + 4 * scale, y + 4 * scale);
+    graphics.strokePath();
+  } else if (expression === 'Angry') {
+    // 04. Angry: Inward-angled combat brow plates with razor red slit optics
+    graphics.fillStyle(baseColor, 0.95);
+    graphics.beginPath();
+    graphics.moveTo(x - 10 * scale, y - 7 * scale);
+    graphics.lineTo(x - 2 * scale, y - 3 * scale);
+    graphics.lineTo(x - 3 * scale, y - 1 * scale);
+    graphics.lineTo(x - 9 * scale, y - 5 * scale);
+    graphics.moveTo(x + 10 * scale, y - 7 * scale);
+    graphics.lineTo(x + 2 * scale, y - 3 * scale);
+    graphics.lineTo(x + 3 * scale, y - 1 * scale);
+    graphics.lineTo(x + 9 * scale, y - 5 * scale);
+    graphics.closePath();
+    graphics.fillPath();
+    graphics.lineStyle(1.8 * scale, baseColor, 1.0);
+    graphics.beginPath();
+    graphics.moveTo(x - 5 * scale, y + 4 * scale);
+    graphics.lineTo(x - 2 * scale, y + 6 * scale);
+    graphics.lineTo(x + 2 * scale, y + 4 * scale);
+    graphics.lineTo(x + 5 * scale, y + 6 * scale);
+    graphics.strokePath();
+  } else if (expression === 'Stern') {
+    // 05. Stern: Unyielding horizontal brow strip with cold optic scan points
+    graphics.lineStyle(2.2 * scale, baseColor, 1.0);
+    graphics.beginPath();
+    graphics.moveTo(x - 10 * scale, y - 6 * scale);
+    graphics.lineTo(x + 10 * scale, y - 6 * scale);
+    graphics.moveTo(x - 4 * scale, y + 5 * scale);
+    graphics.lineTo(x + 4 * scale, y + 5 * scale);
+    graphics.strokePath();
+    graphics.fillStyle(baseColor, 1.0);
+    graphics.fillRect(x - 7 * scale, y - 3 * scale, 4 * scale, 3 * scale);
+    graphics.fillRect(x + 3 * scale, y - 3 * scale, 4 * scale, 3 * scale);
+  } else if (expression === 'Surprised') {
+    // 06. Surprised: Tactical optic sensor reticles with central aperture intake
+    graphics.lineStyle(1.8 * scale, baseColor, 1.0);
+    graphics.strokeRect(x - 8 * scale, y - 6 * scale, 5 * scale, 5 * scale);
+    graphics.strokeRect(x + 3 * scale, y - 6 * scale, 5 * scale, 5 * scale);
+    graphics.fillStyle(baseColor, 1.0);
+    graphics.fillRect(x - 6.5 * scale, y - 4.5 * scale, 2 * scale, 2 * scale);
+    graphics.fillRect(x + 4.5 * scale, y - 4.5 * scale, 2 * scale, 2 * scale);
+    graphics.strokeRect(x - 2.5 * scale, y + 3 * scale, 5 * scale, 4 * scale);
+  } else if (expression === 'Defeated') {
+    // 07. Defeated: Crossed hazard optics with sinuous distress mouth
+    graphics.lineStyle(2.0 * scale, baseColor, 1.0);
+    graphics.beginPath();
+    graphics.moveTo(x - 8 * scale, y - 7 * scale);
+    graphics.lineTo(x - 3 * scale, y - 2 * scale);
+    graphics.moveTo(x - 3 * scale, y - 7 * scale);
+    graphics.lineTo(x - 8 * scale, y - 2 * scale);
+    graphics.moveTo(x + 3 * scale, y - 7 * scale);
+    graphics.lineTo(x + 8 * scale, y - 2 * scale);
+    graphics.moveTo(x + 8 * scale, y - 7 * scale);
+    graphics.lineTo(x + 3 * scale, y - 2 * scale);
+    graphics.moveTo(x - 4 * scale, y + 5 * scale);
+    graphics.lineTo(x, y + 3 * scale);
+    graphics.lineTo(x + 4 * scale, y + 5 * scale);
+    graphics.strokePath();
+  } else if (expression === 'Crying') {
+    // 08. Crying: Horizontal optic sensors with vertical telemetry cascade streams
+    graphics.lineStyle(2.0 * scale, baseColor, 1.0);
+    graphics.beginPath();
+    graphics.moveTo(x - 9 * scale, y - 5 * scale);
+    graphics.lineTo(x - 2 * scale, y - 5 * scale);
+    graphics.moveTo(x + 2 * scale, y - 5 * scale);
+    graphics.lineTo(x + 9 * scale, y - 5 * scale);
+    graphics.moveTo(x - 4 * scale, y + 5 * scale);
+    graphics.lineTo(x, y + 3 * scale);
+    graphics.lineTo(x + 4 * scale, y + 5 * scale);
+    graphics.strokePath();
+    graphics.lineStyle(1.4 * scale, '#38bdf8', 0.85);
+    graphics.beginPath();
+    graphics.moveTo(x - 5.5 * scale, y - 3 * scale);
+    graphics.lineTo(x - 5.5 * scale, y + 3 * scale);
+    graphics.moveTo(x + 5.5 * scale, y - 3 * scale);
+    graphics.lineTo(x + 5.5 * scale, y + 3 * scale);
+    graphics.strokePath();
+  } else if (expression === 'Bored') {
+    // 09. Bored: Half-closed narrow horizontal sensor slits
+    graphics.lineStyle(2.0 * scale, baseColor, 1.0);
+    graphics.beginPath();
+    graphics.moveTo(x - 9 * scale, y - 4 * scale);
+    graphics.lineTo(x - 2 * scale, y - 4 * scale);
+    graphics.moveTo(x + 2 * scale, y - 4 * scale);
+    graphics.lineTo(x + 9 * scale, y - 4 * scale);
+    graphics.moveTo(x - 3 * scale, y + 4 * scale);
+    graphics.lineTo(x + 3 * scale, y + 4 * scale);
+    graphics.strokePath();
+  } else if (expression === 'Ecstatic') {
+    // 10. Ecstatic: Radial optic crosshairs with radiant ascending smile arc
+    graphics.lineStyle(2.0 * scale, baseColor, 1.0);
+    graphics.beginPath();
+    graphics.moveTo(x - 8 * scale, y - 5 * scale);
+    graphics.lineTo(x - 2 * scale, y - 5 * scale);
+    graphics.moveTo(x - 5 * scale, y - 8 * scale);
+    graphics.lineTo(x - 5 * scale, y - 2 * scale);
+    graphics.moveTo(x + 2 * scale, y - 5 * scale);
+    graphics.lineTo(x + 8 * scale, y - 5 * scale);
+    graphics.moveTo(x + 5 * scale, y - 8 * scale);
+    graphics.lineTo(x + 5 * scale, y - 2 * scale);
+    graphics.moveTo(x - 5 * scale, y + 4 * scale);
+    graphics.lineTo(x, y + 7 * scale);
+    graphics.lineTo(x + 5 * scale, y + 4 * scale);
+    graphics.strokePath();
+  } else if (expression === 'Bloodthirsty') {
+    // 11. Bloodthirsty: Tactical trident reticles (Psi) & serrated combat fangs
+    graphics.lineStyle(2.0 * scale, baseColor, 1.0);
+    graphics.beginPath();
+    graphics.moveTo(x - 8 * scale, y - 7 * scale);
+    graphics.lineTo(x - 8 * scale, y - 3 * scale);
+    graphics.lineTo(x - 2 * scale, y - 3 * scale);
+    graphics.lineTo(x - 2 * scale, y - 7 * scale);
+    graphics.moveTo(x - 5 * scale, y - 7 * scale);
+    graphics.lineTo(x - 5 * scale, y - 1 * scale);
+    graphics.moveTo(x + 2 * scale, y - 7 * scale);
+    graphics.lineTo(x + 2 * scale, y - 3 * scale);
+    graphics.lineTo(x + 8 * scale, y - 3 * scale);
+    graphics.lineTo(x + 8 * scale, y - 7 * scale);
+    graphics.moveTo(x + 5 * scale, y - 7 * scale);
+    graphics.lineTo(x + 5 * scale, y - 1 * scale);
+    graphics.moveTo(x - 4 * scale, y + 4 * scale);
+    graphics.lineTo(x, y + 7 * scale);
+    graphics.lineTo(x + 4 * scale, y + 4 * scale);
+    graphics.strokePath();
+  } else if (expression === 'Devout') {
+    // 12. Devout: Triple harmonic sensor bars
+    graphics.lineStyle(1.8 * scale, baseColor, 1.0);
+    graphics.beginPath();
+    for (let b = 0; b < 3; b++) {
+      const by = y - (7 - b * 3) * scale;
+      graphics.moveTo(x - 8 * scale, by);
+      graphics.lineTo(x - 2 * scale, by);
+      graphics.moveTo(x + 2 * scale, by);
+      graphics.lineTo(x + 8 * scale, by);
+    }
+    graphics.moveTo(x - 3 * scale, y + 5 * scale);
+    graphics.lineTo(x + 3 * scale, y + 5 * scale);
+    graphics.strokePath();
+  } else if (expression === 'Enchanted') {
+    // 13. Enchanted: Prismatic 4-point diamond star lenses
+    graphics.fillStyle(baseColor, 1.0);
+    graphics.lineStyle(1.6 * scale, baseColor, 1.0);
+    graphics.beginPath();
+    graphics.moveTo(x - 5 * scale, y - 8 * scale);
+    graphics.lineTo(x - 3 * scale, y - 4 * scale);
+    graphics.lineTo(x - 5 * scale, y);
+    graphics.lineTo(x - 7 * scale, y - 4 * scale);
+    graphics.moveTo(x + 5 * scale, y - 8 * scale);
+    graphics.lineTo(x + 7 * scale, y - 4 * scale);
+    graphics.lineTo(x + 5 * scale, y);
+    graphics.lineTo(x + 3 * scale, y - 4 * scale);
+    graphics.closePath();
+    graphics.fillPath();
+    graphics.strokePath();
+    graphics.beginPath();
+    graphics.moveTo(x - 4 * scale, y + 4 * scale);
+    graphics.lineTo(x, y + 7 * scale);
+    graphics.lineTo(x + 4 * scale, y + 4 * scale);
+    graphics.strokePath();
+  } else if (expression === 'Cunning') {
+    // 14. Cunning: Asymmetrical angled radar lenses & smirk
+    graphics.lineStyle(2.0 * scale, baseColor, 1.0);
+    graphics.beginPath();
+    graphics.moveTo(x - 9 * scale, y - 6 * scale);
+    graphics.lineTo(x - 3 * scale, y - 6 * scale);
+    graphics.lineTo(x - 3 * scale, y - 2 * scale);
+    graphics.moveTo(x + 3 * scale, y - 6 * scale);
+    graphics.lineTo(x + 9 * scale, y - 6 * scale);
+    graphics.lineTo(x + 9 * scale, y - 2 * scale);
+    graphics.moveTo(x - 2 * scale, y + 5 * scale);
+    graphics.lineTo(x + 5 * scale, y + 3 * scale);
+    graphics.strokePath();
+  } else if (expression === 'Relentless') {
+    // 15. Relentless: Target-lock crosshair brackets & focus slit
+    graphics.lineStyle(1.8 * scale, baseColor, 1.0);
+    graphics.beginPath();
+    graphics.moveTo(x - 8 * scale, y - 6 * scale);
+    graphics.lineTo(x - 4 * scale, y - 6 * scale);
+    graphics.moveTo(x - 8 * scale, y - 2 * scale);
+    graphics.lineTo(x - 4 * scale, y - 2 * scale);
+    graphics.moveTo(x - 6 * scale, y - 7 * scale);
+    graphics.lineTo(x - 6 * scale, y - 1 * scale);
+    graphics.moveTo(x + 4 * scale, y - 6 * scale);
+    graphics.lineTo(x + 8 * scale, y - 6 * scale);
+    graphics.moveTo(x + 4 * scale, y - 2 * scale);
+    graphics.lineTo(x + 8 * scale, y - 2 * scale);
+    graphics.moveTo(x + 6 * scale, y - 7 * scale);
+    graphics.lineTo(x + 6 * scale, y - 1 * scale);
+    graphics.moveTo(x - 4 * scale, y + 5 * scale);
+    graphics.lineTo(x + 4 * scale, y + 5 * scale);
+    graphics.strokePath();
+  } else if (expression === 'Furious') {
+    // 16. Furious: Downward-slanting combat armor plates
+    graphics.fillStyle(baseColor, 1.0);
+    graphics.beginPath();
+    graphics.moveTo(x - 9 * scale, y - 2 * scale);
+    graphics.lineTo(x - 3 * scale, y - 6 * scale);
+    graphics.lineTo(x - 3 * scale, y - 2 * scale);
+    graphics.moveTo(x + 9 * scale, y - 2 * scale);
+    graphics.lineTo(x + 3 * scale, y - 6 * scale);
+    graphics.lineTo(x + 3 * scale, y - 2 * scale);
+    graphics.closePath();
+    graphics.fillPath();
+    graphics.lineStyle(2.0 * scale, baseColor, 1.0);
+    graphics.beginPath();
+    graphics.moveTo(x - 5 * scale, y + 4 * scale);
+    graphics.lineTo(x - 2 * scale, y + 6 * scale);
+    graphics.lineTo(x + 2 * scale, y + 4 * scale);
+    graphics.lineTo(x + 5 * scale, y + 6 * scale);
+    graphics.strokePath();
+  } else if (expression === 'Serene') {
+    // 17. Serene: Gentle descending curved harmonic visors
+    graphics.lineStyle(2.0 * scale, baseColor, 1.0);
+    graphics.beginPath();
+    graphics.moveTo(x - 8 * scale, y - 6 * scale);
+    graphics.lineTo(x - 5 * scale, y - 3 * scale);
+    graphics.lineTo(x - 2 * scale, y - 6 * scale);
+    graphics.moveTo(x + 2 * scale, y - 6 * scale);
+    graphics.lineTo(x + 5 * scale, y - 3 * scale);
+    graphics.lineTo(x + 8 * scale, y - 6 * scale);
+    graphics.moveTo(x - 3 * scale, y + 4 * scale);
+    graphics.lineTo(x, y + 6 * scale);
+    graphics.lineTo(x + 3 * scale, y + 4 * scale);
+    graphics.strokePath();
+  } else if (expression === 'Obsessed') {
+    // 18. Obsessed: Concentric square scanner apertures
+    graphics.lineStyle(1.4 * scale, baseColor, 1.0);
+    graphics.strokeRect(x - 8 * scale, y - 6 * scale, 5 * scale, 5 * scale);
+    graphics.strokeRect(x + 3 * scale, y - 6 * scale, 5 * scale, 5 * scale);
+    graphics.fillStyle(baseColor, 1.0);
+    graphics.fillRect(x - 6.5 * scale, y - 4.5 * scale, 2 * scale, 2 * scale);
+    graphics.fillRect(x + 4.5 * scale, y - 4.5 * scale, 2 * scale, 2 * scale);
+    graphics.fillRect(x - 4 * scale, y + 4 * scale, 8 * scale, 2 * scale);
+  } else if (expression === 'Melancholic') {
+    // 19. Melancholic: Slanted drooping sensor bars & soft tear dots
+    graphics.lineStyle(2.0 * scale, baseColor, 1.0);
+    graphics.beginPath();
+    graphics.moveTo(x - 8 * scale, y - 6 * scale);
+    graphics.lineTo(x - 3 * scale, y - 4 * scale);
+    graphics.moveTo(x + 3 * scale, y - 4 * scale);
+    graphics.lineTo(x + 8 * scale, y - 6 * scale);
+    graphics.moveTo(x - 4 * scale, y + 5 * scale);
+    graphics.lineTo(x, y + 3 * scale);
+    graphics.lineTo(x + 4 * scale, y + 5 * scale);
+    graphics.strokePath();
+    graphics.fillStyle(baseColor, 0.85);
+    graphics.fillCircle(x - 5.5 * scale, y - 1 * scale, 1.2 * scale);
+    graphics.fillCircle(x + 5.5 * scale, y - 1 * scale, 1.2 * scale);
+  } else if (expression === 'Euphoric') {
+    // 20. Euphoric: 5-Pointed stellar optic cores & energetic grin
+    graphics.lineStyle(1.8 * scale, baseColor, 1.0);
+    graphics.fillStyle(baseColor, 0.95);
+    const drawStar = (cx: number, cy: number, r: number) => {
+      graphics.beginPath();
+      for (let s = 0; s < 10; s++) {
+        const rad = (s * Math.PI) / 5 - Math.PI / 2;
+        const dist = s % 2 === 0 ? r : r * 0.45;
+        const px = cx + Math.cos(rad) * dist;
+        const py = cy + Math.sin(rad) * dist;
+        if (s === 0) {
+          graphics.moveTo(px, py);
+        } else {
+          graphics.lineTo(px, py);
+        }
+      }
+      graphics.closePath();
+      graphics.fillPath();
+      graphics.strokePath();
+    };
+    drawStar(x - 5.5 * scale, y - 4 * scale, 3.8 * scale);
+    drawStar(x + 5.5 * scale, y - 4 * scale, 3.8 * scale);
+    graphics.lineStyle(2.0 * scale, baseColor, 1.0);
+    graphics.beginPath();
+    graphics.moveTo(x - 5 * scale, y + 3 * scale);
+    graphics.lineTo(x, y + 7 * scale);
+    graphics.lineTo(x + 5 * scale, y + 3 * scale);
+    graphics.strokePath();
+  }
+}
+
 export function renderStudioExpression(
   ctx: CanvasRenderingContext2D,
   expressionId: string,
@@ -3494,166 +3984,48 @@ export function renderStudioExpression(
   ctx.save();
   ctx.clearRect(0, 0, width, height);
 
-  ctx.fillStyle = '#05020c';
+  // Solid deep space background (Zero circular glow halo)
+  ctx.fillStyle = '#020108';
   ctx.fillRect(0, 0, width, height);
+
+  // Subtle ultra-soft cyber grid lines
+  ctx.strokeStyle = 'rgba(0, 240, 255, 0.025)';
+  ctx.lineWidth = 1;
+  const step = 60;
+  for (let x = 0; x < width; x += step) {
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, height);
+    ctx.stroke();
+  }
+  for (let y = 0; y < height; y += step) {
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(width, y);
+    ctx.stroke();
+  }
 
   const cx = width / 2;
   const cy = height / 2;
-  const s = Math.min(width, height) / 36;
-  const expr = CYBER_EXPRESSIONS.find(e => e.id === expressionId) || CYBER_EXPRESSIONS[0]!;
-  const color = expr.color;
+  const s = Math.min(width, height) / 40;
 
-  // Outer HUD Frame matching Image 2 "MATRIZ SENSORIAL HUD"
-  const boxW = 28 * s;
-  const boxH = 20 * s;
-  ctx.strokeStyle = '#00f0ff88';
-  ctx.lineWidth = 1.6;
-  ctx.strokeRect(cx - boxW / 2, cy - boxH / 2, boxW, boxH);
+  if (expressionId === 'none') {
+    // Empty Sensor HUD Chamber
+    ctx.strokeStyle = 'rgba(0, 240, 255, 0.2)';
+    ctx.lineWidth = 1.2;
+    const chSize = 25 * s;
+    ctx.beginPath();
+    ctx.moveTo(cx - chSize, cy); ctx.lineTo(cx + chSize, cy);
+    ctx.moveTo(cx, cy - chSize); ctx.lineTo(cx, cy + chSize);
+    ctx.stroke();
 
-  // Corner Accents
-  ctx.strokeStyle = '#00f0ff';
-  ctx.lineWidth = 3.0;
-  const cSize = 2.5 * s;
-  // Top Left
-  ctx.beginPath();
-  ctx.moveTo(cx - boxW / 2, cy - boxH / 2 + cSize);
-  ctx.lineTo(cx - boxW / 2, cy - boxH / 2);
-  ctx.lineTo(cx - boxW / 2 + cSize, cy - boxH / 2);
-  ctx.stroke();
-  // Top Right
-  ctx.beginPath();
-  ctx.moveTo(cx + boxW / 2 - cSize, cy - boxH / 2);
-  ctx.lineTo(cx + boxW / 2, cy - boxH / 2);
-  ctx.lineTo(cx + boxW / 2, cy - boxH / 2 + cSize);
-  ctx.stroke();
-  // Bottom Left
-  ctx.beginPath();
-  ctx.moveTo(cx - boxW / 2, cy + boxH / 2 - cSize);
-  ctx.lineTo(cx - boxW / 2, cy + boxH / 2);
-  ctx.lineTo(cx - boxW / 2 + cSize, cy + boxH / 2);
-  ctx.stroke();
-  // Bottom Right
-  ctx.beginPath();
-  ctx.moveTo(cx + boxW / 2 - cSize, cy + boxH / 2);
-  ctx.lineTo(cx + boxW / 2, cy + boxH / 2);
-  ctx.lineTo(cx + boxW / 2, cy + boxH / 2 - cSize);
-  ctx.stroke();
-
-  // HUD Title at bottom
-  ctx.fillStyle = '#00f0ff';
-  ctx.font = `bold ${Math.max(10, 1.3 * s)}px 'Orbitron', monospace`;
-  ctx.textAlign = 'center';
-  ctx.fillText('MATRIZ SENSORIAL HUD', cx, cy + boxH / 2 - 1.2 * s);
-
-  // Draw Facial Vector Optics (scaled up cleanly)
-  const faceScale = s * 0.9;
-  const fx = cx;
-  const fy = cy - 1.5 * s;
-
-  ctx.strokeStyle = color;
-  ctx.fillStyle = color;
-  ctx.lineWidth = 2.5 * (faceScale / s);
-
-  if (expr.id === 'Happy') {
-    ctx.beginPath();
-    ctx.moveTo(fx - 9 * faceScale, fy - 4 * faceScale);
-    ctx.lineTo(fx - 5 * faceScale, fy - 7 * faceScale);
-    ctx.lineTo(fx - 2 * faceScale, fy - 4 * faceScale);
-    ctx.moveTo(fx + 2 * faceScale, fy - 4 * faceScale);
-    ctx.lineTo(fx + 5 * faceScale, fy - 7 * faceScale);
-    ctx.lineTo(fx + 9 * faceScale, fy - 4 * faceScale);
-    ctx.moveTo(fx - 5 * faceScale, fy + 4 * faceScale);
-    ctx.lineTo(fx, fy + 7 * faceScale);
-    ctx.lineTo(fx + 5 * faceScale, fy + 4 * faceScale);
-    ctx.stroke();
-  } else if (expr.id === 'Excited') {
-    ctx.strokeRect(fx - 9 * faceScale, fy - 7 * faceScale, 6 * faceScale, 5 * faceScale);
-    ctx.strokeRect(fx + 3 * faceScale, fy - 7 * faceScale, 6 * faceScale, 5 * faceScale);
-    ctx.beginPath();
-    ctx.moveTo(fx - 5 * faceScale, fy + 3 * faceScale);
-    ctx.lineTo(fx + 5 * faceScale, fy + 3 * faceScale);
-    ctx.lineTo(fx + 3 * faceScale, fy + 7 * faceScale);
-    ctx.lineTo(fx - 3 * faceScale, fy + 7 * faceScale);
-    ctx.closePath();
-    ctx.stroke();
-  } else if (expr.id === 'Joyful') {
-    ctx.beginPath();
-    ctx.moveTo(fx - 9 * faceScale, fy - 2 * faceScale);
-    ctx.lineTo(fx - 5 * faceScale, fy - 7 * faceScale);
-    ctx.lineTo(fx - 1 * faceScale, fy - 2 * faceScale);
-    ctx.moveTo(fx + 1 * faceScale, fy - 2 * faceScale);
-    ctx.lineTo(fx + 5 * faceScale, fy - 7 * faceScale);
-    ctx.lineTo(fx + 9 * faceScale, fy - 2 * faceScale);
-    ctx.moveTo(fx - 4 * faceScale, fy + 4 * faceScale);
-    ctx.lineTo(fx + 4 * faceScale, fy + 4 * faceScale);
-    ctx.stroke();
-  } else if (expr.id === 'Angry') {
-    ctx.beginPath();
-    ctx.moveTo(fx - 10 * faceScale, fy - 7 * faceScale);
-    ctx.lineTo(fx - 2 * faceScale, fy - 3 * faceScale);
-    ctx.moveTo(fx + 10 * faceScale, fy - 7 * faceScale);
-    ctx.lineTo(fx + 2 * faceScale, fy - 3 * faceScale);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(fx - 5 * faceScale, fy + 5 * faceScale);
-    ctx.lineTo(fx - 2 * faceScale, fy + 3 * faceScale);
-    ctx.lineTo(fx + 2 * faceScale, fy + 5 * faceScale);
-    ctx.lineTo(fx + 5 * faceScale, fy + 3 * faceScale);
-    ctx.stroke();
-  } else if (expr.id === 'Stern') {
-    ctx.beginPath();
-    ctx.moveTo(fx - 10 * faceScale, fy - 6 * faceScale);
-    ctx.lineTo(fx + 10 * faceScale, fy - 6 * faceScale);
-    ctx.moveTo(fx - 4 * faceScale, fy + 5 * faceScale);
-    ctx.lineTo(fx + 4 * faceScale, fy + 5 * faceScale);
-    ctx.stroke();
-    ctx.fillRect(fx - 7 * faceScale, fy - 3 * faceScale, 4 * faceScale, 3 * faceScale);
-    ctx.fillRect(fx + 3 * faceScale, fy - 3 * faceScale, 4 * faceScale, 3 * faceScale);
-  } else if (expr.id === 'Surprised') {
-    ctx.strokeRect(fx - 8 * faceScale, fy - 6 * faceScale, 5 * faceScale, 5 * faceScale);
-    ctx.strokeRect(fx + 3 * faceScale, fy - 6 * faceScale, 5 * faceScale, 5 * faceScale);
-    ctx.strokeRect(fx - 2.5 * faceScale, fy + 3 * faceScale, 5 * faceScale, 4 * faceScale);
-  } else if (expr.id === 'Defeated') {
-    ctx.beginPath();
-    ctx.moveTo(fx - 8 * faceScale, fy - 7 * faceScale);
-    ctx.lineTo(fx - 3 * faceScale, fy - 2 * faceScale);
-    ctx.moveTo(fx - 3 * faceScale, fy - 7 * faceScale);
-    ctx.lineTo(fx - 8 * faceScale, fy - 2 * faceScale);
-    ctx.moveTo(fx + 3 * faceScale, fy - 7 * faceScale);
-    ctx.lineTo(fx + 8 * faceScale, fy - 2 * faceScale);
-    ctx.moveTo(fx + 8 * faceScale, fy - 7 * faceScale);
-    ctx.lineTo(fx + 3 * faceScale, fy - 2 * faceScale);
-    ctx.moveTo(fx - 4 * faceScale, fy + 5 * faceScale);
-    ctx.lineTo(fx, fy + 3 * faceScale);
-    ctx.lineTo(fx + 4 * faceScale, fy + 5 * faceScale);
-    ctx.stroke();
-  } else if (expr.id === 'Crying') {
-    ctx.beginPath();
-    ctx.moveTo(fx - 9 * faceScale, fy - 5 * faceScale);
-    ctx.lineTo(fx - 2 * faceScale, fy - 5 * faceScale);
-    ctx.moveTo(fx + 2 * faceScale, fy - 5 * faceScale);
-    ctx.lineTo(fx + 9 * faceScale, fy - 5 * faceScale);
-    ctx.moveTo(fx - 4 * faceScale, fy + 5 * faceScale);
-    ctx.lineTo(fx, fy + 3 * faceScale);
-    ctx.lineTo(fx + 4 * faceScale, fy + 5 * faceScale);
-    ctx.stroke();
-    ctx.strokeStyle = '#38bdf8';
-    ctx.beginPath();
-    ctx.moveTo(fx - 5.5 * faceScale, fy - 3 * faceScale);
-    ctx.lineTo(fx - 5.5 * faceScale, fy + 3 * faceScale);
-    ctx.moveTo(fx + 5.5 * faceScale, fy - 3 * faceScale);
-    ctx.lineTo(fx + 5.5 * faceScale, fy + 3 * faceScale);
-    ctx.stroke();
+    ctx.fillStyle = '#64748b';
+    ctx.font = `bold ${Math.max(12, 1.4 * s)}px 'Orbitron', monospace`;
+    ctx.textAlign = 'center';
+    ctx.fillText('NENHUM SENSOR HUD ACOPLADO', cx, cy + 30 * s);
   } else {
-    // Default high-tech optical eyes and neutral smile
-    ctx.beginPath();
-    ctx.moveTo(fx - 8 * faceScale, fy - 4 * faceScale);
-    ctx.lineTo(fx - 2 * faceScale, fy - 4 * faceScale);
-    ctx.moveTo(fx + 2 * faceScale, fy - 4 * faceScale);
-    ctx.lineTo(fx + 8 * faceScale, fy - 4 * faceScale);
-    ctx.moveTo(fx - 4 * faceScale, fy + 4 * faceScale);
-    ctx.lineTo(fx + 4 * faceScale, fy + 4 * faceScale);
-    ctx.stroke();
+    const shim = createPhaserGraphicsShim(ctx, 0.55);
+    drawCyberHUDExpression(shim, expressionId, cx, cy, s * 1.8);
   }
 
   ctx.restore();
@@ -3848,96 +4220,6 @@ export const BIOME_SCENARIOS_DATA: BiomeScenarioData[] = [
 
 // --- Procedural Generation Helper Functions for Scenarios ---
 
-function createPhaserGraphicsShim(c: CanvasRenderingContext2D) {
-  let curFill = 'rgba(0,0,0,1)';
-  let curStroke = 'rgba(0,0,0,1)';
-  let curLineWidth = 1;
-
-  function toRgba(val: number | string, alpha = 1): string {
-    if (typeof val === 'string') {
-      if (val.startsWith('#')) {
-        const num = parseInt(val.slice(1), 16);
-        const r = (num >> 16) & 255;
-        const g = (num >> 8) & 255;
-        const b = num & 255;
-        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-      }
-      return val;
-    }
-    const r = (val >> 16) & 255;
-    const g = (val >> 8) & 255;
-    const b = val & 255;
-    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-  }
-
-  return {
-    clear() {},
-    fillStyle(color: number | string, alpha = 1) {
-      curFill = toRgba(color, alpha);
-      c.fillStyle = curFill;
-    },
-    lineStyle(width: number, color: number | string, alpha = 1) {
-      curLineWidth = width;
-      curStroke = toRgba(color, alpha);
-      c.lineWidth = width;
-      c.strokeStyle = curStroke;
-    },
-    fillRect(x: number, y: number, w: number, h: number) {
-      c.fillStyle = curFill;
-      c.fillRect(x, y, w, h);
-    },
-    strokeRect(x: number, y: number, w: number, h: number) {
-      c.strokeStyle = curStroke;
-      c.lineWidth = curLineWidth;
-      c.strokeRect(x, y, w, h);
-    },
-    fillCircle(x: number, y: number, r: number) {
-      c.fillStyle = curFill;
-      c.beginPath();
-      c.arc(x, y, Math.max(0, r), 0, Math.PI * 2);
-      c.fill();
-    },
-    strokeCircle(x: number, y: number, r: number) {
-      c.strokeStyle = curStroke;
-      c.lineWidth = curLineWidth;
-      c.beginPath();
-      c.arc(x, y, Math.max(0, r), 0, Math.PI * 2);
-      c.stroke();
-    },
-    lineBetween(x1: number, y1: number, x2: number, y2: number) {
-      c.strokeStyle = curStroke;
-      c.lineWidth = curLineWidth;
-      c.beginPath();
-      c.moveTo(x1, y1);
-      c.lineTo(x2, y2);
-      c.stroke();
-    },
-    beginPath() {
-      c.beginPath();
-    },
-    moveTo(x: number, y: number) {
-      c.moveTo(x, y);
-    },
-    lineTo(x: number, y: number) {
-      c.lineTo(x, y);
-    },
-    arc(cx: number, cy: number, r: number, sAng: number, eAng: number, anticlockwise = false) {
-      c.arc(cx, cy, Math.max(0, r), sAng, eAng, anticlockwise);
-    },
-    closePath() {
-      c.closePath();
-    },
-    fillPath() {
-      c.fillStyle = curFill;
-      c.fill();
-    },
-    strokePath() {
-      c.strokeStyle = curStroke;
-      c.lineWidth = curLineWidth;
-      c.stroke();
-    }
-  };
-}
 
 interface ForestTreeModel {
   xRatio: number;
