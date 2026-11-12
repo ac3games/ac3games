@@ -460,6 +460,8 @@ export interface DroneData {
   role: string;
   combatAction: string;
   playerBonus: string;
+  munitionName: string;
+  munitionBehavior: string;
   codeRef: string;
 }
 
@@ -472,7 +474,9 @@ export const DRONES_DATA: DroneData[] = [
     role: 'Artilharia / Demolição',
     combatAction: 'Dispara salvas contínuas de 2 micro-mísseis balísticos teleguiados que buscam alvos hostis com explosão em área.',
     playerBonus: '+15% Dano Explosivo (AoE) para todas as armas da nave e rajadas teleguiadas automáticas a cada 2.5s.',
-    codeRef: 'RenderSystem.ts:line 2185'
+    munitionName: 'Micro-Mísseis Teleguiados Concussivos',
+    munitionBehavior: 'Propulsão autônoma com curva de interceptação e raio de detonação termodinâmica de 120px.',
+    codeRef: 'hq-scene.ts:line 781 / RenderSystem.ts:line 2185'
   },
   {
     id: 'lightning',
@@ -482,7 +486,9 @@ export const DRONES_DATA: DroneData[] = [
     role: 'Controle de Hordas / Eletricidade',
     combatAction: 'Descarrega arcos elétricos estocásticos de alta voltagem que saltam instantaneamente entre até 3 inimigos próximos.',
     playerBonus: '+20% Dano Elétrico Global e chance de 20% de atordoamento (stun) temporário em alvos de porte leve.',
-    codeRef: 'RenderSystem.ts:line 2205'
+    munitionName: 'Arcos Voltaicos em Cadeia',
+    munitionBehavior: 'Descargas eletrostáticas instantâneas com arcos secundários encadeados de alta frequência.',
+    codeRef: 'hq-scene.ts:line 811 / RenderSystem.ts:line 2205'
   },
   {
     id: 'golden_aura',
@@ -492,7 +498,9 @@ export const DRONES_DATA: DroneData[] = [
     role: 'Aura Térmica / Proximidade',
     combatAction: 'Projeta um halo permanente de radiação termonuclear em volta da nave que queima qualquer entidade que se aproxime.',
     playerBonus: '+10% Dano de Casco e queima contínua de 45 HP/s em todos os inimigos dentro do raio de 180px.',
-    codeRef: 'RenderSystem.ts:line 2220'
+    munitionName: 'Radiação Coronal Solar',
+    munitionBehavior: 'Halo contínuo de calor coronal de 360° que funde blindagens e dissolve escudos por proximidade.',
+    codeRef: 'hq-scene.ts:line 834 / RenderSystem.ts:line 2220'
   },
   {
     id: 'black_hole',
@@ -502,7 +510,9 @@ export const DRONES_DATA: DroneData[] = [
     role: 'Gravidade / Coleta Automática',
     combatAction: 'Gera micro-singularidades periódicas que desaceleram e atraem inimigos e fragmentos em direção ao centro do vácuo.',
     playerBonus: 'Atração magnética automática de 100% dos fragmentos e orbes soltos no setor +15% taxa de créditos.',
-    codeRef: 'RenderSystem.ts:line 2235'
+    munitionName: 'Poço de Singularidade Gravitacional',
+    munitionBehavior: 'Vácuo gravitacional de atração contínua que imobiliza naves leves e concentra alvos para ataques em área.',
+    codeRef: 'hq-scene.ts:line 859 / RenderSystem.ts:line 2235'
   },
   {
     id: 'death_wave',
@@ -512,7 +522,9 @@ export const DRONES_DATA: DroneData[] = [
     role: 'Disrupção / Limpeza de Projéteis',
     combatAction: 'Emite pulsos circulares expansivos de plasma de alta densidade que empurram constructos hostis e dissolvem tiros inimigos.',
     playerBonus: 'Dano de cavitação expansivo a cada 4s e destruição de projéteis hostis leves na área de expansão.',
-    codeRef: 'RenderSystem.ts:line 2245'
+    munitionName: 'Ondas de Choque Harmônicas de Cavitação',
+    munitionBehavior: 'Pulsos de choque concussivo em 3 arcos concêntricos de alta velocidade com anulação de disparos hostis.',
+    codeRef: 'hq-scene.ts:line 890 / RenderSystem.ts:line 2245'
   },
   {
     id: 'chrono_field',
@@ -522,7 +534,9 @@ export const DRONES_DATA: DroneData[] = [
     role: 'Dilatação Temporal / Suporte',
     combatAction: 'Projeta engrenagens e mostradores holográficos que distorcem o tempo ao redor da nave.',
     playerBonus: 'Redução de 60% na velocidade de deslocamento de todos os inimigos e tiros hostis próximos à nave.',
-    codeRef: 'RenderSystem.ts:line 2255'
+    munitionName: 'Bolha de Estase Temporal',
+    munitionBehavior: 'Campo taquiônico de desaceleração que reduz em 60% a taxa de atualização física das entidades inimigas.',
+    codeRef: 'hq-scene.ts:line 907 / RenderSystem.ts:line 2255'
   },
   {
     id: 'orbital_beam_drone',
@@ -532,7 +546,9 @@ export const DRONES_DATA: DroneData[] = [
     role: 'Sniper / Anti-Blindagem',
     combatAction: 'Dispara um feixe colimado vertical de satélite direto do espaço com penetração contínua e foco sustentado.',
     playerBonus: 'Dano perfurante massivo contínuo contra Bosses e tanques pesados, ignorando 50% da blindagem natural.',
-    codeRef: 'RenderSystem.ts:line 2265'
+    munitionName: 'Feixe Laser Colimado Ionizante',
+    munitionBehavior: 'Raio laser vertical perpétuo que varre o plano de cima para baixo com incineração molecular pura.',
+    codeRef: 'hq-scene.ts:line 931 / RenderSystem.ts:line 2265'
   },
   {
     id: 'quantum_boomerang_drone',
@@ -542,7 +558,9 @@ export const DRONES_DATA: DroneData[] = [
     role: 'Corte Contínuo / Retorno',
     combatAction: 'Lança lâminas giratórias que transpassam os inimigos em trajetória orbital e retornam causando dano duplo no retorno.',
     playerBonus: '+15% Velocidade de Recarga de Módulos e acertos múltiplos garantidos por projétil lançado.',
-    codeRef: 'RenderSystem.ts:line 2285'
+    munitionName: 'Chakram Tri-Facetado de Retorno Magnético',
+    munitionBehavior: 'Três pás aerodinâmicas em rotação contínua que perfuram colunas de alvos na ida e retornam ao drone.',
+    codeRef: 'hq-scene.ts:line 955 / RenderSystem.ts:line 2285'
   },
   {
     id: 'proximity_mine_drone',
@@ -552,7 +570,9 @@ export const DRONES_DATA: DroneData[] = [
     role: 'Defesa de Retaguarda / Armadilhas',
     combatAction: 'Deposita minas octogonais no rastro da nave que detonam ao toque de inimigos perseguidores ou corredores.',
     playerBonus: 'Proteção contra investidas pelas costas e retaguarda com dano de fragmentação em área de 120px.',
-    codeRef: 'RenderSystem.ts:line 2305'
+    munitionName: 'Minas Octogonais de Fragmentação',
+    munitionBehavior: 'Sensores de proximidade com 4 antenas de gatilho e detonação de fragmentos explosivos em 360°.',
+    codeRef: 'hq-scene.ts:line 976 / RenderSystem.ts:line 2305'
   },
   {
     id: 'mirror_deflector_drone',
@@ -562,7 +582,9 @@ export const DRONES_DATA: DroneData[] = [
     role: 'Defesa Reativa / Contra-Ataque',
     combatAction: 'Prisma refletor de diamante que orbita a nave e rebate disparos hostis de volta contra os atiradores.',
     playerBonus: 'Chance de 35% de defletir tiros inimigos como projéteis aliados com 1.5x de dano crítico.',
-    codeRef: 'RenderSystem.ts:line 2335'
+    munitionName: 'Shards de Refração Holográfica',
+    munitionBehavior: 'Prisma frontal de diamante com 4 fragmentos orbitais que invertem o vetor de velocidade de projéteis hostis.',
+    codeRef: 'hq-scene.ts:line 1014 / RenderSystem.ts:line 2335'
   },
   {
     id: 'subzero_cryo_drone',
@@ -572,7 +594,9 @@ export const DRONES_DATA: DroneData[] = [
     role: 'Congelamento / Controle de Área',
     combatAction: 'Dispara saraivadas de micro-agulhas de gelo que aplicam acúmulos de frio e congelam inimigos no lugar.',
     playerBonus: '+40% Dano Crítico contra inimigos congelados e redução passiva de 30% no dano recebido de alvos sob estase.',
-    codeRef: 'RenderSystem.ts:line 2350'
+    munitionName: 'Espículas de Gelo Subatômico',
+    munitionBehavior: 'Cristal hexagonal com 6 pontas térmicas negativas que reduzem a velocidade do inimigo a zero.',
+    codeRef: 'hq-scene.ts:line 1038 / RenderSystem.ts:line 2350'
   },
   {
     id: 'tesla_coil_drone',
@@ -582,7 +606,9 @@ export const DRONES_DATA: DroneData[] = [
     role: 'Sobrecarga de Energia / Arcos em Cascata',
     combatAction: 'Canaliza cascatas de arcos voltaicos contínuos entre o drone e os principais alvos na tela.',
     playerBonus: '+25% Regeneração de Energia (EN) para a nave e disparo de sobrecarga automática em emergências.',
-    codeRef: 'RenderSystem.ts:line 2360'
+    munitionName: 'Descargas Eletrostáticas em Cascata',
+    munitionBehavior: 'Núcleo indutor com 3 faíscas orbitais emitindo relâmpagos contínuos que drenam energia dos chefes.',
+    codeRef: 'hq-scene.ts:line 1057 / RenderSystem.ts:line 2360'
   },
   {
     id: 'elemental_buffer_drone',
@@ -592,7 +618,9 @@ export const DRONES_DATA: DroneData[] = [
     role: 'Amplificação / Sinergia Mágica',
     combatAction: 'Orbita com 4 satélites de energia que modulam a frequência dos tiros da nave.',
     playerBonus: '+18% Dano Elemental a todas as armas equipadas (Fogo, Gelo, Eletricidade e Vazio).',
-    codeRef: 'RenderSystem.ts:line 2370'
+    munitionName: 'Orbes de Infusão Quad-Elemental',
+    munitionBehavior: 'Modula ciclicamente os disparos com Veneno, Choque, Fogo e Gelo aumentando o multiplicador de dano.',
+    codeRef: 'hq-scene.ts:line 1124 / RenderSystem.ts:line 2370'
   },
   {
     id: 'tactical_buffer_drone',
@@ -602,7 +630,9 @@ export const DRONES_DATA: DroneData[] = [
     role: 'Fortaleza / Escudo Balístico',
     combatAction: 'Projeta uma cúpula móvel hexagonal que acompanha a nave, absorvendo disparos pesados.',
     playerBonus: 'Absorve até 350 pontos de dano por onda e reduz em 20% a perda de integridade do casco.',
-    codeRef: 'RenderSystem.ts:line 2400'
+    munitionName: 'Barreira Hexagonal Aegis',
+    munitionBehavior: 'Escudo com 3 emissores periféricos que cria um domo físico absorvedor de impacto cinético.',
+    codeRef: 'hq-scene.ts:line 1148 / RenderSystem.ts:line 2400'
   },
   {
     id: 'scavenger_harvester_drone',
@@ -612,7 +642,9 @@ export const DRONES_DATA: DroneData[] = [
     role: 'Economia / Mineração de Recursos',
     combatAction: 'Chassi com 3 coletores magnéticos que varrem os cantos da arena minerando fragmentos extras dos destroços.',
     playerBonus: '+25% Créditos e Moedas por onda e aumento de 15% na chance de drop de itens raros.',
-    codeRef: 'RenderSystem.ts:line 2440'
+    munitionName: 'Feixes de Extração Magnética',
+    munitionBehavior: 'Gera vórtices de sucção que atraem e convertem destroços inimigos em fragmentos de dados e XP.',
+    codeRef: 'hq-scene.ts:line 1077 / RenderSystem.ts:line 2440'
   },
   {
     id: 'disruptor_debuffer_drone',
@@ -622,7 +654,9 @@ export const DRONES_DATA: DroneData[] = [
     role: 'Debuff / Corrosão de Blindagem',
     combatAction: 'Sonda com 2 pontas laterais que projeta raios de corrosão ácida nos alvos de maior HP.',
     playerBonus: 'Reduz a armadura dos Chefes e Tanques em -30%, permitindo que toda a esquadra cause dano amplificado.',
-    codeRef: 'RenderSystem.ts:line 2465'
+    munitionName: 'Feixe de Desestabilização Entrópica',
+    munitionBehavior: 'Raios laterais de ressonância reversa que dissolvem a integridade de armadura e escudos hostis.',
+    codeRef: 'hq-scene.ts:line 1101 / RenderSystem.ts:line 2465'
   }
 ];
 
@@ -773,68 +807,138 @@ export const PROJECTILES_DATA: ProjectileInfo[] = [
   }
 ];
 
-export const CLASSES_DATA = [
+export interface HeroClassData {
+  id: string;
+  name: string;
+  code: string;
+  pwr: number;
+  agi: number;
+  hul: number;
+  sys: number;
+  prc: number;
+  nrg: number;
+  color: string;
+  combatProfile: string;
+  weaponId: string;
+  weaponName: string;
+  munitionName: string;
+  munitionDetails: string;
+  codeRef: string;
+}
+
+export const HERO_CLASSES_DATA: HeroClassData[] = [
   {
-    id: 'fighter',
-    name: 'Guerreiro (Fighter)',
+    id: 'vanguard',
+    name: 'VANGUARDA [1]',
+    code: 'Fighter',
+    pwr: 12,
+    agi: 10,
+    hul: 12,
+    sys: 8,
+    prc: 8,
+    nrg: 10,
+    color: '#00ffaa',
+    combatProfile: 'Dano Cinético em Área: Foguetes pesados com dispersão de 140px.',
     weaponId: 'weapon_bazooka',
-    weaponName: 'Bazuca Pesada Balística',
-    munitionName: 'Munição: Míssil Ogiva Cinética',
-    color: '#ff3b30',
-    attributes: { str: 10, dex: 6, con: 10, int: 4, wit: 4, men: 4 },
-    desc: 'Especialista em resistência corporal e demolição em área. Dispara foguetes pesados de alto impacto com onda de concussão.'
+    weaponName: 'Bazuca de Plasma (Vanguarda)',
+    munitionName: 'Ogiva Balística Concussiva Termodinâmica',
+    munitionDetails: 'Projéteis balísticos pesados que geram onda de choque expansiva de 140px com empurrão e desintegração de blindagens.',
+    codeRef: 'HullSetupOverlay.ts:line 253'
   },
   {
-    id: 'rogue',
-    name: 'Ladino (Rogue)',
+    id: 'interceptor',
+    name: 'INTERCEPTADOR [2]',
+    code: 'Rogue',
+    pwr: 10,
+    agi: 14,
+    hul: 8,
+    sys: 8,
+    prc: 10,
+    nrg: 10,
+    color: '#3b82f6',
+    combatProfile: 'Lâminas de Plasma: Alta velocidade, esquiva quântica e taxa crítica.',
     weaponId: 'weapon_daggers',
-    weaponName: 'Adagas Cinéticas de Fase',
-    munitionName: 'Munição: Lâminas Flechette de Fase',
-    color: '#38bdf8',
-    attributes: { str: 6, dex: 10, con: 6, int: 4, wit: 8, men: 4 },
-    desc: 'Mestre da agilidade, esquiva e acertos críticos. Lança lâminas duplas velozes que ricocheteiam entre alvos.'
+    weaponName: 'Adagas Cibernéticas (Interceptador)',
+    munitionName: 'Dupla de Lâminas Ondulatórias de Fase',
+    munitionDetails: '2 adagas paralelas ondulatórias em frequência senoidal cruzando o centro (±16px) com alta perfuração e taxa crítica.',
+    codeRef: 'HullSetupOverlay.ts:line 254'
   },
   {
-    id: 'mage',
-    name: 'Mago (Mage)',
-    weaponId: 'weapon_fireball',
-    weaponName: 'Esfera de Plasma Ígneo',
-    munitionName: 'Munição: Bola de Fogo Termonuclear',
-    color: '#f97316',
-    attributes: { str: 4, dex: 4, con: 4, int: 10, wit: 6, men: 10 },
-    desc: 'Manipulador de energias arcanas sintetizadas. Conjurador de orbes termonucleares com dano contínuo de queimadura.'
-  },
-  {
-    id: 'bard',
-    name: 'Bardo (Bard)',
-    weaponId: 'weapon_musical_notes',
-    weaponName: 'Ressonador Sônico de Frequência',
-    munitionName: 'Munição: Notas Musicais de Cavitação',
+    id: 'disruptor',
+    name: 'DISRUPTOR QUÂNTICO [3]',
+    code: 'Mage',
+    pwr: 8,
+    agi: 8,
+    hul: 10,
+    sys: 14,
+    prc: 12,
+    nrg: 8,
     color: '#a855f7',
-    attributes: { str: 4, dex: 8, con: 6, int: 6, wit: 10, men: 8 },
-    desc: 'Harmonizador bio-computacional. Projeta notas acústicas em expansão que desestabilizam armaduras e restauram sistemas.'
+    combatProfile: 'Torpedos Térmicos: Detonação plasmática e ondas de pulso devastadoras.',
+    weaponId: 'weapon_fireball',
+    weaponName: 'Cajado Solar (Disruptor)',
+    munitionName: 'Esfera de Plasma Coronal Incandescente',
+    munitionDetails: 'Esferas térmicas incandescentes com labaredas orbitais que aplicam Queimadura contínua (Burn DoT) e desestabilização de escudos.',
+    codeRef: 'HullSetupOverlay.ts:line 255'
   },
   {
-    id: 'paladin',
-    name: 'Paladino (Paladin)',
+    id: 'resonator',
+    name: 'RESSONADOR [4]',
+    code: 'Bard',
+    pwr: 8,
+    agi: 10,
+    hul: 8,
+    sys: 10,
+    prc: 14,
+    nrg: 12,
+    color: '#d946ef',
+    combatProfile: 'Emissor Sônico: Ondas de choque senoidais com desorientação e estase.',
+    weaponId: 'weapon_musical_notes',
+    weaponName: 'Sintetizador Harmônico (Ressonador)',
+    munitionName: 'Pulsos de Choque Acústico & Notas Harmônicas',
+    munitionDetails: 'Ondas acústicas oscilatórias e notas sônicas perfurantes que causam cavitação estrutural, desorientação e estase nos inimigos.',
+    codeRef: 'HullSetupOverlay.ts:line 256'
+  },
+  {
+    id: 'bastion',
+    name: 'BASTIÃO AEGIS [5]',
+    code: 'Paladin',
+    pwr: 12,
+    agi: 8,
+    hul: 14,
+    sys: 8,
+    prc: 8,
+    nrg: 10,
+    color: '#facc15',
+    combatProfile: 'Feixe Táquion: Perfuração linear em linha e nanites reparadores de estrutura.',
     weaponId: 'weapon_holy_beam',
-    weaponName: 'Lança de Luz Sagrada',
-    munitionName: 'Munição: Feixe Perfurante de Fótons',
-    color: '#ffd700',
-    attributes: { str: 8, dex: 4, con: 10, int: 6, wit: 6, men: 10 },
-    desc: 'Bastião inquebrável da justiça geométrica. Emite feixes de luz fotônica contínua que transpassam colunas de inimigos.'
+    weaponName: 'Prisma de Luz Sagrada (Bastião)',
+    munitionName: 'Feixe Colimado de Luz Divina Táquion',
+    munitionDetails: 'Feixe colimado direcional de longo alcance com prisma de refração em diamante, incineração contínua e nanites de reparo.',
+    codeRef: 'HullSetupOverlay.ts:line 257'
   },
   {
-    id: 'ranger',
-    name: 'Patrulheiro (Ranger)',
+    id: 'marksman',
+    name: 'ATIRADOR TÁTICO [6]',
+    code: 'Ranger',
+    pwr: 10,
+    agi: 14,
+    hul: 10,
+    sys: 8,
+    prc: 12,
+    nrg: 8,
+    color: '#f97316',
+    combatProfile: 'Dardos Flechette: Alta penetração, múltiplos disparos em leque e precisão.',
     weaponId: 'weapon_bow_arrows',
-    weaponName: 'Arco Balístico Quântico',
-    munitionName: 'Munição: Flecha de Precisão Hipersônica',
-    color: '#10b981',
-    attributes: { str: 6, dex: 10, con: 6, int: 4, wit: 8, men: 6 },
-    desc: 'Atirador de elite de longo alcance. Dispara flechas de aceleração extrema com 100% de precisão e perfuração crítica.'
+    weaponName: 'Arco Cibernético (Atirador)',
+    munitionName: 'Flechas Flechette Hipersônicas de Precisão',
+    munitionDetails: 'Flechas vetoriais hipersônicas disparadas com precisão cirúrgica de longo alcance e multiplicador extremo de dano crítico.',
+    codeRef: 'HullSetupOverlay.ts:line 258'
   }
 ];
+
+// Compatibility alias for older references
+export const CLASSES_DATA = HERO_CLASSES_DATA;
 
 /**
  * Direct port of catalog-scene.ts:drawVectorShape (lines 4359-4529)
@@ -1259,7 +1363,8 @@ export function renderStudioArenaBoss(
 }
 
 /**
- * 5. DRONES
+ * 5. DRONES & ARMAS SUPREMAS (16 CANONICAL DRONES & WEAPONS)
+ * Verbatim procedural designs from hq-scene.ts:drawProceduralWeaponIcon (lines 780-1175)
  */
 export function renderStudioDrone(
   ctx: CanvasRenderingContext2D,
@@ -1276,122 +1381,716 @@ export function renderStudioDrone(
 
   const cx = width / 2;
   const cy = height / 2;
-  const s = Math.min(width, height) / 60;
+  const s = Math.min(width, height) / 36;
 
   let baseColor = '#00f0ff';
-  if (droneId === 'missiles') baseColor = '#ff3b30';
+  if (droneId === 'missiles') baseColor = '#ff3333';
   else if (droneId === 'lightning') baseColor = '#ffd700';
   else if (droneId === 'golden_aura') baseColor = '#ffcc00';
-  else if (droneId === 'black_hole') baseColor = '#a855f7';
-  else if (droneId === 'death_wave') baseColor = '#00f0ff';
-  else if (droneId === 'chrono_field') baseColor = '#06b6d4';
-  else if (droneId === 'orbital_beam_drone') baseColor = '#34d399';
+  else if (droneId === 'black_hole') baseColor = '#cc33ff';
+  else if (droneId === 'death_wave') baseColor = '#ff4400';
+  else if (droneId === 'chrono_field') baseColor = '#facc15';
+  else if (droneId === 'orbital_beam_drone') baseColor = '#00f0ff';
   else if (droneId === 'quantum_boomerang_drone') baseColor = '#38bdf8';
   else if (droneId === 'proximity_mine_drone') baseColor = '#ef4444';
-  else if (droneId === 'mirror_deflector_drone') baseColor = '#6366f1';
+  else if (droneId === 'mirror_deflector_drone') baseColor = '#60a5fa';
   else if (droneId === 'subzero_cryo_drone') baseColor = '#38bdf8';
-  else if (droneId === 'tesla_coil_drone') baseColor = '#c084fc';
-  else if (droneId === 'elemental_buffer_drone') baseColor = '#00ffcc';
+  else if (droneId === 'tesla_coil_drone') baseColor = '#a855f7';
+  else if (droneId === 'elemental_buffer_drone') baseColor = '#10b981';
   else if (droneId === 'tactical_buffer_drone') baseColor = '#f59e0b';
   else if (droneId === 'scavenger_harvester_drone') baseColor = '#10b981';
   else if (droneId === 'disruptor_debuffer_drone') baseColor = '#ec4899';
 
   ctx.strokeStyle = baseColor;
-  ctx.lineWidth = 1.8;
+  ctx.lineWidth = Math.max(2, 1.8 * (s / 4));
 
-  if (droneId === 'missiles') {
-    ctx.fillStyle = '#3a0808';
+  switch (droneId) {
+    case 'missiles': {
+      // Aerodynamic Ballistic Missile with Delta Stabilizers & Exhaust Dots
+      ctx.fillStyle = '#3a0808';
+      ctx.beginPath();
+      ctx.moveTo(cx + 13 * s, cy);
+      ctx.lineTo(cx + 4 * s, cy - 6 * s);
+      ctx.lineTo(cx - 7 * s, cy - 6 * s);
+      ctx.lineTo(cx - 11 * s, cy - 10 * s);
+      ctx.lineTo(cx - 9 * s, cy - 3 * s);
+      ctx.lineTo(cx - 9 * s, cy + 3 * s);
+      ctx.lineTo(cx - 11 * s, cy + 10 * s);
+      ctx.lineTo(cx - 7 * s, cy + 6 * s);
+      ctx.lineTo(cx + 4 * s, cy + 6 * s);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.4 * (s / 4);
+      ctx.beginPath();
+      ctx.moveTo(cx - 5 * s, cy);
+      ctx.lineTo(cx + 7 * s, cy);
+      ctx.stroke();
+
+      ctx.fillStyle = '#ffaa00';
+      ctx.beginPath();
+      ctx.arc(cx - 12 * s, cy, 2.2 * s, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(cx - 9 * s, cy, 1.4 * s, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    }
+
+    case 'lightning': {
+      // High-Voltage Collimated Dual-Discharge Bolt with Spark Nodes
+      ctx.fillStyle = '#3d3000';
+      ctx.beginPath();
+      ctx.moveTo(cx + 2 * s, cy - 13 * s);
+      ctx.lineTo(cx - 7 * s, cy - 1 * s);
+      ctx.lineTo(cx - 1 * s, cy - 1 * s);
+      ctx.lineTo(cx - 3 * s, cy + 13 * s);
+      ctx.lineTo(cx + 7 * s, cy + 1 * s);
+      ctx.lineTo(cx + 1 * s, cy + 1 * s);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.2 * (s / 4);
+      ctx.beginPath();
+      ctx.moveTo(cx - 4 * s, cy - 5 * s);
+      ctx.lineTo(cx + 4 * s, cy + 5 * s);
+      ctx.stroke();
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(cx, cy, 2.2 * s, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    }
+
+    case 'golden_aura': {
+      // Radiant Solar Coronal Field with 4 Cardinal Spikes
+      ctx.fillStyle = '#382d00';
+      ctx.beginPath();
+      ctx.arc(cx, cy, 10 * s, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.strokeStyle = baseColor;
+      ctx.lineWidth = 1.6 * (s / 4);
+      ctx.beginPath();
+      ctx.arc(cx, cy, 6 * s, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(cx, cy, 2.8 * s, 0, Math.PI * 2);
+      ctx.fill();
+
+      for (let r = 0; r < 4; r++) {
+        const ra = (r * Math.PI) / 2 + time * 0.8;
+        ctx.beginPath();
+        ctx.moveTo(cx + Math.cos(ra) * 6 * s, cy + Math.sin(ra) * 6 * s);
+        ctx.lineTo(cx + Math.cos(ra) * 13 * s, cy + Math.sin(ra) * 13 * s);
+        ctx.stroke();
+      }
+      break;
+    }
+
+    case 'black_hole': {
+      // Toroidal Gravitational Singularity with Accretion Disks
+      ctx.fillStyle = '#18002e';
+      ctx.beginPath();
+      ctx.arc(cx, cy, 8.5 * s, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      for (const rot of [Math.PI / 4 + time * 0.5, -Math.PI / 4 - time * 0.5]) {
+        ctx.beginPath();
+        for (let a = 0; a <= Math.PI * 2; a += 0.35) {
+          const ex = Math.cos(a) * 14 * s;
+          const ey = Math.sin(a) * 5 * s;
+          const rx = cx + ex * Math.cos(rot) - ey * Math.sin(rot);
+          const ry = cy + ex * Math.sin(rot) + ey * Math.cos(rot);
+          if (a === 0) ctx.moveTo(rx, ry); else ctx.lineTo(rx, ry);
+        }
+        ctx.closePath();
+        ctx.stroke();
+      }
+
+      ctx.fillStyle = '#000000';
+      ctx.beginPath();
+      ctx.arc(cx, cy, 3.8 * s, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(cx + 1 * s, cy - 1 * s, 1.1 * s, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    }
+
+    case 'death_wave': {
+      // Concentric Harmonic Cavitation Shockwaves
+      ctx.lineWidth = 2.0 * (s / 4);
+      for (let a = 1; a <= 3; a++) {
+        const ar = (a * 5 + 2) * s;
+        ctx.beginPath();
+        ctx.arc(cx - 4 * s, cy, ar, -Math.PI * 0.42, Math.PI * 0.42);
+        ctx.stroke();
+      }
+
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(cx - 4 * s, cy, 2.8 * s, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.2 * (s / 4);
+      ctx.beginPath();
+      ctx.moveTo(cx - 8 * s, cy);
+      ctx.lineTo(cx - 2 * s, cy);
+      ctx.stroke();
+      break;
+    }
+
+    case 'chrono_field': {
+      // Precision Chronometer Stasis Gear with Radial Teeth & Axle Hub
+      ctx.fillStyle = '#002626';
+      ctx.beginPath();
+      ctx.arc(cx, cy, 7 * s, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      for (let gr = 0; gr < 6; gr++) {
+        const ga = (gr * Math.PI) / 3 + time * 0.6;
+        ctx.beginPath();
+        ctx.moveTo(cx + Math.cos(ga) * 7 * s, cy + Math.sin(ga) * 7 * s);
+        ctx.lineTo(cx + Math.cos(ga) * 11.5 * s, cy + Math.sin(ga) * 11.5 * s);
+        ctx.stroke();
+      }
+
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(cx, cy, 2.8 * s, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = baseColor;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(cx + 3.5 * s, cy - 3.5 * s);
+      ctx.stroke();
+      break;
+    }
+
+    case 'orbital_beam_drone': {
+      // Satellite Drone Prism Emitter with Vertical Piercing Laser Beam
+      ctx.fillStyle = '#002233';
+      ctx.beginPath();
+      ctx.moveTo(cx, cy - 11 * s);
+      ctx.lineTo(cx + 8 * s, cy + 3 * s);
+      ctx.lineTo(cx - 8 * s, cy + 3 * s);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Piercing vertical beam
+      ctx.strokeStyle = baseColor;
+      ctx.lineWidth = 2.2 * (s / 4);
+      ctx.beginPath();
+      ctx.moveTo(cx, cy + 3 * s);
+      ctx.lineTo(cx, cy + 18 * s);
+      ctx.stroke();
+
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.1 * (s / 4);
+      ctx.beginPath();
+      ctx.moveTo(cx, cy + 3 * s);
+      ctx.lineTo(cx, cy + 18 * s);
+      ctx.stroke();
+
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(cx, cy - 2 * s, 2.2 * s, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    }
+
+    case 'quantum_boomerang_drone': {
+      // Spinning Chakram Aerodynamic Tri-Blade Boomerang
+      ctx.fillStyle = '#033e5c';
+      for (let b = 0; b < 3; b++) {
+        const ba = (b * 2 * Math.PI) / 3 - Math.PI / 2 + time * 1.5;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(cx + Math.cos(ba) * 12 * s, cy + Math.sin(ba) * 12 * s);
+        ctx.lineTo(cx + Math.cos(ba + 0.5) * 6 * s, cy + Math.sin(ba + 0.5) * 6 * s);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+      }
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(cx, cy, 2.8 * s, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    }
+
+    case 'proximity_mine_drone': {
+      // Armored Octagonal Mine with 4 Standoff Sensors & Detonator
+      ctx.fillStyle = '#380505';
+      ctx.beginPath();
+      for (let m = 0; m < 8; m++) {
+        const ma = (m * Math.PI) / 4;
+        const mx = cx + Math.cos(ma) * 9 * s;
+        const my = cy + Math.sin(ma) * 9 * s;
+        if (m === 0) ctx.moveTo(mx, my); else ctx.lineTo(mx, my);
+      }
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      for (let sp = 0; sp < 4; sp++) {
+        const spa = (sp * Math.PI) / 2 + Math.PI / 4;
+        ctx.beginPath();
+        ctx.moveTo(cx + Math.cos(spa) * 9 * s, cy + Math.sin(spa) * 9 * s);
+        ctx.lineTo(cx + Math.cos(spa) * 13 * s, cy + Math.sin(spa) * 13 * s);
+        ctx.stroke();
+      }
+
+      ctx.fillStyle = '#ff5555';
+      ctx.beginPath();
+      ctx.arc(cx, cy, 3.8 * s, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(cx, cy, 1.6 * s, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    }
+
+    case 'mirror_deflector_drone': {
+      // Diamond Reflector Prism + 4 Orbiting Deflector Shards
+      ctx.fillStyle = '#0e244d';
+      ctx.beginPath();
+      ctx.moveTo(cx, cy - 10 * s);
+      ctx.lineTo(cx + 7.5 * s, cy);
+      ctx.lineTo(cx, cy + 10 * s);
+      ctx.lineTo(cx - 7.5 * s, cy);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      for (let d = 0; d < 4; d++) {
+        const da = (d * Math.PI) / 2 + Math.PI / 4 + time * 0.8;
+        ctx.fillStyle = baseColor;
+        ctx.beginPath();
+        ctx.arc(cx + Math.cos(da) * 13 * s, cy + Math.sin(da) * 13 * s, 1.8 * s, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(cx, cy, 2.3 * s, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    }
+
+    case 'subzero_cryo_drone': {
+      // Hexagonal Cryogenic Snowflake Lattice with 6 Frost Spurs
+      ctx.fillStyle = '#082f49';
+      ctx.beginPath();
+      ctx.arc(cx, cy, 7 * s, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      for (let c = 0; c < 6; c++) {
+        const ca = (c * Math.PI) / 3;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(cx + Math.cos(ca) * 12 * s, cy + Math.sin(ca) * 12 * s);
+        ctx.stroke();
+
+        ctx.fillStyle = baseColor;
+        ctx.beginPath();
+        ctx.arc(cx + Math.cos(ca) * 9 * s, cy + Math.sin(ca) * 9 * s, 1.6 * s, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(cx, cy, 2.8 * s, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    }
+
+    case 'tesla_coil_drone': {
+      // Tesla Inductor Core with 3 Orbiting Discharge Sparks
+      ctx.fillStyle = '#270744';
+      ctx.beginPath();
+      ctx.arc(cx, cy, 8 * s, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      for (let sn = 0; sn < 3; sn++) {
+        const sa = (sn * 2 * Math.PI) / 3 - Math.PI / 2 + time * 1.2;
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(cx + Math.cos(sa) * 11 * s, cy + Math.sin(sa) * 11 * s, 2 * s, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.strokeStyle = baseColor;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(cx + Math.cos(sa) * 11 * s, cy + Math.sin(sa) * 11 * s);
+        ctx.stroke();
+      }
+
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(cx, cy, 3 * s, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    }
+
+    case 'elemental_buffer_drone': {
+      // Prismatic Quad-Elemental Diamond Core with 4 orbiting sparks
+      ctx.fillStyle = '#042f2e';
+      ctx.beginPath();
+      ctx.moveTo(cx, cy - 10 * s);
+      ctx.lineTo(cx + 8 * s, cy);
+      ctx.lineTo(cx, cy + 10 * s);
+      ctx.lineTo(cx - 8 * s, cy);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      const eleColors = ['#10b981', '#fbbf24', '#f97316', '#38bdf8'];
+      for (let m = 0; m < 4; m++) {
+        const ma = (m * Math.PI) / 2 + time * 0.9;
+        ctx.fillStyle = eleColors[m]!;
+        ctx.beginPath();
+        ctx.arc(cx + Math.cos(ma) * 12 * s, cy + Math.sin(ma) * 12 * s, 1.8 * s, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(cx, cy, 2.8 * s, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    }
+
+    case 'tactical_buffer_drone': {
+      // Hexagonal Aegis Forcefield Shield with 3 Emitters
+      ctx.fillStyle = '#451a03';
+      ctx.beginPath();
+      for (let h = 0; h < 6; h++) {
+        const ha = (h * Math.PI) / 3;
+        const hx = cx + Math.cos(ha) * 8.5 * s;
+        const hy = cy + Math.sin(ha) * 8.5 * s;
+        if (h === 0) ctx.moveTo(hx, hy); else ctx.lineTo(hx, hy);
+      }
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      for (let sa = 0; sa < 3; sa++) {
+        const ang = (sa * 2 * Math.PI) / 3 - Math.PI / 2 + time * 0.8;
+        ctx.fillStyle = '#fde047';
+        ctx.beginPath();
+        ctx.arc(cx + Math.cos(ang) * 13 * s, cy + Math.sin(ang) * 13 * s, 1.8 * s, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(cx, cy, 3 * s, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    }
+
+    case 'scavenger_harvester_drone': {
+      // Geometric Emerald Harvester Prism with 3 satellite orbiters
+      ctx.fillStyle = '#064e3b';
+      ctx.beginPath();
+      ctx.arc(cx, cy, 9 * s, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#34d399';
+      ctx.beginPath();
+      ctx.moveTo(cx, cy - 5 * s);
+      ctx.lineTo(cx + 5 * s, cy);
+      ctx.lineTo(cx, cy + 5 * s);
+      ctx.lineTo(cx - 5 * s, cy);
+      ctx.closePath();
+      ctx.fill();
+
+      for (let m = 0; m < 3; m++) {
+        const ma = (m * 2 * Math.PI) / 3 + time * 1.1;
+        ctx.fillStyle = '#a7f3d0';
+        ctx.beginPath();
+        ctx.arc(cx + Math.cos(ma) * 13 * s, cy + Math.sin(ma) * 13 * s, 1.6 * s, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      break;
+    }
+
+    case 'disruptor_debuffer_drone': {
+      // Neon Magenta Entropy Disruptor with dual lateral prongs
+      ctx.fillStyle = '#500724';
+      ctx.beginPath();
+      ctx.moveTo(cx, cy - 8 * s);
+      ctx.lineTo(cx + 7 * s, cy + 4 * s);
+      ctx.lineTo(cx - 7 * s, cy + 4 * s);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#f472b6';
+      ctx.beginPath();
+      ctx.arc(cx, cy, 3 * s, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(cx, cy, 1.5 * s, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.strokeStyle = '#f43f5e';
+      ctx.beginPath();
+      ctx.moveTo(cx - 8 * s, cy);
+      ctx.lineTo(cx - 13 * s, cy + 3 * s);
+      ctx.moveTo(cx + 8 * s, cy);
+      ctx.lineTo(cx + 13 * s, cy + 3 * s);
+      ctx.stroke();
+      break;
+    }
+
+    default: {
+      ctx.fillStyle = '#0c1a2e';
+      ctx.beginPath();
+      ctx.arc(cx, cy, 10 * s, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(cx, cy, 3 * s, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    }
+  }
+
+  ctx.restore();
+}
+
+/**
+ * 6. HERO CLASS WEAPON & PROJECTILE RENDERER
+ * Authentic renders from catalog-scene.ts (lines 3535-3645) & RenderSystem.ts
+ */
+export function renderStudioHeroClassWeapon(
+  ctx: CanvasRenderingContext2D,
+  classId: string,
+  width: number,
+  height: number,
+  time: number
+) {
+  ctx.save();
+  ctx.clearRect(0, 0, width, height);
+
+  ctx.fillStyle = '#05020c';
+  ctx.fillRect(0, 0, width, height);
+
+  const cx = width / 2;
+  const cy = height / 2;
+  const s = Math.min(width, height) / 28;
+  const pulse = Math.sin(time * 3.5) * 0.5 + 0.5;
+
+  const id = classId.toLowerCase();
+
+  if (id === 'vanguard' || id === 'fighter' || id === 'weapon_bazooka') {
+    // Plasma Bazooka: Heavy concussive thermodynamic warhead + plasma exhaust
+    ctx.strokeStyle = '#f97316';
+    ctx.lineWidth = 2.2 * (s / 4);
+    ctx.fillStyle = '#431407';
     ctx.beginPath();
-    ctx.moveTo(cx + 13 * s, cy);
-    ctx.lineTo(cx + 4 * s, cy - 6 * s);
-    ctx.lineTo(cx - 7 * s, cy - 6 * s);
-    ctx.lineTo(cx - 11 * s, cy - 10 * s);
-    ctx.lineTo(cx - 9 * s, cy - 3 * s);
-    ctx.lineTo(cx - 9 * s, cy + 3 * s);
-    ctx.lineTo(cx - 11 * s, cy + 10 * s);
-    ctx.lineTo(cx - 7 * s, cy + 6 * s);
-    ctx.lineTo(cx + 4 * s, cy + 6 * s);
+    ctx.moveTo(cx + 18 * s, cy);
+    ctx.lineTo(cx + 4 * s, cy - 8 * s);
+    ctx.lineTo(cx - 14 * s, cy - 8 * s);
+    ctx.lineTo(cx - 14 * s, cy + 8 * s);
+    ctx.lineTo(cx + 4 * s, cy + 8 * s);
     ctx.closePath();
     ctx.fill();
+    ctx.stroke();
+
+    // Incandescent core
+    ctx.fillStyle = '#ffedd5';
+    ctx.beginPath();
+    ctx.arc(cx + 8 * s, cy, 3.5 * s, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Concussive shockwave exhaust
+    ctx.strokeStyle = '#f97316';
+    ctx.lineWidth = 1.8 * (s / 4);
+    ctx.beginPath();
+    ctx.arc(cx - 18 * s, cy, (5 + pulse * 2) * s, 0, Math.PI * 2);
+    ctx.stroke();
+
+    ctx.fillStyle = '#ff4400';
+    ctx.beginPath();
+    ctx.arc(cx - 18 * s, cy, 3 * s, 0, Math.PI * 2);
+    ctx.fill();
+
+  } else if (id === 'interceptor' || id === 'rogue' || id === 'weapon_daggers') {
+    // Twin Cyber Daggers: Parallel undulating sinusoidal plasma wave
+    ctx.strokeStyle = '#38bdf8';
+    ctx.lineWidth = 2.0 * (s / 4);
+
+    // Sinusoidal wave trail
+    ctx.beginPath();
+    for (let x = -24; x <= 24; x += 1) {
+      const y = Math.sin(x * 0.25 + time * 6.0) * 8 * s;
+      if (x === -24) ctx.moveTo(cx + x * s, cy + y);
+      else ctx.lineTo(cx + x * s, cy + y);
+    }
+    ctx.stroke();
+
+    // Twin Daggers
+    for (const offY of [-7 * s, 7 * s]) {
+      ctx.fillStyle = '#031a24';
+      ctx.strokeStyle = '#00f0ff';
+      ctx.lineWidth = 1.8 * (s / 4);
+      ctx.beginPath();
+      ctx.moveTo(cx + 18 * s, cy + offY);
+      ctx.lineTo(cx + 4 * s, cy + offY - 4 * s);
+      ctx.lineTo(cx - 12 * s, cy + offY);
+      ctx.lineTo(cx + 4 * s, cy + offY + 4 * s);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(cx + 6 * s, cy + offY, 2.0 * s, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+  } else if (id === 'disruptor' || id === 'mage' || id === 'weapon_fireball') {
+    // Solar Flare Staff: Blazing coronal plasma orb with orbiting solar flares
+    const orbR = (12 + pulse * 2) * s;
+    ctx.fillStyle = 'rgba(255, 69, 0, 0.25)';
+    ctx.beginPath();
+    ctx.arc(cx, cy, orbR + 6 * s, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = 'rgba(255, 140, 0, 0.6)';
+    ctx.beginPath();
+    ctx.arc(cx, cy, orbR, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = '#ffffcc';
+    ctx.beginPath();
+    ctx.arc(cx, cy, orbR * 0.45, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Orbiting flares
+    for (let f = 0; f < 4; f++) {
+      const fa = time * 4.0 + (f * Math.PI) / 2;
+      ctx.fillStyle = '#ffa500';
+      ctx.beginPath();
+      ctx.arc(cx + Math.cos(fa) * (orbR + 7 * s), cy + Math.sin(fa) * (orbR + 7 * s), 2.5 * s, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+  } else if (id === 'resonator' || id === 'bard' || id === 'weapon_musical_notes') {
+    // Harmonic Synthesizer: Vibrating musical treble notes + expanding soundwave rings
+    ctx.strokeStyle = '#a855f7';
+    ctx.lineWidth = 2.0 * (s / 4);
+    ctx.fillStyle = '#3b0764';
+    ctx.beginPath();
+    ctx.arc(cx - 6 * s, cy + 4 * s, 5 * s, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.lineWidth = 2.2 * (s / 4);
+    ctx.beginPath();
+    ctx.moveTo(cx - 1 * s, cy + 4 * s);
+    ctx.lineTo(cx - 1 * s, cy - 10 * s);
+    ctx.lineTo(cx + 7 * s, cy - 8 * s);
+    ctx.stroke();
+
+    // Acoustic concentric ripples
+    const rip = ((time * 25) % 18) * s;
+    ctx.strokeStyle = 'rgba(216, 180, 254, 0.7)';
+    ctx.lineWidth = 1.5 * (s / 4);
+    ctx.beginPath();
+    ctx.arc(cx + 8 * s, cy, rip, 0, Math.PI * 2);
+    ctx.stroke();
+
+  } else if (id === 'bastion' || id === 'paladin' || id === 'weapon_holy_beam') {
+    // Divine Radiance: Focused collimated ray with diamond refraction prism
+    ctx.strokeStyle = 'rgba(250, 204, 21, 0.4)';
+    ctx.lineWidth = 4.5 * (s / 4);
+    ctx.beginPath();
+    ctx.moveTo(cx - 26 * s, cy);
+    ctx.lineTo(cx + 26 * s, cy);
     ctx.stroke();
 
     ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = 1.2;
+    ctx.lineWidth = 2.0 * (s / 4);
     ctx.beginPath();
-    ctx.moveTo(cx - 5 * s, cy);
-    ctx.lineTo(cx + 7 * s, cy);
+    ctx.moveTo(cx - 26 * s, cy);
+    ctx.lineTo(cx + 26 * s, cy);
     ctx.stroke();
 
-    ctx.fillStyle = '#ffaa00';
+    // Diamond Prism Lens
+    ctx.strokeStyle = '#fef08a';
+    ctx.lineWidth = 1.8 * (s / 4);
+    ctx.fillStyle = '#713f12';
     ctx.beginPath();
-    ctx.arc(cx - 12 * s, cy, 2.5 * s, 0, Math.PI * 2);
-    ctx.fill();
-  } else if (droneId === 'lightning') {
-    ctx.fillStyle = '#3d3000';
-    ctx.beginPath();
-    ctx.moveTo(cx + 2 * s, cy - 13 * s);
-    ctx.lineTo(cx - 7 * s, cy - 1 * s);
-    ctx.lineTo(cx - 1 * s, cy - 1 * s);
-    ctx.lineTo(cx - 3 * s, cy + 13 * s);
-    ctx.lineTo(cx + 7 * s, cy + 1 * s);
-    ctx.lineTo(cx + 1 * s, cy + 1 * s);
+    ctx.moveTo(cx + 12 * s, cy);
+    ctx.lineTo(cx, cy - 9 * s);
+    ctx.lineTo(cx - 12 * s, cy);
+    ctx.lineTo(cx, cy + 9 * s);
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
-  } else if (droneId === 'golden_aura') {
-    ctx.fillStyle = '#382d00';
-    ctx.beginPath();
-    ctx.arc(cx, cy, 10 * s, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.stroke();
-    for (let r = 0; r < 4; r++) {
-      const ra = (r * Math.PI) / 2 + time * 0.8;
-      ctx.beginPath();
-      ctx.moveTo(cx + Math.cos(ra) * 6 * s, cy + Math.sin(ra) * 6 * s);
-      ctx.lineTo(cx + Math.cos(ra) * 15 * s, cy + Math.sin(ra) * 15 * s);
-      ctx.stroke();
-    }
-  } else if (droneId === 'black_hole') {
-    ctx.fillStyle = '#18002e';
-    ctx.beginPath();
-    ctx.arc(cx, cy, 9 * s, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.stroke();
-    for (const rot of [Math.PI / 4 + time, -Math.PI / 4 - time]) {
-      ctx.beginPath();
-      ctx.ellipse(cx, cy, 15 * s, 6 * s, rot, 0, Math.PI * 2);
-      ctx.stroke();
-    }
-  } else if (droneId === 'death_wave') {
-    for (let a = 1; a <= 3; a++) {
-      const ar = (a * 5 + 2) * s;
-      ctx.beginPath();
-      ctx.arc(cx - 4 * s, cy, ar, -Math.PI * 0.42, Math.PI * 0.42);
-      ctx.stroke();
-    }
-  } else if (droneId === 'chrono_field') {
-    ctx.fillStyle = '#002626';
-    ctx.beginPath();
-    ctx.arc(cx, cy, 8 * s, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.stroke();
-    for (let gr = 0; gr < 6; gr++) {
-      const ga = (gr * Math.PI) / 3 + time * 0.7;
-      ctx.beginPath();
-      ctx.moveTo(cx + Math.cos(ga) * 8 * s, cy + Math.sin(ga) * 8 * s);
-      ctx.lineTo(cx + Math.cos(ga) * 13 * s, cy + Math.sin(ga) * 13 * s);
-      ctx.stroke();
-    }
-  } else {
-    ctx.fillStyle = '#0c1a2e';
-    ctx.beginPath();
-    ctx.arc(cx, cy, 10 * s, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.stroke();
+
     ctx.fillStyle = '#ffffff';
     ctx.beginPath();
     ctx.arc(cx, cy, 3 * s, 0, Math.PI * 2);
     ctx.fill();
+
+  } else if (id === 'marksman' || id === 'ranger' || id === 'weapon_bow_arrows') {
+    // Cyber Composite Bow: Aerodynamic vector flechette with kinetic tip
+    ctx.strokeStyle = '#10b981';
+    ctx.lineWidth = 2.2 * (s / 4);
+    ctx.beginPath();
+    ctx.moveTo(cx - 18 * s, cy);
+    ctx.lineTo(cx + 18 * s, cy);
+    ctx.stroke();
+
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 1.4 * (s / 4);
+    ctx.beginPath();
+    ctx.moveTo(cx - 14 * s, cy);
+    ctx.lineTo(cx + 14 * s, cy);
+    ctx.stroke();
+
+    // Arrow head
+    ctx.fillStyle = '#10b981';
+    ctx.beginPath();
+    ctx.moveTo(cx + 22 * s, cy);
+    ctx.lineTo(cx + 14 * s, cy - 6 * s);
+    ctx.lineTo(cx + 14 * s, cy + 6 * s);
+    ctx.closePath();
+    ctx.fill();
+
+    // Fletching fins
+    ctx.strokeStyle = '#34d399';
+    ctx.lineWidth = 1.6 * (s / 4);
+    ctx.beginPath();
+    ctx.moveTo(cx - 16 * s, cy);
+    ctx.lineTo(cx - 21 * s, cy - 5 * s);
+    ctx.moveTo(cx - 16 * s, cy);
+    ctx.lineTo(cx - 21 * s, cy + 5 * s);
+    ctx.stroke();
   }
 
   ctx.restore();
