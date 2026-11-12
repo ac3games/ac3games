@@ -259,14 +259,27 @@ export function drawInGameCatalogShape(
   const is6Star = !isSpecial && sides === 12;
   const isQuatrefoil = isSpecial && specialType === 'star';
 
-  // Helper: draw continuous lobed shape (Trefoil, Quatrefoil, Pure Flower without internal lines)
+  // Helper: draw continuous lobed shape (Trefoil, Quatrefoil, Pure Flower)
+  // Verbatim from GeometryGenerator.ts: pure outer contour, ZERO internal crossing lines
   const drawContinuousLobedShape = (count: number, distRatio: number, lobeRatio: number) => {
     const dist = r * distRatio;
     const lobeR = r * lobeRatio;
-    const d = 2 * dist * Math.sin(Math.PI / count);
-    const halfAngle = Math.acos((d / 2) / lobeR);
-    const span = halfAngle + (Math.PI / 2 - Math.PI / count);
-    const stepsPerLobe = 24;
+    const alpha = Math.PI / count;
+
+    // Robust geometric intersection of adjacent circle lobes along their common boundary ray
+    const D = 2 * dist * Math.sin(alpha);
+    const h = Math.sqrt(Math.max(0, lobeR * lobeR - (D / 2) * (D / 2)));
+    const c0x = dist, c0y = 0;
+    const c1x = dist * Math.cos(2 * alpha), c1y = dist * Math.sin(2 * alpha);
+    const midX = (c0x + c1x) / 2;
+    const midY = (c0y + c1y) / 2;
+    const rMid = Math.sqrt(midX * midX + midY * midY);
+    const pOuterX = midX + (midX / rMid) * h;
+    const pOuterY = midY + (midY / rMid) * h;
+
+    // Outer valley angle relative to the lobe center (pure outer contour, ZERO internal crossing lines)
+    const span = Math.atan2(pOuterY - c0y, pOuterX - c0x);
+    const stepsPerLobe = 20;
 
     ctx.beginPath();
     for (let i = 0; i < count; i++) {
@@ -459,18 +472,6 @@ export function renderStudioPlayer(
   // Draw pure player shape (isPlayer = true -> no reticle, clean contour)
   drawInGameCatalogShape(ctx, cx, cy, radius, form, rarity.color, true);
 
-  // In-Game Sensory HUD Expression Face (Image 2)
-  const faceScale = s * 0.9;
-  ctx.fillStyle = '#f97316';
-  // Left eye 'I'
-  ctx.fillRect(cx - 7 * faceScale, cy - 4 * faceScale, 3.5 * faceScale, 7 * faceScale);
-  // Right eye 'I'
-  ctx.fillRect(cx + 3.5 * faceScale, cy - 4 * faceScale, 3.5 * faceScale, 7 * faceScale);
-  // Nose dot
-  ctx.fillRect(cx - 1 * faceScale, cy - 8 * faceScale, 2 * faceScale, 2 * faceScale);
-  // Mouth bar
-  ctx.fillRect(cx - 5 * faceScale, cy + 6 * faceScale, 10 * faceScale, 2.5 * faceScale);
-
   ctx.restore();
 }
 
@@ -578,13 +579,11 @@ export function renderStudioWaveBoss(
 }
 
 /**
- * 4. ARENA BOSS RENDERER (Images 3 and 5)
- * Authentic in-game Arena Boss:
- * - Base geometric shape with double glowing frame
- * - Huge concentric circular arena rings (yellow, cyan dial gauge with radial tick marks, red ring)
- * - Central red ocular core with white center dot and 4 crosshairs
- * - 4 Satellite sensor orbs (cyan and yellow)
- * - Divergent laser beams (Image 3) or Forcefield Shield "ESCUDO IMUNE" (Image 5)
+ * 4. ARENA BOSS RENDERER (Clean in-game accurate render)
+ * - Base geometric shape (Triangle, Square, etc.)
+ * - Concentric arena circles: Outer yellow ring + Inner red ring
+ * - Central hostile ocular core (red circle + white center + 4 crosshairs)
+ * - No fake dots, no lasers, no extra cyan circles
  */
 export function renderStudioArenaBoss(
   ctx: CanvasRenderingContext2D,
@@ -607,84 +606,28 @@ export function renderStudioArenaBoss(
   const rarity = RARITIES_DATA[rarityIdx - 1] || RARITIES_DATA[0]!;
   const radius = 38 * s;
 
-  // 1. Triple Divergent Laser Beams (for Boss 1 Triangle as in Image 3)
-  if (boss.sides === 3) {
-    const beamColors = ['#00f0ff', '#00ff66', '#ff0055'];
-    const angles = [Math.PI / 2 - 0.32, Math.PI / 2, Math.PI / 2 + 0.32];
-    for (let b = 0; b < 3; b++) {
-      const bColor = beamColors[b]!;
-      const bAngle = angles[b]!;
-      const endX = cx + Math.cos(bAngle) * (radius * 2.8);
-      const endY = cy + Math.sin(bAngle) * (radius * 2.8);
-
-      // Outer laser aura
-      ctx.strokeStyle = `${bColor}55`;
-      ctx.lineWidth = 14 * s;
-      ctx.beginPath();
-      ctx.moveTo(cx, cy);
-      ctx.lineTo(endX, endY);
-      ctx.stroke();
-
-      // Dense beam core
-      ctx.strokeStyle = bColor;
-      ctx.lineWidth = 6 * s;
-      ctx.beginPath();
-      ctx.moveTo(cx, cy);
-      ctx.lineTo(endX, endY);
-      ctx.stroke();
-
-      // White nuclear center
-      ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 2 * s;
-      ctx.beginPath();
-      ctx.moveTo(cx, cy);
-      ctx.lineTo(endX, endY);
-      ctx.stroke();
-    }
-  }
-
-  // 2. Base Geometric Frame with Double Glowing Outline
+  // 1. Base Geometric Shape
   const matchedForm = CATALOG_FORMS.find(f => f.sides === boss.sides) || CATALOG_FORMS[0]!;
   drawInGameCatalogShape(ctx, cx, cy, radius * 1.05, matchedForm, rarity.color, false);
 
-  // 3. Concentric Circular Arena Rings (Images 3 and 5)
+  // 2. Concentric Circular Arena Rings
   const ringR = radius * 0.95;
 
-  // 3A. Outer Yellow Circle Ring
+  // Outer Yellow Circle Ring
   ctx.strokeStyle = '#ffd700';
   ctx.lineWidth = 2.4;
   ctx.beginPath();
   ctx.arc(cx, cy, ringR * 1.15, 0, Math.PI * 2);
   ctx.stroke();
 
-  // 3B. Cyan Dial Gauge Circle with Radial Notches (Compass/Protractor style)
-  ctx.strokeStyle = '#00f0ff';
-  ctx.lineWidth = 1.8;
-  ctx.beginPath();
-  ctx.arc(cx, cy, ringR, 0, Math.PI * 2);
-  ctx.stroke();
-
-  // Radial tick marks around the cyan ring
-  const tickCount = 24;
-  ctx.strokeStyle = '#00f0ff88';
-  ctx.lineWidth = 1.2;
-  for (let t = 0; t < tickCount; t++) {
-    const ta = (t * 2 * Math.PI) / tickCount;
-    const tLen = t % 6 === 0 ? 5.5 * s : 3 * s;
-    ctx.beginPath();
-    ctx.moveTo(cx + Math.cos(ta) * (ringR - tLen), cy + Math.sin(ta) * (ringR - tLen));
-    ctx.lineTo(cx + Math.cos(ta) * ringR, cy + Math.sin(ta) * ringR);
-    ctx.stroke();
-  }
-
-  // 3C. Inner Red/Orange Concentric Circle
+  // Inner Red/Orange Concentric Circle
   ctx.strokeStyle = '#ff0055';
   ctx.lineWidth = 2.0;
   ctx.beginPath();
   ctx.arc(cx, cy, ringR * 0.65, 0, Math.PI * 2);
   ctx.stroke();
 
-  // 4. Central Hostile Ocular Core (Images 3 & 5)
+  // 3. Central Hostile Ocular Core
   const coreR = ringR * 0.42;
 
   // Red circle fill
@@ -707,53 +650,15 @@ export function renderStudioArenaBoss(
   ctx.strokeStyle = '#ffffff';
   ctx.lineWidth = 1.4;
   ctx.beginPath();
-  ctx.moveTo(cx - ringR * 0.9, cy);
+  ctx.moveTo(cx - ringR * 1.15, cy);
   ctx.lineTo(cx - coreR * 0.45, cy);
   ctx.moveTo(cx + coreR * 0.45, cy);
-  ctx.lineTo(cx + ringR * 0.9, cy);
-  ctx.moveTo(cx, cy - ringR * 0.9);
+  ctx.lineTo(cx + ringR * 1.15, cy);
+  ctx.moveTo(cx, cy - ringR * 1.15);
   ctx.lineTo(cx, cy - coreR * 0.45);
   ctx.moveTo(cx, cy + coreR * 0.45);
-  ctx.lineTo(cx, cy + ringR * 0.9);
+  ctx.lineTo(cx, cy + ringR * 1.15);
   ctx.stroke();
-
-  // 5. 4 Satellite Sensor Orbs (cyan and yellow dots in 4 quadrants)
-  const orbDist = ringR * 0.72;
-  const orbAngles = [-Math.PI * 0.75, -Math.PI * 0.25, Math.PI * 0.75, Math.PI * 0.25];
-  const orbColors = ['#ffd700', '#00f0ff', '#00f0ff', '#ffd700'];
-  for (let o = 0; o < 4; o++) {
-    const oa = orbAngles[o]!;
-    const ox = cx + Math.cos(oa) * orbDist;
-    const oy = cy + Math.sin(oa) * orbDist;
-    ctx.fillStyle = orbColors[o]!;
-    ctx.beginPath();
-    ctx.arc(ox, oy, 3.2 * s, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = '#ffffff';
-    ctx.beginPath();
-    ctx.arc(ox, oy, 1.4 * s, 0, Math.PI * 2);
-    ctx.fill();
-  }
-
-  // 6. Forcefield Shield Overlay for Square & others (Image 5: "ESCUDO IMUNE")
-  if (boss.sides === 4) {
-    ctx.fillStyle = 'rgba(0, 240, 255, 0.12)';
-    ctx.beginPath();
-    ctx.arc(cx, cy, ringR * 1.15, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Floating Shield Badge
-    ctx.fillStyle = '#00f0ff';
-    ctx.font = `bold ${Math.max(11, 2.5 * s)}px 'Orbitron', monospace`;
-    ctx.textAlign = 'center';
-    ctx.fillText('🛡️ ESCUDO IMUNE', cx, cy - 8 * s);
-  }
-
-  // Floating Combat Damage Indicator (as seen in Image 3 and 5)
-  ctx.fillStyle = '#ff3300';
-  ctx.font = `bold ${Math.max(12, 3.0 * s)}px 'Orbitron', sans-serif`;
-  ctx.textAlign = 'left';
-  ctx.fillText('💥 264456', cx + 2 * s, cy - 18 * s);
 
   ctx.restore();
 }
