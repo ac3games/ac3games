@@ -1396,13 +1396,22 @@ export function renderStudioPlayer(
   width: number,
   height: number,
   time: number,
-  expressionId: string = 'none'
+  expressionId: string = 'none',
+  backgroundMode: string = 'none'
 ) {
   ctx.save();
   ctx.clearRect(0, 0, width, height);
 
-  ctx.fillStyle = '#060312';
-  ctx.fillRect(0, 0, width, height);
+  // 1. Background layer: Transparent, Dark Void, or 100% Game Scenario
+  if (backgroundMode === 'transparent') {
+    // Pure transparent canvas for PNG download
+  } else if (!backgroundMode || backgroundMode === 'none' || backgroundMode === 'dark') {
+    ctx.fillStyle = '#060312';
+    ctx.fillRect(0, 0, width, height);
+  } else {
+    // Render 100% Full Procedural Game Scenario as Background
+    drawBiomeBackgroundFull(ctx, backgroundMode, width, height, time);
+  }
 
   const cx = width / 2;
   const cy = height / 2;
@@ -1412,7 +1421,7 @@ export function renderStudioPlayer(
   const isFormNone = formIdx === 0;
   const isRarityNone = rarityIdx === 0;
 
-  // 1. Stern Plasma Flame & Hull Shape
+  // 2. Stern Plasma Flame & Hull Shape
   if (!isFormNone) {
     const form = CATALOG_FORMS[formIdx - 1] || CATALOG_FORMS[0]!;
     const rarity = isRarityNone ? null : (RARITIES_DATA[rarityIdx - 1] || RARITIES_DATA[0]!);
@@ -1442,7 +1451,7 @@ export function renderStudioPlayer(
     drawInGameCatalogShape(ctx, cx, cy, radius, form, hullColor, true);
   } else {
     // Subtle cockpit coordinate calibration brackets when hull is None
-    ctx.strokeStyle = 'rgba(0, 240, 255, 0.25)';
+    ctx.strokeStyle = 'rgba(0, 240, 255, 0.3)';
     ctx.lineWidth = 1.2;
     const chSize = 18 * s;
     ctx.beginPath();
@@ -1455,7 +1464,7 @@ export function renderStudioPlayer(
     // Corner brackets
     const bSize = 24 * s;
     const cArm = 6 * s;
-    ctx.strokeStyle = 'rgba(0, 240, 255, 0.15)';
+    ctx.strokeStyle = 'rgba(0, 240, 255, 0.2)';
     ctx.beginPath();
     ctx.moveTo(cx - bSize, cy - bSize + cArm); ctx.lineTo(cx - bSize, cy - bSize); ctx.lineTo(cx - bSize + cArm, cy - bSize);
     ctx.moveTo(cx + bSize - cArm, cy - bSize); ctx.lineTo(cx + bSize, cy - bSize); ctx.lineTo(cx + bSize, cy - bSize + cArm);
@@ -1464,11 +1473,12 @@ export function renderStudioPlayer(
     ctx.stroke();
   }
 
-  // 2. Cyber HUD Expression directly inside cockpit
+  // 3. Cyber HUD Expression directly inside cockpit
   if (expressionId && expressionId !== 'none') {
-    const shim = createPhaserGraphicsShim(ctx, 0.55);
-    // Matching RenderSystem.ts:line 1775: drawCyberHUDExpression(graphics, expression, pos.x, pos.y, render.scale * 1.35)
-    drawCyberHUDExpression(shim, expressionId, cx, cy, s * 1.35);
+    const shim = createPhaserGraphicsShim(ctx, 0.65);
+    // Optical center of player hull cockpit (triangle optical center is slightly above circumcenter)
+    const exprY = formIdx === 1 ? cy - 3 * s : cy;
+    drawCyberHUDExpression(shim, expressionId, cx, exprY, s * 1.6);
   }
 
   ctx.restore();
@@ -3644,12 +3654,22 @@ export function drawCyberHUDExpression(
   colorOverride?: number | string
 ) {
   if (!expression || expression === 'none') return;
-  const found = CYBER_EXPRESSIONS.find(e => e.id === expression);
+  const raw = expression.trim();
+  const key = raw.toLowerCase();
+
+  // Find color from CYBER_EXPRESSIONS with alias tolerance
+  const found = CYBER_EXPRESSIONS.find(e => 
+    e.id.toLowerCase() === key ||
+    (key === 'charmed' && e.id === 'Enchanted') ||
+    (key === 'static' && e.id === 'Ecstatic') ||
+    (key === 'thirsty' && e.id === 'Bloodthirsty') ||
+    (key === 'devoted' && e.id === 'Devout')
+  );
   const baseColor = colorOverride !== undefined ? colorOverride : (found ? found.color : '#00f0ff');
 
-  if (expression === 'Happy') {
+  if (key === 'happy') {
     // 01. Happy: Dual upturned glowing laser visors & digital smile notch
-    graphics.lineStyle(2.2 * scale, baseColor, 1.0);
+    graphics.lineStyle(2.4 * scale, baseColor, 1.0);
     graphics.beginPath();
     graphics.moveTo(x - 9 * scale, y - 4 * scale);
     graphics.lineTo(x - 5 * scale, y - 7 * scale);
@@ -3662,14 +3682,14 @@ export function drawCyberHUDExpression(
     graphics.lineTo(x + 5 * scale, y + 4 * scale);
     graphics.strokePath();
     graphics.fillStyle('#ffffff', 0.95);
-    graphics.fillCircle(x - 5.5 * scale, y - 3.5 * scale, 1.2 * scale);
-    graphics.fillCircle(x + 5.5 * scale, y - 3.5 * scale, 1.2 * scale);
-  } else if (expression === 'Excited') {
+    graphics.fillCircle(x - 5.5 * scale, y - 3.5 * scale, 1.3 * scale);
+    graphics.fillCircle(x + 5.5 * scale, y - 3.5 * scale, 1.3 * scale);
+  } else if (key === 'excited') {
     // 02. Excited: Wide radiant sensor lenses with open acoustic exhaust
-    graphics.lineStyle(2.0 * scale, baseColor, 1.0);
+    graphics.lineStyle(2.2 * scale, baseColor, 1.0);
     graphics.strokeRect(x - 9 * scale, y - 7 * scale, 6 * scale, 5 * scale);
     graphics.strokeRect(x + 3 * scale, y - 7 * scale, 6 * scale, 5 * scale);
-    graphics.fillStyle('#ffffff', 0.9);
+    graphics.fillStyle('#ffffff', 0.95);
     graphics.fillRect(x - 7.5 * scale, y - 5.5 * scale, 3 * scale, 2 * scale);
     graphics.fillRect(x + 4.5 * scale, y - 5.5 * scale, 3 * scale, 2 * scale);
     graphics.beginPath();
@@ -3678,12 +3698,12 @@ export function drawCyberHUDExpression(
     graphics.lineTo(x + 3 * scale, y + 8 * scale);
     graphics.lineTo(x - 3 * scale, y + 8 * scale);
     graphics.closePath();
-    graphics.fillStyle(baseColor, 0.3);
+    graphics.fillStyle(baseColor, 0.35);
     graphics.fillPath();
     graphics.strokePath();
-  } else if (expression === 'Joyful') {
+  } else if (key === 'joyful') {
     // 03. Joyful: Sleek inverted-V chevron optics with soft pulse bar
-    graphics.lineStyle(2.2 * scale, baseColor, 1.0);
+    graphics.lineStyle(2.4 * scale, baseColor, 1.0);
     graphics.beginPath();
     graphics.moveTo(x - 9 * scale, y - 2 * scale);
     graphics.lineTo(x - 5 * scale, y - 7 * scale);
@@ -3694,7 +3714,7 @@ export function drawCyberHUDExpression(
     graphics.moveTo(x - 4 * scale, y + 4 * scale);
     graphics.lineTo(x + 4 * scale, y + 4 * scale);
     graphics.strokePath();
-  } else if (expression === 'Angry') {
+  } else if (key === 'angry') {
     // 04. Angry: Inward-angled combat brow plates with razor red slit optics
     graphics.fillStyle(baseColor, 0.95);
     graphics.beginPath();
@@ -3708,16 +3728,16 @@ export function drawCyberHUDExpression(
     graphics.lineTo(x + 9 * scale, y - 5 * scale);
     graphics.closePath();
     graphics.fillPath();
-    graphics.lineStyle(1.8 * scale, baseColor, 1.0);
+    graphics.lineStyle(2.0 * scale, baseColor, 1.0);
     graphics.beginPath();
     graphics.moveTo(x - 5 * scale, y + 4 * scale);
     graphics.lineTo(x - 2 * scale, y + 6 * scale);
     graphics.lineTo(x + 2 * scale, y + 4 * scale);
     graphics.lineTo(x + 5 * scale, y + 6 * scale);
     graphics.strokePath();
-  } else if (expression === 'Stern') {
+  } else if (key === 'stern') {
     // 05. Stern: Unyielding horizontal brow strip with cold optic scan points
-    graphics.lineStyle(2.2 * scale, baseColor, 1.0);
+    graphics.lineStyle(2.4 * scale, baseColor, 1.0);
     graphics.beginPath();
     graphics.moveTo(x - 10 * scale, y - 6 * scale);
     graphics.lineTo(x + 10 * scale, y - 6 * scale);
@@ -3727,18 +3747,18 @@ export function drawCyberHUDExpression(
     graphics.fillStyle(baseColor, 1.0);
     graphics.fillRect(x - 7 * scale, y - 3 * scale, 4 * scale, 3 * scale);
     graphics.fillRect(x + 3 * scale, y - 3 * scale, 4 * scale, 3 * scale);
-  } else if (expression === 'Surprised') {
+  } else if (key === 'surprised') {
     // 06. Surprised: Tactical optic sensor reticles with central aperture intake
-    graphics.lineStyle(1.8 * scale, baseColor, 1.0);
+    graphics.lineStyle(2.0 * scale, baseColor, 1.0);
     graphics.strokeRect(x - 8 * scale, y - 6 * scale, 5 * scale, 5 * scale);
     graphics.strokeRect(x + 3 * scale, y - 6 * scale, 5 * scale, 5 * scale);
     graphics.fillStyle(baseColor, 1.0);
     graphics.fillRect(x - 6.5 * scale, y - 4.5 * scale, 2 * scale, 2 * scale);
     graphics.fillRect(x + 4.5 * scale, y - 4.5 * scale, 2 * scale, 2 * scale);
     graphics.strokeRect(x - 2.5 * scale, y + 3 * scale, 5 * scale, 4 * scale);
-  } else if (expression === 'Defeated') {
+  } else if (key === 'defeated') {
     // 07. Defeated: Crossed hazard optics with sinuous distress mouth
-    graphics.lineStyle(2.0 * scale, baseColor, 1.0);
+    graphics.lineStyle(2.2 * scale, baseColor, 1.0);
     graphics.beginPath();
     graphics.moveTo(x - 8 * scale, y - 7 * scale);
     graphics.lineTo(x - 3 * scale, y - 2 * scale);
@@ -3752,9 +3772,9 @@ export function drawCyberHUDExpression(
     graphics.lineTo(x, y + 3 * scale);
     graphics.lineTo(x + 4 * scale, y + 5 * scale);
     graphics.strokePath();
-  } else if (expression === 'Crying') {
+  } else if (key === 'crying') {
     // 08. Crying: Horizontal optic sensors with vertical telemetry cascade streams
-    graphics.lineStyle(2.0 * scale, baseColor, 1.0);
+    graphics.lineStyle(2.2 * scale, baseColor, 1.0);
     graphics.beginPath();
     graphics.moveTo(x - 9 * scale, y - 5 * scale);
     graphics.lineTo(x - 2 * scale, y - 5 * scale);
@@ -3764,16 +3784,16 @@ export function drawCyberHUDExpression(
     graphics.lineTo(x, y + 3 * scale);
     graphics.lineTo(x + 4 * scale, y + 5 * scale);
     graphics.strokePath();
-    graphics.lineStyle(1.4 * scale, '#38bdf8', 0.85);
+    graphics.lineStyle(1.6 * scale, '#38bdf8', 0.9);
     graphics.beginPath();
     graphics.moveTo(x - 5.5 * scale, y - 3 * scale);
     graphics.lineTo(x - 5.5 * scale, y + 3 * scale);
     graphics.moveTo(x + 5.5 * scale, y - 3 * scale);
     graphics.lineTo(x + 5.5 * scale, y + 3 * scale);
     graphics.strokePath();
-  } else if (expression === 'Bored') {
+  } else if (key === 'bored') {
     // 09. Bored: Half-closed narrow horizontal sensor slits
-    graphics.lineStyle(2.0 * scale, baseColor, 1.0);
+    graphics.lineStyle(2.2 * scale, baseColor, 1.0);
     graphics.beginPath();
     graphics.moveTo(x - 9 * scale, y - 4 * scale);
     graphics.lineTo(x - 2 * scale, y - 4 * scale);
@@ -3782,9 +3802,9 @@ export function drawCyberHUDExpression(
     graphics.moveTo(x - 3 * scale, y + 4 * scale);
     graphics.lineTo(x + 3 * scale, y + 4 * scale);
     graphics.strokePath();
-  } else if (expression === 'Ecstatic') {
-    // 10. Ecstatic: Radial optic crosshairs with radiant ascending smile arc
-    graphics.lineStyle(2.0 * scale, baseColor, 1.0);
+  } else if (key === 'ecstatic' || key === 'static') {
+    // 10. Ecstatic / Static: Radial optic crosshairs with radiant ascending smile arc
+    graphics.lineStyle(2.2 * scale, baseColor, 1.0);
     graphics.beginPath();
     graphics.moveTo(x - 8 * scale, y - 5 * scale);
     graphics.lineTo(x - 2 * scale, y - 5 * scale);
@@ -3798,9 +3818,9 @@ export function drawCyberHUDExpression(
     graphics.lineTo(x, y + 7 * scale);
     graphics.lineTo(x + 5 * scale, y + 4 * scale);
     graphics.strokePath();
-  } else if (expression === 'Bloodthirsty') {
-    // 11. Bloodthirsty: Tactical trident reticles (Psi) & serrated combat fangs
-    graphics.lineStyle(2.0 * scale, baseColor, 1.0);
+  } else if (key === 'bloodthirsty' || key === 'thirsty') {
+    // 11. Bloodthirsty / Thirsty: Tactical trident reticles (Psi) & serrated combat fangs
+    graphics.lineStyle(2.2 * scale, baseColor, 1.0);
     graphics.beginPath();
     graphics.moveTo(x - 8 * scale, y - 7 * scale);
     graphics.lineTo(x - 8 * scale, y - 3 * scale);
@@ -3818,9 +3838,9 @@ export function drawCyberHUDExpression(
     graphics.lineTo(x, y + 7 * scale);
     graphics.lineTo(x + 4 * scale, y + 4 * scale);
     graphics.strokePath();
-  } else if (expression === 'Devout') {
-    // 12. Devout: Triple harmonic sensor bars
-    graphics.lineStyle(1.8 * scale, baseColor, 1.0);
+  } else if (key === 'devout' || key === 'devoted') {
+    // 12. Devout / Devoted: Triple harmonic sensor bars
+    graphics.lineStyle(2.0 * scale, baseColor, 1.0);
     graphics.beginPath();
     for (let b = 0; b < 3; b++) {
       const by = y - (7 - b * 3) * scale;
@@ -3832,10 +3852,10 @@ export function drawCyberHUDExpression(
     graphics.moveTo(x - 3 * scale, y + 5 * scale);
     graphics.lineTo(x + 3 * scale, y + 5 * scale);
     graphics.strokePath();
-  } else if (expression === 'Enchanted') {
-    // 13. Enchanted: Prismatic 4-point diamond star lenses
+  } else if (key === 'enchanted' || key === 'charmed') {
+    // 13. Enchanted / Charmed: Prismatic 4-point diamond star lenses (✧ ✧)
     graphics.fillStyle(baseColor, 1.0);
-    graphics.lineStyle(1.6 * scale, baseColor, 1.0);
+    graphics.lineStyle(1.8 * scale, baseColor, 1.0);
     graphics.beginPath();
     graphics.moveTo(x - 5 * scale, y - 8 * scale);
     graphics.lineTo(x - 3 * scale, y - 4 * scale);
@@ -3853,9 +3873,9 @@ export function drawCyberHUDExpression(
     graphics.lineTo(x, y + 7 * scale);
     graphics.lineTo(x + 4 * scale, y + 4 * scale);
     graphics.strokePath();
-  } else if (expression === 'Cunning') {
+  } else if (key === 'cunning') {
     // 14. Cunning: Asymmetrical angled radar lenses & smirk
-    graphics.lineStyle(2.0 * scale, baseColor, 1.0);
+    graphics.lineStyle(2.2 * scale, baseColor, 1.0);
     graphics.beginPath();
     graphics.moveTo(x - 9 * scale, y - 6 * scale);
     graphics.lineTo(x - 3 * scale, y - 6 * scale);
@@ -3866,9 +3886,9 @@ export function drawCyberHUDExpression(
     graphics.moveTo(x - 2 * scale, y + 5 * scale);
     graphics.lineTo(x + 5 * scale, y + 3 * scale);
     graphics.strokePath();
-  } else if (expression === 'Relentless') {
+  } else if (key === 'relentless') {
     // 15. Relentless: Target-lock crosshair brackets & focus slit
-    graphics.lineStyle(1.8 * scale, baseColor, 1.0);
+    graphics.lineStyle(2.0 * scale, baseColor, 1.0);
     graphics.beginPath();
     graphics.moveTo(x - 8 * scale, y - 6 * scale);
     graphics.lineTo(x - 4 * scale, y - 6 * scale);
@@ -3885,7 +3905,7 @@ export function drawCyberHUDExpression(
     graphics.moveTo(x - 4 * scale, y + 5 * scale);
     graphics.lineTo(x + 4 * scale, y + 5 * scale);
     graphics.strokePath();
-  } else if (expression === 'Furious') {
+  } else if (key === 'furious') {
     // 16. Furious: Downward-slanting combat armor plates
     graphics.fillStyle(baseColor, 1.0);
     graphics.beginPath();
@@ -3897,16 +3917,16 @@ export function drawCyberHUDExpression(
     graphics.lineTo(x + 3 * scale, y - 2 * scale);
     graphics.closePath();
     graphics.fillPath();
-    graphics.lineStyle(2.0 * scale, baseColor, 1.0);
+    graphics.lineStyle(2.2 * scale, baseColor, 1.0);
     graphics.beginPath();
     graphics.moveTo(x - 5 * scale, y + 4 * scale);
     graphics.lineTo(x - 2 * scale, y + 6 * scale);
     graphics.lineTo(x + 2 * scale, y + 4 * scale);
     graphics.lineTo(x + 5 * scale, y + 6 * scale);
     graphics.strokePath();
-  } else if (expression === 'Serene') {
+  } else if (key === 'serene') {
     // 17. Serene: Gentle descending curved harmonic visors
-    graphics.lineStyle(2.0 * scale, baseColor, 1.0);
+    graphics.lineStyle(2.2 * scale, baseColor, 1.0);
     graphics.beginPath();
     graphics.moveTo(x - 8 * scale, y - 6 * scale);
     graphics.lineTo(x - 5 * scale, y - 3 * scale);
@@ -3918,18 +3938,18 @@ export function drawCyberHUDExpression(
     graphics.lineTo(x, y + 6 * scale);
     graphics.lineTo(x + 3 * scale, y + 4 * scale);
     graphics.strokePath();
-  } else if (expression === 'Obsessed') {
+  } else if (key === 'obsessed') {
     // 18. Obsessed: Concentric square scanner apertures
-    graphics.lineStyle(1.4 * scale, baseColor, 1.0);
+    graphics.lineStyle(1.6 * scale, baseColor, 1.0);
     graphics.strokeRect(x - 8 * scale, y - 6 * scale, 5 * scale, 5 * scale);
     graphics.strokeRect(x + 3 * scale, y - 6 * scale, 5 * scale, 5 * scale);
     graphics.fillStyle(baseColor, 1.0);
     graphics.fillRect(x - 6.5 * scale, y - 4.5 * scale, 2 * scale, 2 * scale);
     graphics.fillRect(x + 4.5 * scale, y - 4.5 * scale, 2 * scale, 2 * scale);
     graphics.fillRect(x - 4 * scale, y + 4 * scale, 8 * scale, 2 * scale);
-  } else if (expression === 'Melancholic') {
+  } else if (key === 'melancholic') {
     // 19. Melancholic: Slanted drooping sensor bars & soft tear dots
-    graphics.lineStyle(2.0 * scale, baseColor, 1.0);
+    graphics.lineStyle(2.2 * scale, baseColor, 1.0);
     graphics.beginPath();
     graphics.moveTo(x - 8 * scale, y - 6 * scale);
     graphics.lineTo(x - 3 * scale, y - 4 * scale);
@@ -3939,12 +3959,12 @@ export function drawCyberHUDExpression(
     graphics.lineTo(x, y + 3 * scale);
     graphics.lineTo(x + 4 * scale, y + 5 * scale);
     graphics.strokePath();
-    graphics.fillStyle(baseColor, 0.85);
-    graphics.fillCircle(x - 5.5 * scale, y - 1 * scale, 1.2 * scale);
-    graphics.fillCircle(x + 5.5 * scale, y - 1 * scale, 1.2 * scale);
-  } else if (expression === 'Euphoric') {
-    // 20. Euphoric: 5-Pointed stellar optic cores & energetic grin
-    graphics.lineStyle(1.8 * scale, baseColor, 1.0);
+    graphics.fillStyle(baseColor, 0.9);
+    graphics.fillCircle(x - 5.5 * scale, y - 1 * scale, 1.3 * scale);
+    graphics.fillCircle(x + 5.5 * scale, y - 1 * scale, 1.3 * scale);
+  } else if (key === 'euphoric') {
+    // 20. Euphoric: 5-Pointed stellar optic cores (★ ★) & energetic grin
+    graphics.lineStyle(2.0 * scale, baseColor, 1.0);
     graphics.fillStyle(baseColor, 0.95);
     const drawStar = (cx: number, cy: number, r: number) => {
       graphics.beginPath();
@@ -3963,13 +3983,24 @@ export function drawCyberHUDExpression(
       graphics.fillPath();
       graphics.strokePath();
     };
-    drawStar(x - 5.5 * scale, y - 4 * scale, 3.8 * scale);
-    drawStar(x + 5.5 * scale, y - 4 * scale, 3.8 * scale);
-    graphics.lineStyle(2.0 * scale, baseColor, 1.0);
+    drawStar(x - 5.5 * scale, y - 4 * scale, 4.0 * scale);
+    drawStar(x + 5.5 * scale, y - 4 * scale, 4.0 * scale);
+    graphics.lineStyle(2.2 * scale, baseColor, 1.0);
     graphics.beginPath();
     graphics.moveTo(x - 5 * scale, y + 3 * scale);
     graphics.lineTo(x, y + 7 * scale);
     graphics.lineTo(x + 5 * scale, y + 3 * scale);
+    graphics.strokePath();
+  } else {
+    // Universal Vector HUD Visor fallback
+    graphics.lineStyle(2.4 * scale, baseColor, 1.0);
+    graphics.beginPath();
+    graphics.moveTo(x - 8 * scale, y - 4 * scale);
+    graphics.lineTo(x - 2 * scale, y - 4 * scale);
+    graphics.moveTo(x + 2 * scale, y - 4 * scale);
+    graphics.lineTo(x + 8 * scale, y - 4 * scale);
+    graphics.moveTo(x - 4 * scale, y + 4 * scale);
+    graphics.lineTo(x + 4 * scale, y + 4 * scale);
     graphics.strokePath();
   }
 }
@@ -5853,6 +5884,43 @@ function drawFuturisticPlatformBar(
   }
 }
 
+
+export function drawBiomeBackgroundFull(
+  ctx: CanvasRenderingContext2D,
+  biomeId: string,
+  width: number,
+  height: number,
+  time: number
+) {
+  ctx.save();
+  const baseW = 1920;
+  const baseH = 1080;
+
+  if (Math.abs(width / height - baseW / baseH) < 0.02) {
+    ctx.scale(width / baseW, height / baseH);
+  } else if (width > height) {
+    const s = height / baseH;
+    const offsetX = (width - baseW * s) / 2;
+    ctx.translate(offsetX, 0);
+    ctx.scale(s, s);
+  } else {
+    const s = width / baseW;
+    const offsetY = (height - baseH * s) / 2;
+    ctx.translate(0, offsetY);
+    ctx.scale(s, s);
+  }
+
+  const shim = createPhaserGraphicsShim(ctx);
+  const biome = BIOME_SCENARIOS_DATA.find((b) => b.id === biomeId) || BIOME_SCENARIOS_DATA[0]!;
+  
+  // 100% full edge-to-edge backdrop: X=0 to 1920, Y=0 to 1054 + 26px platform bar = 1080
+  const zoneEndY = 1054;
+  drawZoneEnvironment(shim, 0, 1920, 0, zoneEndY, 1, biome.id, biome.colorNumber, time);
+  drawFuturisticPlatformBar(shim, 0, 1920, zoneEndY, biome.id, biome.colorNumber, time);
+
+  ctx.restore();
+}
+
 export function renderStudioBiomeScenario(
   ctx: CanvasRenderingContext2D,
   biomeId: string,
@@ -5907,15 +5975,10 @@ export function renderStudioBiomeScenario(
     ctx.fillText('PISTA 3 (SUPERIOR) [Y=300]   |   PISTA 2 (CENTRAL) [Y=600]   |   PISTA 1 (INFERIOR) [Y=900]', 70, 946);
     ctx.fillText('MOTOR GEOMETRY PLATFORMS // LARGURA: 1820px // MODULAR 80px // ESPESSURA: 26px // RenderSystem.ts:lines 2518–4500', 70, 970);
   } else {
-    const drawStartY = 40;
-    const zoneEndY = 780;
-    drawZoneEnvironment(shim, startX, endX, drawStartY, zoneEndY, 1, biome.id, biome.colorNumber, time);
-    drawFuturisticPlatformBar(shim, startX, endX, zoneEndY, biome.id, biome.colorNumber, time);
-
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
-    ctx.font = '14px Consolas, monospace';
-    ctx.fillText(`BIOMA EXPANDIDO // ${biome.namePt.toUpperCase()} (${biome.nameEn.toUpperCase()}) // ATALHO DO MOTOR: ${biome.id}`, 70, 840);
-    ctx.fillText(`PALETA NEON: ${biome.colorHex} // CÓDIGO FONTE: RenderSystem.ts:lines 2518–4500`, 70, 865);
+    // 100% edge-to-edge single biome scenario with zero debug text overlays
+    const zoneEndY = 1054;
+    drawZoneEnvironment(shim, 0, 1920, 0, zoneEndY, 1, biome.id, biome.colorNumber, time);
+    drawFuturisticPlatformBar(shim, 0, 1920, zoneEndY, biome.id, biome.colorNumber, time);
   }
 
   ctx.restore();

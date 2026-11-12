@@ -29,6 +29,7 @@ export const CodexStudio: React.FC = () => {
   const [playerForm, setPlayerForm] = useState<number>(1);
   const [playerRarity, setPlayerRarity] = useState<number>(1);
   const [playerExpression, setPlayerExpression] = useState<string>('none');
+  const [playerBackground, setPlayerBackground] = useState<string>('none');
   const [hudExpressionId, setHudExpressionId] = useState<string>('Happy');
 
   const [enemyForm, setEnemyForm] = useState<number>(1);
@@ -63,7 +64,7 @@ export const CodexStudio: React.FC = () => {
       const elapsed = (performance.now() - startTime) / 1000;
 
       if (activeTab === 'player') {
-        renderStudioPlayer(ctx, playerForm, playerRarity, canvas.width, canvas.height, elapsed, playerExpression);
+        renderStudioPlayer(ctx, playerForm, playerRarity, canvas.width, canvas.height, elapsed, playerExpression, playerBackground);
       } else if (activeTab === 'hud_expression') {
         renderStudioExpression(ctx, hudExpressionId, canvas.width, canvas.height, elapsed);
       } else if (activeTab === 'enemy') {
@@ -93,6 +94,7 @@ export const CodexStudio: React.FC = () => {
     playerForm,
     playerRarity,
     playerExpression,
+    playerBackground,
     hudExpressionId,
     enemyForm,
     enemyRarity,
@@ -128,8 +130,8 @@ export const CodexStudio: React.FC = () => {
     let filename = `AC3GAMES_${tag}.png`;
 
     if (activeTab === 'player') {
-      renderStudioPlayer(offCtx, playerForm, playerRarity, width, height, 0, playerExpression);
-      filename = `player_forma_${playerForm}_raridade_${playerRarity}_expr_${playerExpression}_${tag}.png`;
+      renderStudioPlayer(offCtx, playerForm, playerRarity, width, height, 0, playerExpression, playerBackground);
+      filename = `player_forma_${playerForm}_raridade_${playerRarity}_expr_${playerExpression}_bg_${playerBackground}_${tag}.png`;
     } else if (activeTab === 'hud_expression') {
       renderStudioExpression(offCtx, hudExpressionId, width, height, 0);
       filename = `expressao_hud_${hudExpressionId}_${tag}.png`;
@@ -163,6 +165,10 @@ export const CodexStudio: React.FC = () => {
   };
 
   // Helper data getters
+  const isPlayerBiomeBackground = playerBackground !== 'none' && playerBackground !== 'transparent';
+  const isFullScenarioView =
+    (activeTab === 'player' && isPlayerBiomeBackground) ||
+    (activeTab === 'biome_platform' && platformViewMode === 'single');
   const isPlayerFormNone = playerForm === 0;
   const isPlayerRarityNone = playerRarity === 0;
   const isPlayerExprNone = playerExpression === 'none';
@@ -331,10 +337,12 @@ export const CodexStudio: React.FC = () => {
               className="w-full h-full object-contain"
             />
             
-            {/* Top Badge Overlay */}
-            <div className="absolute top-4 left-4 bg-black/70 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/10 font-mono text-[11px] text-white/80">
-              RENDER 16:9 // CONTORNO PRECISO // 60 FPS
-            </div>
+            {/* Top Badge Overlay (hidden when a full-space scenario is displayed) */}
+            {!isFullScenarioView && (
+              <div className="absolute top-4 left-4 bg-black/70 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/10 font-mono text-[11px] text-white/80">
+                RENDER 16:9 // CONTORNO PRECISO // 60 FPS
+              </div>
+            )}
           </div>
 
           {/* Formatos de Download Oficial: 21:9 / 16:9 / 9:16 */}
@@ -457,6 +465,61 @@ export const CodexStudio: React.FC = () => {
                       </option>
                     ))}
                   </select>
+                </div>
+
+                {/* 4. SELETOR DE CENÁRIO DE FUNDO */}
+                <div>
+                  <label className="block text-xs font-mono text-amber-300 font-bold uppercase mb-1.5 flex items-center justify-between">
+                    <span>4. Cenário de Fundo / Retirar Fundo:</span>
+                    <span className="text-[11px] text-slate-400 font-normal">
+                      {playerBackground === 'none'
+                        ? 'Vazio Padrão'
+                        : playerBackground === 'transparent'
+                          ? 'Sem Fundo'
+                          : BIOME_SCENARIOS_DATA.find((b) => b.id === playerBackground)?.namePt}
+                    </span>
+                  </label>
+                  <div className="grid grid-cols-2 gap-2 mb-2">
+                    {([
+                      { id: 'none', label: '⬛ Vazio Padrão' },
+                      { id: 'transparent', label: '✨ Sem Fundo (Transparente)' }
+                    ] as const).map((opt) => (
+                      <button
+                        key={opt.id}
+                        onClick={() => setPlayerBackground(opt.id)}
+                        className={`px-2.5 py-1.5 rounded-lg border text-left font-mono text-[11px] transition-all ${
+                          playerBackground === opt.id
+                            ? 'bg-cyber-cyan text-black font-bold border-cyber-cyan shadow-neon-cyan'
+                            : 'bg-cyber-darker text-slate-400 hover:text-white border-cyber-cardBorder'
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto pr-1">
+                    {BIOME_SCENARIOS_DATA.map((b) => (
+                      <button
+                        key={b.id}
+                        onClick={() => setPlayerBackground(b.id)}
+                        className={`px-2.5 py-1.5 rounded-lg border text-left font-mono text-[11px] transition-all flex items-center gap-2 ${
+                          playerBackground === b.id
+                            ? 'bg-cyber-card text-white font-bold'
+                            : 'bg-cyber-darker text-slate-400 hover:text-white border-cyber-cardBorder'
+                        }`}
+                        style={{
+                          borderColor: playerBackground === b.id ? b.colorHex : undefined,
+                          boxShadow: playerBackground === b.id ? `0 0 12px ${b.colorHex}40` : undefined
+                        }}
+                      >
+                        <span
+                          className="w-2.5 h-2.5 rounded-full shrink-0"
+                          style={{ backgroundColor: b.colorHex, boxShadow: `0 0 6px ${b.colorHex}` }}
+                        />
+                        <span className="truncate">{b.namePt}</span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
 
