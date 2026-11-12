@@ -140,21 +140,637 @@ export interface RarityInfo {
   hex: number;
   multiplier: number;
   flameColor: string;
+  playerBonus: string;
+  enemyBonus: string;
 }
 
 export const RARITIES_DATA: RarityInfo[] = [
-  { index: 1, name: 'Common', namePt: 'Comum', color: '#ffffff', hex: 0xffffff, multiplier: 1.0, flameColor: '#ff0055' },
-  { index: 2, name: 'Enhanced', namePt: 'Aprimorado', color: '#ff3333', hex: 0xff3333, multiplier: 1.15, flameColor: '#ff5500' },
-  { index: 3, name: 'Refined', namePt: 'Refinado', color: '#ff8800', hex: 0xff8800, multiplier: 1.3, flameColor: '#ffd700' },
-  { index: 4, name: 'Advanced', namePt: 'Avançado', color: '#ffd700', hex: 0xffd700, multiplier: 1.5, flameColor: '#ffff00' },
-  { index: 5, name: 'Elite', namePt: 'Elite', color: '#00ff66', hex: 0x00ff66, multiplier: 1.7, flameColor: '#00f0ff' },
-  { index: 6, name: 'Rare', namePt: 'Raro', color: '#0088ff', hex: 0x0088ff, multiplier: 1.9, flameColor: '#00ffff' },
-  { index: 7, name: 'Epic', namePt: 'Épico', color: '#4a00e0', hex: 0x4a00e0, multiplier: 2.1, flameColor: '#8e2de2' },
-  { index: 8, name: 'Masterwork', namePt: 'Obra-Prima', color: '#9d4edd', hex: 0x9d4edd, multiplier: 2.3, flameColor: '#c77dff' },
-  { index: 9, name: 'Legendary', namePt: 'Lendário', color: '#ff00ff', hex: 0xff00ff, multiplier: 2.6, flameColor: '#ff007f' },
-  { index: 10, name: 'Ascendant', namePt: 'Ascendente', color: '#ff0077', hex: 0xff0077, multiplier: 3.0, flameColor: '#ff00bb' },
-  { index: 11, name: 'Transcendent', namePt: 'Transcendente', color: '#00f0ff', hex: 0x00f0ff, multiplier: 3.5, flameColor: '#ffffff' },
-  { index: 12, name: 'Mythic', namePt: 'Mítico', color: '#ff0033', hex: 0xff0033, multiplier: 4.2, flameColor: '#ffd700' }
+  {
+    index: 1,
+    name: 'Common',
+    namePt: 'Comum',
+    color: '#ffffff',
+    hex: 0xffffff,
+    multiplier: 1.0,
+    flameColor: '#ff0055',
+    playerBonus: 'Multiplicador Base: 1.00x de Dano & Casco. Configuração padrão de fábrica da nave Vector-01.',
+    enemyBonus: 'HP Base: 1.00x. Comportamento padrão de onda inicial. Drop: 1 Fragmento de Sucata.'
+  },
+  {
+    index: 2,
+    name: 'Enhanced',
+    namePt: 'Aprimorado',
+    color: '#ff3333',
+    hex: 0xff3333,
+    multiplier: 1.25,
+    flameColor: '#ff5500',
+    playerBonus: '+25% Potência de Fogo Primária e +10% Capacidade de Escudo.',
+    enemyBonus: 'HP Base: 1.25x (+25% Vida) e +5% Velocidade de Perseguição. Drop: 2 Fragmentos de Energia.'
+  },
+  {
+    index: 3,
+    name: 'Refined',
+    namePt: 'Refinado',
+    color: '#ff8800',
+    hex: 0xff8800,
+    multiplier: 1.5,
+    flameColor: '#ffd700',
+    playerBonus: '+50% Dano de Casco, +15% Velocidade de Projéteis e -5% Recarga dos Módulos Táticos.',
+    enemyBonus: 'HP Base: 1.50x (+50% Vida). Troca de pistas mais agressiva. Drop: 3 Fragmentos de Energia.'
+  },
+  {
+    index: 4,
+    name: 'Advanced',
+    namePt: 'Avançado',
+    color: '#ffd700',
+    hex: 0xffd700,
+    multiplier: 1.8,
+    flameColor: '#ffff00',
+    playerBonus: '+80% Dano Crítico e +20% Resistência a Choques Físicos de Colisão.',
+    enemyBonus: 'HP Base: 1.80x (+80% Vida). Dispara rajadas balísticas com +15% cadência. Drop: 4 Fragmentos.'
+  },
+  {
+    index: 5,
+    name: 'Elite',
+    namePt: 'Elite',
+    color: '#00ff66',
+    hex: 0x00ff66,
+    multiplier: 2.2,
+    flameColor: '#00f0ff',
+    playerBonus: '+120% Dano Global, +1 Perfuração Natural em Todos os Tiros e +15% Ganho de EXP.',
+    enemyBonus: 'HP Base: 2.20x (+120% Vida) e Aura de Aceleração que buffa inimigos vizinhos em +10%. Drop: 6 Fragmentos.'
+  },
+  {
+    index: 6,
+    name: 'Rare',
+    namePt: 'Raro',
+    color: '#0088ff',
+    hex: 0x0088ff,
+    multiplier: 2.7,
+    flameColor: '#00ffff',
+    playerBonus: '+170% Multiplicador de Potência, Escudo Regenerativo Reativo e +25% Alcance do Ímã de Coleta.',
+    enemyBonus: 'HP Base: 2.70x (+170% Vida). Resistência a dano em área (AoE) e disparos em espiral. Drop: 8 Fragmentos.'
+  },
+  {
+    index: 7,
+    name: 'Epic',
+    namePt: 'Épico',
+    color: '#7a22ff',
+    hex: 0x7a22ff,
+    multiplier: 3.3,
+    flameColor: '#8e2de2',
+    playerBonus: '+230% Multiplicador de Dano, Desbloqueio do 2º Slot de Módulo Especial e -15% Cooldown.',
+    enemyBonus: 'HP Base: 3.30x (+230% Vida). Ganha Escudo Ciano (Barra Branca) que absorve 40% do dano inicial. Drop: 10 Fragmentos.'
+  },
+  {
+    index: 8,
+    name: 'Masterwork',
+    namePt: 'Obra-Prima',
+    color: '#b533ff',
+    hex: 0xb533ff,
+    multiplier: 4.0,
+    flameColor: '#c77dff',
+    playerBonus: '+300% Multiplicador de Combate, +35% Chance de Acerto Crítico e Dano em Área Duplicado.',
+    enemyBonus: 'HP Base: 4.00x (+300% Vida). Dispara projéteis teleguiados de perseguição de curto alcance. Drop: 12 Fragmentos.'
+  },
+  {
+    index: 9,
+    name: 'Legendary',
+    namePt: 'Lendário',
+    color: '#ff00ea',
+    hex: 0xff00ea,
+    multiplier: 5.0,
+    flameColor: '#ff007f',
+    playerBonus: '+400% Dano Total, Jato de Plasma com Trilha Ionizada Letal e +50% Drop de Créditos & Moedas.',
+    enemyBonus: 'HP Base: 5.00x (+400% Vida). Velocidade extrema, imunidade a desaceleração criogênica. Drop: 15 Fragmentos & 1 Orbe Raro.'
+  },
+  {
+    index: 10,
+    name: 'Ascendant',
+    namePt: 'Ascendente',
+    color: '#ff0077',
+    hex: 0xff0077,
+    multiplier: 6.5,
+    flameColor: '#ff00bb',
+    playerBonus: '+550% Potência Bélica, Fasagem Invulnerável durante Troca de Pistas e 2.0x Dano Crítico.',
+    enemyBonus: 'HP Base: 6.50x (+550% Vida). Emite ondas de pulso sônico periódicas que repelem disparos. Drop: 20 Fragmentos.'
+  },
+  {
+    index: 11,
+    name: 'Transcendent',
+    namePt: 'Transcendente',
+    color: '#00ffff',
+    hex: 0x00ffff,
+    multiplier: 8.5,
+    flameColor: '#ffffff',
+    playerBonus: '+750% Multiplicador Quântico, +3 Perfurações em Projéteis e +50% Regeneração Contínua de Casco.',
+    enemyBonus: 'HP Base: 8.50x (+750% Vida). Entidade de Elite Suprema. Teleporta horizontalmente ao ser alvejada. Drop: Núcleo de Matéria Escura.'
+  },
+  {
+    index: 12,
+    name: 'Mythic',
+    namePt: 'Mítico',
+    color: '#ff1744',
+    hex: 0xff1744,
+    multiplier: 12.0,
+    flameColor: '#ffd700',
+    playerBonus: '+1100% Apoteose Cósmica Máxima, Sobrecarga Quântica Infinita e Escudo Invencível Aegis de Emergência.',
+    enemyBonus: 'HP Base: 12.00x (+1100% Vida). Super Titã de Onda. Dispara anéis de plasma de 360°, invoca sub-entidades e entra em Fúria. Drop: 1 Núcleo Cósmico Puro & Baú Mítico Garantido.'
+  }
+];
+
+export interface ArenaBossData {
+  index: number;
+  formId: string;
+  namePt: string;
+  nameEn: string;
+  wave: number;
+  sides: number;
+  color: string;
+  secondary: string;
+  desc: string;
+  mechanics: string;
+  relicDrop: string;
+}
+
+export const ARENA_BOSSES_DATA: ArenaBossData[] = [
+  {
+    index: 1,
+    formId: 'triangle',
+    namePt: 'SENTINELA OCULAR PRISMÁTICA',
+    nameEn: 'PRISMATIC OCULAR SENTINEL',
+    wave: 5,
+    sides: 3,
+    color: '#ffd700',
+    secondary: '#00f0ff',
+    desc: 'Canhão de Varredura Prismática & Feixes Ionizantes',
+    mechanics: 'Varre a arena com 3 feixes de laser divergentes e emite pulsos de energia que forçam o jogador a alternar de pistas rapidamente.',
+    relicDrop: 'Prisma Ocular da Percepção (+15% Dano Crítico e +10% Alcance de Miras)'
+  },
+  {
+    index: 2,
+    formId: 'square',
+    namePt: 'TITÃ DE AÇO GRAVITACIONAL',
+    nameEn: 'GRAVITATIONAL STEEL TITAN',
+    wave: 65,
+    sides: 4,
+    color: '#ff5533',
+    secondary: '#ffaa00',
+    desc: 'Impacto Hidráulico & Ondas de Choque Tectônicas',
+    mechanics: 'Ativa Escudo de Imunidade temporário, desce verticalmente como pilão hidráulico gerando ondas de choque em ambas as direções.',
+    relicDrop: 'Blindagem Tectônica Inquebrável (+25% HP Máximo e Imunidade a Dano de Impacto Físico)'
+  },
+  {
+    index: 3,
+    formId: 'pentagon',
+    namePt: 'IGNIS ELEMENTALISTA DE MAGMA',
+    nameEn: 'IGNIS MAGMA ELEMENTALIST',
+    wave: 135,
+    sides: 5,
+    color: '#ff3300',
+    secondary: '#ffcc00',
+    desc: 'Erupções Piroclásticas & Núcleo Vulcânico',
+    mechanics: 'Lança projéteis de magma em parábola que incendeiam as plataformas por 6 segundos, reduzindo a mobilidade segura.',
+    relicDrop: 'Coração de Magma Incandescente (+30% Dano de Fogo e Queimadura Contínua em Todos os Tiros)'
+  },
+  {
+    index: 4,
+    formId: 'hexagon',
+    namePt: 'GUARDIÃO DA COLMEIA',
+    nameEn: 'HONEYCOMB GUARDIAN',
+    wave: 200,
+    sides: 6,
+    color: '#ffbb00',
+    secondary: '#00ffcc',
+    desc: 'Barreira Hexagonal & Drones Sub-Celulares',
+    mechanics: 'Projeta escudos celulares modulares e libera enxames de pequenos hexágonos explosivos kamikazes.',
+    relicDrop: 'Matriz de Colmeia Modular (+2 Drones Concorrentes e +20% Cadência da Esquadra)'
+  },
+  {
+    index: 5,
+    formId: 'heptagon',
+    namePt: 'INVOCADOR ESPECTRAL',
+    nameEn: 'SPECTRAL SUMMONER',
+    wave: 265,
+    sides: 7,
+    color: '#a855f7',
+    secondary: '#ec4899',
+    desc: 'Rupturas do Vazio & Clones Espectrais Espelhados',
+    mechanics: 'Abre portais dimensionais para invocar clones de energia com cópias exatas do padrão balístico do chefe.',
+    relicDrop: 'Espelho do Vazio Dimensional (+15% Evasão e Chance de Clonar Projéteis Disparados)'
+  },
+  {
+    index: 6,
+    formId: 'octagon',
+    namePt: 'SENHOR DAS MINAS DE ANTIMATÉRIA',
+    nameEn: 'ANTIMATTER MINE LORD',
+    wave: 330,
+    sides: 8,
+    color: '#ef4444',
+    secondary: '#8b5cf6',
+    desc: 'Minas de Proximidade & Campo de Singularidade',
+    mechanics: 'Semeia a arena com minas magnéticas de antimatéria e atrai a nave do jogador em direção ao centro de gravidade.',
+    relicDrop: 'Condensador de Antimatéria (+40% Raio de Explosão de Armas e Dano em Área Duplicado)'
+  },
+  {
+    index: 7,
+    formId: 'trefoil',
+    namePt: 'VÓRTICE SOMBRIO',
+    nameEn: 'SHADOW VORTEX',
+    wave: 395,
+    sides: 9,
+    color: '#6366f1',
+    secondary: '#06b6d4',
+    desc: 'Distorção do Horizonte de Eventos & Matéria Escura',
+    mechanics: 'Teleporta periodicamente deixando réplicas de vácuo que sugam projéteis e disparam estilhaços sombrios.',
+    relicDrop: 'Lóbulo da Distorção Espacial (-25% Cooldown de Todas as Habilidades e Dash Transdimensional)'
+  },
+  {
+    index: 8,
+    formId: '4-star',
+    namePt: 'ARTILHEIRO ORBITAL TITÂNICO',
+    nameEn: 'TITANIC ORBITAL GUNNER',
+    wave: 460,
+    sides: 10,
+    color: '#38bdf8',
+    secondary: '#f43f5e',
+    desc: 'Baterias de Railgun Orbital & Matriz Laser Quádrupla',
+    mechanics: 'Trava miras a laser simultâneas nas 4 diagonais da tela e dispara rajadas hipersônicas de railgun com perfuração.',
+    relicDrop: 'Bateria de Railgun Hiper-Acelerada (+50% Velocidade de Projétil e +2 Perfurações Naturais)'
+  },
+  {
+    index: 9,
+    formId: '5-star',
+    namePt: 'MANIPULADOR TEMPORAL',
+    nameEn: 'CHRONO MANIPULATOR',
+    wave: 525,
+    sides: 11,
+    color: '#10b981',
+    secondary: '#6ee7b7',
+    desc: 'Anéis de Dilatação Temporal & Mostradores Cronológicos',
+    mechanics: 'Manipula o fluxo temporal do setor, desacelerando a nave do jogador em 60% enquanto acelera os próprios ataques.',
+    relicDrop: 'Ampulheta Quântica de Chronos (Imunidade a Lentidão e +30% Velocidade Global Permanente)'
+  },
+  {
+    index: 10,
+    formId: '6-star',
+    namePt: 'SOBERANO VETORIAL',
+    nameEn: 'VECTOR SOVEREIGN',
+    wave: 590,
+    sides: 12,
+    color: '#f59e0b',
+    secondary: '#a855f7',
+    desc: 'Geometria Sagrada de Hexagrama & Recursão Vetorial',
+    mechanics: 'Conecta 6 pontos de laser em geometria recursiva fechada, criando campos de corte que se contraem em direção ao centro.',
+    relicDrop: 'Sigilo Vetorial Sagrado (+35% Dano Global e Sobrecarga de Energia Quântica)'
+  },
+  {
+    index: 11,
+    formId: 'quatrefoil',
+    namePt: 'DRAGÃO SINTÉTICO',
+    nameEn: 'SYNTHETIC DRAGON',
+    wave: 655,
+    sides: 10,
+    color: '#14b8a6',
+    secondary: '#f97316',
+    desc: 'Segmentos Serpentine Biomédicos & Arcos de Bio-Plasma',
+    mechanics: 'Corpo segmentado com 4 asas lobadas que serpenteia pelo cenário e sopra labaredas helicoidais de bio-plasma denso.',
+    relicDrop: 'Escama do Dragão Quântico (+20% Chance de Evasão e Sifão de 3% de HP por Inimigo Destruído)'
+  },
+  {
+    index: 12,
+    formId: 'flower',
+    namePt: 'GUARDIÃO PRIMORDIAL',
+    nameEn: 'PRIMORDIAL GUARDIAN',
+    wave: 720,
+    sides: 12,
+    color: '#fbbf24',
+    secondary: '#ec4899',
+    desc: 'Apoteose da Lótus Cósmica & Anel Primordial da Gênese',
+    mechanics: 'Chefe supremo da franquia. 2 fases completas de combate, anéis concêntricos de disparos rotativos, escudo impenetrável e Fúria Final.',
+    relicDrop: 'Gênese Primordial Cósmica (Desbloqueio de Todas as Sinergias e Multiplicador 2.5x no Score Final)'
+  }
+];
+
+export interface DroneData {
+  id: string;
+  namePt: string;
+  nameEn: string;
+  color: string;
+  role: string;
+  combatAction: string;
+  playerBonus: string;
+  codeRef: string;
+}
+
+export const DRONES_DATA: DroneData[] = [
+  {
+    id: 'missiles',
+    namePt: 'Drone de Mísseis Táticos',
+    nameEn: 'MISSILE DRONE',
+    color: '#ff3333',
+    role: 'Artilharia / Demolição',
+    combatAction: 'Dispara salvas contínuas de 2 micro-mísseis balísticos teleguiados que buscam alvos hostis com explosão em área.',
+    playerBonus: '+15% Dano Explosivo (AoE) para todas as armas da nave e rajadas teleguiadas automáticas a cada 2.5s.',
+    codeRef: 'RenderSystem.ts:line 2185'
+  },
+  {
+    id: 'lightning',
+    namePt: 'Drone Bobina Tesla',
+    nameEn: 'TESLA COIL DRONE',
+    color: '#ffd700',
+    role: 'Controle de Hordas / Eletricidade',
+    combatAction: 'Descarrega arcos elétricos estocásticos de alta voltagem que saltam instantaneamente entre até 3 inimigos próximos.',
+    playerBonus: '+20% Dano Elétrico Global e chance de 20% de atordoamento (stun) temporário em alvos de porte leve.',
+    codeRef: 'RenderSystem.ts:line 2205'
+  },
+  {
+    id: 'golden_aura',
+    namePt: 'Drone Aura Solar',
+    nameEn: 'SOLAR AURA DRONE',
+    color: '#ffcc00',
+    role: 'Aura Térmica / Proximidade',
+    combatAction: 'Projeta um halo permanente de radiação termonuclear em volta da nave que queima qualquer entidade que se aproxime.',
+    playerBonus: '+10% Dano de Casco e queima contínua de 45 HP/s em todos os inimigos dentro do raio de 180px.',
+    codeRef: 'RenderSystem.ts:line 2220'
+  },
+  {
+    id: 'black_hole',
+    namePt: 'Drone Vórtice (Singularidade)',
+    nameEn: 'BLACK HOLE DRONE',
+    color: '#cc33ff',
+    role: 'Gravidade / Coleta Automática',
+    combatAction: 'Gera micro-singularidades periódicas que desaceleram e atraem inimigos e fragmentos em direção ao centro do vácuo.',
+    playerBonus: 'Atração magnética automática de 100% dos fragmentos e orbes soltos no setor +15% taxa de créditos.',
+    codeRef: 'RenderSystem.ts:line 2235'
+  },
+  {
+    id: 'death_wave',
+    namePt: 'Drone Onda de Plasma',
+    nameEn: 'PLASMA WAVE DRONE',
+    color: '#ff4400',
+    role: 'Disrupção / Limpeza de Projéteis',
+    combatAction: 'Emite pulsos circulares expansivos de plasma de alta densidade que empurram constructos hostis e dissolvem tiros inimigos.',
+    playerBonus: 'Dano de cavitação expansivo a cada 4s e destruição de projéteis hostis leves na área de expansão.',
+    codeRef: 'RenderSystem.ts:line 2245'
+  },
+  {
+    id: 'chrono_field',
+    namePt: 'Drone Campo Chrono',
+    nameEn: 'CHRONO FIELD DRONE',
+    color: '#facc15',
+    role: 'Dilatação Temporal / Suporte',
+    combatAction: 'Projeta engrenagens e mostradores holográficos que distorcem o tempo ao redor da nave.',
+    playerBonus: 'Redução de 60% na velocidade de deslocamento de todos os inimigos e tiros hostis próximos à nave.',
+    codeRef: 'RenderSystem.ts:line 2255'
+  },
+  {
+    id: 'orbital_beam_drone',
+    namePt: 'Drone Raio Orbital',
+    nameEn: 'ORBITAL BEAM DRONE',
+    color: '#00f0ff',
+    role: 'Sniper / Anti-Blindagem',
+    combatAction: 'Dispara um feixe colimado vertical de satélite direto do espaço com penetração contínua e foco sustentado.',
+    playerBonus: 'Dano perfurante massivo contínuo contra Bosses e tanques pesados, ignorando 50% da blindagem natural.',
+    codeRef: 'RenderSystem.ts:line 2265'
+  },
+  {
+    id: 'quantum_boomerang_drone',
+    namePt: 'Drone Bumerangue Quântico',
+    nameEn: 'QUANTUM BOOMERANG DRONE',
+    color: '#38bdf8',
+    role: 'Corte Contínuo / Retorno',
+    combatAction: 'Lança lâminas giratórias que transpassam os inimigos em trajetória orbital e retornam causando dano duplo no retorno.',
+    playerBonus: '+15% Velocidade de Recarga de Módulos e acertos múltiplos garantidos por projétil lançado.',
+    codeRef: 'RenderSystem.ts:line 2285'
+  },
+  {
+    id: 'proximity_mine_drone',
+    namePt: 'Drone Minas de Proximidade',
+    nameEn: 'PROXIMITY MINE DRONE',
+    color: '#ef4444',
+    role: 'Defesa de Retaguarda / Armadilhas',
+    combatAction: 'Deposita minas octogonais no rastro da nave que detonam ao toque de inimigos perseguidores ou corredores.',
+    playerBonus: 'Proteção contra investidas pelas costas e retaguarda com dano de fragmentação em área de 120px.',
+    codeRef: 'RenderSystem.ts:line 2305'
+  },
+  {
+    id: 'mirror_deflector_drone',
+    namePt: 'Drone Defletor Espelhado',
+    nameEn: 'DEFLECTOR DRONE',
+    color: '#60a5fa',
+    role: 'Defesa Reativa / Contra-Ataque',
+    combatAction: 'Prisma refletor de diamante que orbita a nave e rebate disparos hostis de volta contra os atiradores.',
+    playerBonus: 'Chance de 35% de defletir tiros inimigos como projéteis aliados com 1.5x de dano crítico.',
+    codeRef: 'RenderSystem.ts:line 2335'
+  },
+  {
+    id: 'subzero_cryo_drone',
+    namePt: 'Drone Criogênico Subzero',
+    nameEn: 'SUBZERO CRYO DRONE',
+    color: '#38bdf8',
+    role: 'Congelamento / Controle de Área',
+    combatAction: 'Dispara saraivadas de micro-agulhas de gelo que aplicam acúmulos de frio e congelam inimigos no lugar.',
+    playerBonus: '+40% Dano Crítico contra inimigos congelados e redução passiva de 30% no dano recebido de alvos sob estase.',
+    codeRef: 'RenderSystem.ts:line 2350'
+  },
+  {
+    id: 'tesla_coil_drone',
+    namePt: 'Drone Torre Tesla',
+    nameEn: 'TESLA TOWER DRONE',
+    color: '#a855f7',
+    role: 'Sobrecarga de Energia / Arcos em Cascata',
+    combatAction: 'Canaliza cascatas de arcos voltaicos contínuos entre o drone e os principais alvos na tela.',
+    playerBonus: '+25% Regeneração de Energia (EN) para a nave e disparo de sobrecarga automática em emergências.',
+    codeRef: 'RenderSystem.ts:line 2360'
+  },
+  {
+    id: 'elemental_buffer_drone',
+    namePt: 'Drone Catalisador Elemental',
+    nameEn: 'ELEMENTAL BUFFER DRONE',
+    color: '#10b981',
+    role: 'Amplificação / Sinergia Mágica',
+    combatAction: 'Orbita com 4 satélites de energia que modulam a frequência dos tiros da nave.',
+    playerBonus: '+18% Dano Elemental a todas as armas equipadas (Fogo, Gelo, Eletricidade e Vazio).',
+    codeRef: 'RenderSystem.ts:line 2370'
+  },
+  {
+    id: 'tactical_buffer_drone',
+    namePt: 'Drone Bastião Tático',
+    nameEn: 'TACTICAL BASTION DRONE',
+    color: '#f59e0b',
+    role: 'Fortaleza / Escudo Balístico',
+    combatAction: 'Projeta uma cúpula móvel hexagonal que acompanha a nave, absorvendo disparos pesados.',
+    playerBonus: 'Absorve até 350 pontos de dano por onda e reduz em 20% a perda de integridade do casco.',
+    codeRef: 'RenderSystem.ts:line 2400'
+  },
+  {
+    id: 'scavenger_harvester_drone',
+    namePt: 'Drone Minerador (Scavenger)',
+    nameEn: 'HARVESTER DRONE',
+    color: '#10b981',
+    role: 'Economia / Mineração de Recursos',
+    combatAction: 'Chassi com 3 coletores magnéticos que varrem os cantos da arena minerando fragmentos extras dos destroços.',
+    playerBonus: '+25% Créditos e Moedas por onda e aumento de 15% na chance de drop de itens raros.',
+    codeRef: 'RenderSystem.ts:line 2440'
+  },
+  {
+    id: 'disruptor_debuffer_drone',
+    namePt: 'Drone Disruptor Entrópico',
+    nameEn: 'DISRUPTOR DRONE',
+    color: '#ec4899',
+    role: 'Debuff / Corrosão de Blindagem',
+    combatAction: 'Sonda com 2 pontas laterais que projeta raios de corrosão ácida nos alvos de maior HP.',
+    playerBonus: 'Reduz a armadura dos Chefes e Tanques em -30%, permitindo que toda a esquadra cause dano amplificado.',
+    codeRef: 'RenderSystem.ts:line 2465'
+  }
+];
+
+export interface ProjectileInfo {
+  id: string;
+  namePt: string;
+  nameEn: string;
+  className: string;
+  weaponName: string;
+  color: string;
+  glow: string;
+  projectileBehavior: string;
+  damageAndEffects: string;
+  classBonuses: string;
+  codeRef: string;
+}
+
+export const PROJECTILES_DATA: ProjectileInfo[] = [
+  {
+    id: 'rocket_missile',
+    namePt: 'Míssil Balístico Estabilizado',
+    nameEn: 'ROCKET MISSILE',
+    className: 'Guerreiro (Fighter)',
+    weaponName: 'Bazuca Pesada Balística',
+    color: '#ff3300',
+    glow: '#ffaa00',
+    projectileBehavior: 'Ogiva perfurante com aletas estabilizadoras duplas e cauda de combustão com faíscas incandescentes. Trajetória com rastro térmico.',
+    damageAndEffects: 'Dano Cinético / Explosivo em Área (AoE) de 140px. Causa concussão e atordoamento de 0.5s em constructos médios.',
+    classBonuses: '+15% HP Máximo, +10 Força (STR), alta estabilidade de recuo e absorção de choques de impacto.',
+    codeRef: 'RenderSystem.ts:line 860'
+  },
+  {
+    id: 'phase_flechette',
+    namePt: 'Flechette de Fase Quântica',
+    nameEn: 'PHASE FLECHETTE',
+    className: 'Ladino (Rogue)',
+    weaponName: 'Adagas Cinéticas de Fase',
+    color: '#00f0ff',
+    glow: '#0088ff',
+    projectileBehavior: 'Lâmina facetada de estase com trilha senoidal ondulante de fasagem. Atravessa barreiras e colunas sólidas de geometria.',
+    damageAndEffects: 'Dano de Fasagem Perfurante com 100% chance de perfuração do 1º alvo e ricochete angular de alta velocidade.',
+    classBonuses: '+12% Evasão, +15% Chance de Crítico, +8 Destreza (DEX) e recarga acelerada da habilidade de esquiva.',
+    codeRef: 'RenderSystem.ts:line 1020'
+  },
+  {
+    id: 'plasma_vortex',
+    namePt: 'Núcleo Toroidal de Vórtice',
+    nameEn: 'PLASMA VORTEX',
+    className: 'Mago (Mage)',
+    weaponName: 'Esfera de Plasma Ígneo',
+    color: '#ff4400',
+    glow: '#ff8800',
+    projectileBehavior: 'Toroide com 3 arcos espirais de contenção magnética e núcleo de fusão de alta temperatura em rotação contínua.',
+    damageAndEffects: 'Dano Térmico / Plasma com Queimadura Contínua (DoT). Inflige dano a cada 0.25s por 4 segundos em alvos atingidos.',
+    classBonuses: '+25% Dano de Magia/Sistemas, +20 EN/s de regeneração e escalonamento por Inteligência (INT).',
+    codeRef: 'RenderSystem.ts:line 910'
+  },
+  {
+    id: 'kinetic_dart',
+    namePt: 'Dardo Cinético Sabot Penetrador',
+    nameEn: 'KINETIC DART',
+    className: 'Patrulheiro (Ranger)',
+    weaponName: 'Arco Balístico Quântico',
+    color: '#ffcc00',
+    glow: '#ffaa00',
+    projectileBehavior: 'Penetrador sabot com cone hipersônico, aletas estabilizadoras duplas e linha dorsal de alta velocidade.',
+    damageAndEffects: 'Dano Perfurante Puro com Multiplicador Balístico de Distância (causa até +60% de dano adicional em alcance máximo).',
+    classBonuses: '+100% Precisão em linha reta, +30% Velocidade de Projétil e perfuração natural de até 3 inimigos alinhados.',
+    codeRef: 'RenderSystem.ts:line 950'
+  },
+  {
+    id: 'photon_lance',
+    namePt: 'Lança Fotônica de Prótons',
+    nameEn: 'PHOTON LANCE',
+    className: 'Paladino (Paladin)',
+    weaponName: 'Lança de Luz Sagrada',
+    color: '#ffd700',
+    glow: '#ffffff',
+    projectileBehavior: 'Corredor de feixe colimado luminoso contínuo com ponta prismática de diamante perfurante.',
+    damageAndEffects: 'Dano Radiante Sagrado instantâneo que transpassa toda a coluna de visão em linha reta sem perda de dano.',
+    classBonuses: '+25% Blindagem Reativa, Domo Aegis de Proteção e nanites de auto-reparo que regeneram o casco em combate.',
+    codeRef: 'RenderSystem.ts:line 985'
+  },
+  {
+    id: 'sonic_shockwave',
+    namePt: 'Pulso de Choque Harmônico',
+    nameEn: 'SONIC SHOCKWAVE',
+    className: 'Bardo (Bard)',
+    weaponName: 'Ressonador Sônico de Frequência',
+    color: '#d946ef',
+    glow: '#ff00ff',
+    projectileBehavior: '3 arcos concêntricos de choque por cavitação sônica com nó central oscilante de alta frequência.',
+    damageAndEffects: 'Dano Acústico / Sônico que desestabiliza armaduras pesadas, empurra hordas para trás e quebra barreiras de escudo.',
+    classBonuses: 'Buff de cadência para todos os drones aliados da esquadra, desaceleração acústica de alvos e cura por ressonância.',
+    codeRef: 'RenderSystem.ts:line 1210'
+  },
+  {
+    id: 'cryo_needle',
+    namePt: 'Agulha Criogênica Subzero',
+    nameEn: 'CRYO NEEDLE',
+    className: 'Especialista Criogênico (Cryo)',
+    weaponName: 'Canhão Nano-Cristalino Subzero',
+    color: '#38bdf8',
+    glow: '#a5f3fc',
+    projectileBehavior: 'Agulha hexagonal de gelo em nano-cristais com micro-espigões de geada e rastro gélido de partículas.',
+    damageAndEffects: 'Dano Criogênico com 60% de Lentidão por 3s e efeito de Estilhaçamento (alvos congelados recebem +50% de dano crítico).',
+    classBonuses: '+40% Dano contra inimigos sob estase térmica e congelamento em cadeia que se espalha para alvos próximos.',
+    codeRef: 'RenderSystem.ts:line 1060'
+  },
+  {
+    id: 'quantum_chakram',
+    namePt: 'Chakram Quântico Tri-Facetado',
+    nameEn: 'QUANTUM CHAKRAM',
+    className: 'Tecnomago (Boomerangueiro)',
+    weaponName: 'Chakram Quântico Tri-Facetado',
+    color: '#c084fc',
+    glow: '#a855f7',
+    projectileBehavior: 'Chakram giratório de 3 lâminas com centro oco e trajetória orbital helicoidal que avança e retorna à nave.',
+    damageAndEffects: 'Dano de Corte Circular Contínuo com acertos múltiplos garantidos no mesmo alvo na ida e no retorno.',
+    classBonuses: '+20% Velocidade de Rotação do Projétil e 2.0x Dano no golpe de retorno quando recuperado pela nave.',
+    codeRef: 'RenderSystem.ts:line 1095'
+  },
+  {
+    id: 'proximity_mine',
+    namePt: 'Mina Terrestre Octogonal',
+    nameEn: 'PROXIMITY MINE',
+    className: 'Engenheiro Tático (Combat Engineer)',
+    weaponName: 'Dispensador Balístico de Minas',
+    color: '#10b981',
+    glow: '#34d399',
+    projectileBehavior: 'Corpo octogonal blindado com pinos laterais de ancoragem e diodo sensor óptico que pulsa no ar até a detonação.',
+    damageAndEffects: 'Dano de Fragmentação Pesada em raio de 120px acionado por aproximação de qualquer entidade hostil.',
+    classBonuses: '+40% Área de Efeito das explosões, nanites corrosivos que reduzem a blindagem do inimigo em -25% por 5s.',
+    codeRef: 'RenderSystem.ts:line 1130'
+  },
+  {
+    id: 'tesla_spark',
+    namePt: 'Centelha de Descarga Voltaica',
+    nameEn: 'TESLA SPARK',
+    className: 'Artífice Voltaico (Tesla Specialist)',
+    weaponName: 'Bobina de Choque de Alta Amperagem',
+    color: '#3b82f6',
+    glow: '#60a5fa',
+    projectileBehavior: 'Arco voltaico estocástico com halo de ionização elétrica azul e 4 tentáculos que ramificam no ar.',
+    damageAndEffects: 'Dano Elétrico de Alta Voltagem com efeito em cadeia que salta instantaneamente para até 4 inimigos adicionais.',
+    classBonuses: '3.0x Regeneração de Energia Quântica (EN) e 25% de chance de infligir paralisia motora temporária nos alvos.',
+    codeRef: 'RenderSystem.ts:line 1170'
+  }
 ];
 
 export const CLASSES_DATA = [
@@ -218,21 +834,6 @@ export const CLASSES_DATA = [
     attributes: { str: 6, dex: 10, con: 6, int: 4, wit: 8, men: 6 },
     desc: 'Atirador de elite de longo alcance. Dispara flechas de aceleração extrema com 100% de precisão e perfuração crítica.'
   }
-];
-
-export const ARENA_BOSSES_DATA = [
-  { index: 1, name: 'Titan Colossus Guardian', title: 'Guardião Titânico do Vácuo', sides: 3, coreColor: '#00f0ff' },
-  { index: 2, name: 'Square Aegis Juggernaut', title: 'Fortaleza Quadrática Inquebrável', sides: 4, coreColor: '#ff0055' },
-  { index: 3, name: 'Pentagon Hive Overmind', title: 'Mente Colmeia Pentagonal', sides: 5, coreColor: '#ffd700' },
-  { index: 4, name: 'Hexagon Pulse Dreadnought', title: 'Dreadnought de Pulso Hexagonal', sides: 6, coreColor: '#00ff88' },
-  { index: 5, name: 'Heptagon Singularity Core', title: 'Núcleo de Singularidade Heptagonal', sides: 7, coreColor: '#a855f7' },
-  { index: 6, name: 'Octagon Antimatter Mine Lord', title: 'Senhor de Minas de Antimatéria', sides: 8, coreColor: '#ff3300' },
-  { index: 7, name: 'Trefoil Shadow Vortex', title: 'Vórtice Sombrio de Três Lóbulos', sides: 9, coreColor: '#c084fc' },
-  { index: 8, name: '4-Star Titanic Orbital Gunner', title: 'Artilheiro Estelar Titânico', sides: 10, coreColor: '#38bdf8' },
-  { index: 9, name: '5-Star Chrono Manipulator', title: 'Manipulador Chrono de 5 Pontas', sides: 11, coreColor: '#f59e0b' },
-  { index: 10, name: '6-Star Vector Sovereign', title: 'Soberano Vetorial Hexaestelar', sides: 12, coreColor: '#ec4899' },
-  { index: 11, name: 'Quatrefoil Synthetic Dragon', title: 'Dragão Sintético de Quatro Asas', sides: 11, coreColor: '#10b981' },
-  { index: 12, name: 'Flower Primordial Guardian', title: 'Guardião Floral Supremo da Origem', sides: 12, coreColor: '#ffd700' }
 ];
 
 /**

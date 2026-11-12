@@ -3,28 +3,26 @@ import {
   CATALOG_FORMS,
   FORMS_DATA,
   RARITIES_DATA,
-  CLASSES_DATA,
   ARENA_BOSSES_DATA,
-  CYBER_EXPRESSIONS,
+  DRONES_DATA,
+  PROJECTILES_DATA,
   renderStudioPlayer,
   renderStudioEnemy,
   renderStudioWaveBoss,
   renderStudioArenaBoss,
   renderStudioDrone,
-  renderStudioClassMunition,
-  renderStudioExpression
+  renderStudioClassMunition
 } from '../utils/vectorRenderers';
-import { CODEX_ASSETS } from '../data/codexData';
-import { User, Skull, ShieldAlert, Award, Crosshair, Target, Download, Sparkles, Smile } from 'lucide-react';
+import { User, Skull, ShieldAlert, Award, Crosshair, Target, Download, Sparkles } from 'lucide-react';
 
-type StudioTab = 'player' | 'enemy' | 'wave_boss' | 'arena_boss' | 'drone' | 'class' | 'expression';
+type StudioTab = 'player' | 'enemy' | 'wave_boss' | 'arena_boss' | 'drone' | 'projectiles';
 
 export const CodexStudio: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<StudioTab>('enemy');
+  const [activeTab, setActiveTab] = useState<StudioTab>('player');
 
   // Selectors State
-  const [playerForm, setPlayerForm] = useState<number>(12); // Defaults to Flower
-  const [playerRarity, setPlayerRarity] = useState<number>(12); // Defaults to Mythic
+  const [playerForm, setPlayerForm] = useState<number>(1);
+  const [playerRarity, setPlayerRarity] = useState<number>(1);
 
   const [enemyForm, setEnemyForm] = useState<number>(1);
   const [enemyRarity, setEnemyRarity] = useState<number>(1);
@@ -36,13 +34,9 @@ export const CodexStudio: React.FC = () => {
   const [arenaBossRarity, setArenaBossRarity] = useState<number>(1);
 
   const [droneId, setDroneId] = useState<string>('missiles');
-  const [classId, setClassId] = useState<string>('fighter');
-  const [expressionId, setExpressionId] = useState<string>('Happy');
+  const [projectileId, setProjectileId] = useState<string>('rocket_missile');
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-
-  // Drones list for dropdown
-  const dronesList = CODEX_ASSETS.filter(a => a.category === 'drones');
 
   // Animation Loop for Canvas
   useEffect(() => {
@@ -67,10 +61,8 @@ export const CodexStudio: React.FC = () => {
         renderStudioArenaBoss(ctx, arenaBossIdx, arenaBossRarity, canvas.width, canvas.height, elapsed);
       } else if (activeTab === 'drone') {
         renderStudioDrone(ctx, droneId, canvas.width, canvas.height, elapsed);
-      } else if (activeTab === 'class') {
-        renderStudioClassMunition(ctx, classId, canvas.width, canvas.height, elapsed);
-      } else if (activeTab === 'expression') {
-        renderStudioExpression(ctx, expressionId, canvas.width, canvas.height, elapsed);
+      } else if (activeTab === 'projectiles') {
+        renderStudioClassMunition(ctx, projectileId, canvas.width, canvas.height, elapsed);
       }
 
       animId = requestAnimationFrame(render);
@@ -90,11 +82,10 @@ export const CodexStudio: React.FC = () => {
     arenaBossIdx,
     arenaBossRarity,
     droneId,
-    classId,
-    expressionId
+    projectileId
   ]);
 
-  // Download High-Res 1080p Render of the current combination
+  // Download 1080p Crystal Clear PNG
   const handleDownload = () => {
     const offCanvas = document.createElement('canvas');
     offCanvas.width = 1920;
@@ -102,24 +93,30 @@ export const CodexStudio: React.FC = () => {
     const offCtx = offCanvas.getContext('2d');
     if (!offCtx) return;
 
+    let filename = 'AC3GAMES_render.png';
+
     if (activeTab === 'player') {
       renderStudioPlayer(offCtx, playerForm, playerRarity, 1920, 1080, 0);
+      filename = `player_forma_${playerForm}_raridade_${playerRarity}.png`;
     } else if (activeTab === 'enemy') {
       renderStudioEnemy(offCtx, enemyForm, enemyRarity, 1920, 1080, 0);
+      filename = `inimigo_forma_${enemyForm}_raridade_${enemyRarity}.png`;
     } else if (activeTab === 'wave_boss') {
       renderStudioWaveBoss(offCtx, waveBossForm, waveBossRarity, 1920, 1080, 0);
+      filename = `wave_boss_forma_${waveBossForm}_raridade_${waveBossRarity}.png`;
     } else if (activeTab === 'arena_boss') {
       renderStudioArenaBoss(offCtx, arenaBossIdx, arenaBossRarity, 1920, 1080, 0);
+      filename = `arena_boss_${arenaBossIdx}_raridade_${arenaBossRarity}.png`;
     } else if (activeTab === 'drone') {
       renderStudioDrone(offCtx, droneId, 1920, 1080, 0);
-    } else if (activeTab === 'class') {
-      renderStudioClassMunition(offCtx, classId, 1920, 1080, 0);
-    } else if (activeTab === 'expression') {
-      renderStudioExpression(offCtx, expressionId, 1920, 1080, 0);
+      filename = `drone_${droneId}.png`;
+    } else if (activeTab === 'projectiles') {
+      renderStudioClassMunition(offCtx, projectileId, 1920, 1080, 0);
+      filename = `projetil_${projectileId}.png`;
     }
 
     const link = document.createElement('a');
-    link.download = `AC3GAMES_${activeTab}_1080p.png`;
+    link.download = filename;
     link.href = offCanvas.toDataURL('image/png');
     link.click();
   };
@@ -138,26 +135,25 @@ export const CodexStudio: React.FC = () => {
   const selectedArenaBoss = ARENA_BOSSES_DATA[arenaBossIdx - 1] || ARENA_BOSSES_DATA[0]!;
   const selectedArenaBossRarity = RARITIES_DATA[arenaBossRarity - 1] || RARITIES_DATA[0]!;
 
-  const selectedDrone = dronesList.find(d => d.id === droneId) || dronesList[0]!;
-  const selectedClass = CLASSES_DATA.find(c => c.id === classId) || CLASSES_DATA[0]!;
-  const selectedExpression = CYBER_EXPRESSIONS.find(e => e.id === expressionId) || CYBER_EXPRESSIONS[0]!;
+  const selectedDrone = DRONES_DATA.find(d => d.id === droneId) || DRONES_DATA[0]!;
+  const selectedProjectile = PROJECTILES_DATA.find(p => p.id === projectileId) || PROJECTILES_DATA[0]!;
 
   return (
     <div className="bg-cyber-card rounded-3xl p-6 sm:p-8 border border-cyber-cyan/50 shadow-neon-cyan/20 mb-16">
       
-      {/* Studio Header & Tab Switcher */}
+      {/* Studio Header & 6 Official Tabs */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-cyber-cardBorder/60 mb-8">
         <div>
           <div className="inline-flex items-center gap-2 text-cyber-cyan font-mono text-xs font-semibold tracking-wider uppercase mb-1">
             <Sparkles className="w-4 h-4" />
-            <span>ESTÚDIO DE COMBINAÇÕES & RENDERS 16:9</span>
+            <span>ESTÚDIO VETORIAL CANÔNICO // RENDERS 16:9</span>
           </div>
           <h3 className="font-orbitron font-extrabold text-2xl sm:text-3xl text-white">
-            Forja de Combinações & <span className="text-cyber-cyan">Legenda Técnica</span>
+            Biblioteca Técnica & <span className="text-cyber-cyan">Forja de Combinações</span>
           </h3>
         </div>
 
-        {/* Studio 6-Mode Selector */}
+        {/* 6 Official Category Buttons */}
         <div className="flex flex-wrap items-center gap-2 font-mono text-xs">
           <button
             onClick={() => setActiveTab('player')}
@@ -168,7 +164,7 @@ export const CodexStudio: React.FC = () => {
             }`}
           >
             <User className="w-4 h-4" />
-            <span>Player (Naves)</span>
+            <span>Jogador (Vector-01)</span>
           </button>
 
           <button
@@ -180,7 +176,7 @@ export const CodexStudio: React.FC = () => {
             }`}
           >
             <Skull className="w-4 h-4" />
-            <span>Inimigos (Fixos)</span>
+            <span>Inimigos Comuns</span>
           </button>
 
           <button
@@ -204,7 +200,7 @@ export const CodexStudio: React.FC = () => {
             }`}
           >
             <Award className="w-4 h-4" />
-            <span>Boss de Arena</span>
+            <span>Super Bosses de Arena</span>
           </button>
 
           <button
@@ -216,31 +212,19 @@ export const CodexStudio: React.FC = () => {
             }`}
           >
             <Crosshair className="w-4 h-4" />
-            <span>Drones (16)</span>
+            <span>Drones de Combate</span>
           </button>
 
           <button
-            onClick={() => setActiveTab('class')}
+            onClick={() => setActiveTab('projectiles')}
             className={`px-3 py-2 rounded-xl flex items-center gap-2 transition-all ${
-              activeTab === 'class'
+              activeTab === 'projectiles'
                 ? 'bg-blue-500 text-white font-bold'
                 : 'bg-cyber-darker text-slate-300 hover:text-white border border-cyber-cardBorder'
             }`}
           >
             <Target className="w-4 h-4" />
-            <span>Classes & Munição</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('expression')}
-            className={`px-3 py-2 rounded-xl flex items-center gap-2 transition-all ${
-              activeTab === 'expression'
-                ? 'bg-amber-400 text-black font-bold'
-                : 'bg-cyber-darker text-slate-300 hover:text-white border border-cyber-cardBorder'
-            }`}
-          >
-            <Smile className="w-4 h-4" />
-            <span>Expressões (20)</span>
+            <span>Projéteis de Combate</span>
           </button>
         </div>
       </div>
@@ -278,7 +262,7 @@ export const CodexStudio: React.FC = () => {
         {/* Right: Selectors & Full Explanatory Legend (5 Cols) */}
         <div className="lg:col-span-5 bg-cyber-darker rounded-2xl p-6 border border-cyber-cardBorder flex flex-col justify-between">
           
-          {/* TAB 1: PLAYER (FORMA + RARIDADE COM BÔNUS REAIS) */}
+          {/* TAB 1: JOGADOR (VECTOR-01) */}
           {activeTab === 'player' && (
             <div>
               <div className="mb-6 space-y-4">
@@ -293,7 +277,7 @@ export const CodexStudio: React.FC = () => {
                   >
                     {CATALOG_FORMS.map((f, idx) => (
                       <option key={f.key} value={idx + 1}>
-                        Forma #{idx + 1}: {f.name} (Mult: {f.mult.toFixed(2)}x)
+                        Forma #{idx + 1}: {f.name} ({f.sides} Lados)
                       </option>
                     ))}
                   </select>
@@ -310,7 +294,7 @@ export const CodexStudio: React.FC = () => {
                   >
                     {RARITIES_DATA.map((r) => (
                       <option key={r.index} value={r.index}>
-                        Raridade #{r.index}: {r.namePt} ({r.name}) - {r.multiplier}x
+                        Tier #{r.index}: {r.namePt} ({r.multiplier.toFixed(2)}x Potência)
                       </option>
                     ))}
                   </select>
@@ -324,7 +308,7 @@ export const CodexStudio: React.FC = () => {
                     className="font-mono text-xs font-bold px-2.5 py-1 rounded"
                     style={{ backgroundColor: `${selectedPlayerRarity.color}22`, color: selectedPlayerRarity.color }}
                   >
-                    {selectedPlayerRarity.namePt.toUpperCase()} // MULTIPLICADOR GLOBAL: {playerCombinedMult.toFixed(2)}x
+                    TIER: {selectedPlayerRarity.namePt.toUpperCase()} // MULTIPLICADOR: {playerCombinedMult.toFixed(2)}x
                   </span>
                   <span className="font-mono text-xs text-slate-400">
                     Forma #{playerForm} ({selectedPlayerForm.sides} Lados)
@@ -332,57 +316,41 @@ export const CodexStudio: React.FC = () => {
                 </div>
 
                 <h4 className="font-orbitron font-bold text-xl text-white mb-2">
-                  Chassi {selectedPlayerForm.name}
+                  Nave Vector-01: {selectedPlayerForm.name}
                 </h4>
 
                 <div className="space-y-2 font-mono text-xs mb-4">
-                  <div className="flex justify-between p-2 rounded bg-cyber-card border border-cyber-cardBorder/40">
-                    <span className="text-slate-400">Bônus Nativo do Chassi:</span>
-                    <span className="text-[#00ffaa] font-bold">
+                  <div className="p-2.5 rounded bg-cyber-card border border-cyber-cardBorder/40">
+                    <span className="text-slate-400 block mb-0.5">BÔNUS DO CHASSI (FORMA):</span>
+                    <span className="text-[#00ffaa] font-bold text-sm block">
                       {selectedPlayerForm.bonus}
                     </span>
                   </div>
-                  <div className="flex justify-between p-2 rounded bg-cyber-card border border-cyber-cardBorder/40">
-                    <span className="text-slate-400">Multiplicador de Atributos:</span>
-                    <span className="text-cyber-cyan font-bold">
-                      {playerCombinedMult.toFixed(2)}x Global
+
+                  <div className="p-2.5 rounded bg-cyber-card border border-cyber-cardBorder/40">
+                    <span className="text-slate-400 block mb-0.5">BÔNUS CONCEDIDO PELA RARIDADE:</span>
+                    <span className="text-cyber-cyan font-bold text-sm block">
+                      {selectedPlayerRarity.playerBonus}
                     </span>
                   </div>
+
                   <div className="flex justify-between p-2 rounded bg-cyber-card border border-cyber-cardBorder/40">
-                    <span className="text-slate-400">Bônus de Estrutura Máxima (HP):</span>
+                    <span className="text-slate-400">Multiplicador Global de Casco & Dano:</span>
                     <span className="text-emerald-400 font-bold">
-                      +{Math.round((playerCombinedMult - 1) * 100)}% de Vida
-                    </span>
-                  </div>
-                  <div className="flex justify-between p-2 rounded bg-cyber-card border border-cyber-cardBorder/40">
-                    <span className="text-slate-400">Bônus de Dano de Todas as Armas & Drones:</span>
-                    <span className="text-cyber-neonAmber font-bold">
-                      +{Math.round((playerCombinedMult - 1) * 100)}% de Dano
-                    </span>
-                  </div>
-                  <div className="flex justify-between p-2 rounded bg-cyber-card border border-cyber-cardBorder/40">
-                    <span className="text-slate-400">Bônus de Eficiência de Escudo:</span>
-                    <span className="text-purple-300 font-bold">
-                      +{Math.round((playerCombinedMult - 1) * 60)}% Absorção
-                    </span>
-                  </div>
-                  <div className="flex justify-between p-2 rounded bg-cyber-card border border-cyber-cardBorder/40">
-                    <span className="text-slate-400">Multiplicador de Pontuação (Score):</span>
-                    <span className="text-cyber-neonPink font-bold">
-                      {selectedPlayerRarity.multiplier.toFixed(2)}x Pontos
+                      {playerCombinedMult.toFixed(2)}x Potência
                     </span>
                   </div>
                 </div>
 
                 <div className="p-3 rounded-xl bg-cyber-card/60 border border-cyber-cardBorder/40 font-outfit text-xs text-slate-300">
-                  <span className="font-semibold text-cyber-cyan block mb-1">ARQUIVO DE LORE:</span>
+                  <span className="font-semibold text-cyber-cyan block mb-1">ARQUIVO DE LORE DO CHASSI:</span>
                   {selectedPlayerForm.lore}
                 </div>
               </div>
             </div>
           )}
 
-          {/* TAB 2: INIMIGO (COPIADO 100% DA BIBLIOTECA DO JOGO COMO NAS 5 FOTOS) */}
+          {/* TAB 2: INIMIGOS COMUNS */}
           {activeTab === 'enemy' && (
             <div>
               <div className="mb-6 space-y-4">
@@ -421,26 +389,34 @@ export const CodexStudio: React.FC = () => {
                 </div>
               </div>
 
-              {/* Exact In-Game Catalog Card Layout as in Photos 1-5 */}
+              {/* Exact In-Game Catalog Card Layout */}
               <div className="pt-6 border-t border-cyber-cardBorder/60 bg-[#07071a] p-6 rounded-2xl border border-[#1b2a4a]">
-                {/* Centered Title in Cyan */}
                 <h3 className="text-center font-orbitron font-extrabold text-2xl sm:text-3xl text-cyber-cyan uppercase tracking-wider mb-6">
                   {selectedEnemyForm.name}
                 </h3>
 
-                {/* Technical Specs matching photos */}
                 <div className="space-y-2.5 font-outfit text-base mb-6">
                   <div className="text-slate-300">
                     <span className="font-semibold">LADOS DO POLÍGONO / FORMA:</span>{' '}
                     <span className="font-bold text-white">{selectedEnemyForm.sides}</span>
                   </div>
                   <div className="text-slate-300">
-                    <span className="font-semibold">MULTIPLICADOR DE HP BASE:</span>{' '}
+                    <span className="font-semibold">MULTIPLICADOR DE HP BASE DA FORMA:</span>{' '}
                     <span className="font-bold text-white">{selectedEnemyForm.mult.toFixed(2)}x</span>
                   </div>
                   <div className="text-[#00ffaa] font-bold">
                     BÔNUS DO CHASSI: {selectedEnemyForm.bonus}
                   </div>
+                </div>
+
+                {/* What the enemy gains with this Rarity */}
+                <div className="mb-5 p-3 rounded-xl bg-purple-950/30 border border-purple-500/30">
+                  <h5 className="font-mono text-xs font-bold text-purple-300 uppercase mb-1">
+                    O QUE O INIMIGO GANHA COM ESTA RARIDADE:
+                  </h5>
+                  <p className="font-outfit text-xs text-purple-100 leading-relaxed">
+                    {selectedEnemyRarity.enemyBonus}
+                  </p>
                 </div>
 
                 {/* Comportamento */}
@@ -463,7 +439,6 @@ export const CodexStudio: React.FC = () => {
                   </p>
                 </div>
 
-                {/* Rarity Scaling Factor Indicator */}
                 <div className="pt-3 border-t border-cyber-cardBorder/40 flex items-center justify-between font-mono text-xs">
                   <span className="text-slate-400">Raridade Selecionada:</span>
                   <span
@@ -509,7 +484,7 @@ export const CodexStudio: React.FC = () => {
                   >
                     {RARITIES_DATA.map((r) => (
                       <option key={r.index} value={r.index}>
-                        Raridade #{r.index}: {r.namePt} ({r.multiplier}x Escala de Onda)
+                        Raridade #{r.index}: {r.namePt} ({r.multiplier.toFixed(2)}x Escala)
                       </option>
                     ))}
                   </select>
@@ -522,7 +497,7 @@ export const CodexStudio: React.FC = () => {
                   className="font-mono text-xs font-bold px-2.5 py-1 rounded inline-block mb-2"
                   style={{ backgroundColor: `${selectedWaveBossRarity.color}22`, color: selectedWaveBossRarity.color }}
                 >
-                  GUARDIÃO DE ONDA {selectedWaveBossRarity.namePt.toUpperCase()} // PLACAS EXTERNAS
+                  CHEFÃO DE ONDA PERIÓDICA // TIER {selectedWaveBossRarity.namePt.toUpperCase()}
                 </span>
 
                 <h4 className="font-orbitron font-bold text-xl text-white mb-2">
@@ -530,30 +505,41 @@ export const CodexStudio: React.FC = () => {
                 </h4>
 
                 <p className="font-outfit text-xs text-slate-300 leading-relaxed mb-4">
-                  Comandante de horda dotado de anéis de placas de blindagem destacáveis, canhão frontal multitorreta e modo enrage com espículas de energia ativadas abaixo de 40% de vida.
+                  Constructo colossal aumentado em 35% de escala em relação aos inimigos comuns. Dotado de Barra de Vida superior com Escudo Ciano (Barra Branca) e cronômetro de 10 segundos para entrar no modo Fúria (Enrage).
                 </p>
 
-                <div className="space-y-2 font-mono text-xs">
-                  <div className="flex justify-between p-2 rounded bg-cyber-card border border-cyber-cardBorder/40">
-                    <span className="text-slate-400">Vida do Chefe:</span>
-                    <span className="text-cyber-neonAmber font-bold">
-                      {Math.round(4500 * selectedWaveBossForm.mult * selectedWaveBossRarity.multiplier)} HP
+                <div className="space-y-2 font-mono text-xs mb-4">
+                  <div className="p-2.5 rounded bg-cyber-card border border-cyber-cardBorder/40">
+                    <span className="text-slate-400 block mb-0.5">PADRÃO DE ATAQUE & MOVIMENTO:</span>
+                    <span className="text-cyber-neonAmber font-bold text-xs block">
+                      {selectedWaveBossForm.behavior}
                     </span>
                   </div>
-                  <div className="flex justify-between p-2 rounded bg-cyber-card border border-cyber-cardBorder/40">
-                    <span className="text-slate-400">Placas Protetoras:</span>
-                    <span className="text-white font-bold">{selectedWaveBossForm.sides} Módulos Blindados</span>
+
+                  <div className="p-2.5 rounded bg-cyber-card border border-cyber-cardBorder/40">
+                    <span className="text-slate-400 block mb-0.5">ESCALONAMENTO DA RARIDADE NO BOSS:</span>
+                    <span className="text-purple-300 font-bold text-xs block">
+                      {selectedWaveBossRarity.enemyBonus}
+                    </span>
                   </div>
+
                   <div className="flex justify-between p-2 rounded bg-cyber-card border border-cyber-cardBorder/40">
-                    <span className="text-slate-400">Fase de Fúria (Enrage):</span>
-                    <span className="text-cyber-neonPink font-bold">Cadência +50% & Rajada 360°</span>
+                    <span className="text-slate-400">Multiplicador de HP Total:</span>
+                    <span className="text-cyber-neonPink font-bold">
+                      {(selectedWaveBossForm.mult * selectedWaveBossRarity.multiplier * 2.5).toFixed(1)}x Vida
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between p-2 rounded bg-cyber-card border border-cyber-cardBorder/40">
+                    <span className="text-slate-400">Recompensas ao Derrotar:</span>
+                    <span className="text-[#00ffaa] font-bold">Baú Tático + 15 Fragmentos</span>
                   </div>
                 </div>
               </div>
             </div>
           )}
 
-          {/* TAB 4: BOSS DE ARENA */}
+          {/* TAB 4: SUPER BOSSES DE ARENA */}
           {activeTab === 'arena_boss' && (
             <div>
               <div className="mb-6 space-y-4">
@@ -568,7 +554,7 @@ export const CodexStudio: React.FC = () => {
                   >
                     {ARENA_BOSSES_DATA.map((b) => (
                       <option key={b.index} value={b.index}>
-                        Boss Arena #{b.index}: {b.name}
+                        Boss #{b.index}: {b.namePt} (Wave {b.wave})
                       </option>
                     ))}
                   </select>
@@ -576,7 +562,7 @@ export const CodexStudio: React.FC = () => {
 
                 <div>
                   <label className="block text-xs font-mono text-cyber-neonPurple font-bold uppercase mb-1.5">
-                    2. Escolha o Nível de Ascensão / Raridade:
+                    2. Escolha o Grau de Ascensão / Raridade:
                   </label>
                   <select
                     value={arenaBossRarity}
@@ -585,7 +571,7 @@ export const CodexStudio: React.FC = () => {
                   >
                     {RARITIES_DATA.map((r) => (
                       <option key={r.index} value={r.index}>
-                        Ascensão #{r.index}: {r.namePt} ({r.multiplier}x Dificuldade)
+                        Ascensão #{r.index}: {r.namePt} ({r.multiplier.toFixed(2)}x Ameaça)
                       </option>
                     ))}
                   </select>
@@ -598,51 +584,57 @@ export const CodexStudio: React.FC = () => {
                   className="font-mono text-xs font-bold px-2.5 py-1 rounded inline-block mb-2"
                   style={{ backgroundColor: `${selectedArenaBossRarity.color}22`, color: selectedArenaBossRarity.color }}
                 >
-                  ARENA SUPREMA // {selectedArenaBossRarity.namePt.toUpperCase()}
+                  SUPER CHEFE DE ARENA #{selectedArenaBoss.index} • ONDA {selectedArenaBoss.wave}
                 </span>
 
                 <h4 className="font-orbitron font-bold text-xl text-white mb-1">
-                  {selectedArenaBoss.name}
+                  {selectedArenaBoss.namePt}
                 </h4>
                 <p className="font-mono text-xs text-cyber-neonPurple mb-3">
-                  {selectedArenaBoss.title}
+                  {selectedArenaBoss.nameEn}
                 </p>
 
-                <p className="font-outfit text-xs text-slate-300 leading-relaxed mb-4">
-                  Super guardião primordial de arenas fechadas. Gera grades hexagonais de contenção, satélites de disparos em feixe contínuo e tempestades bullet hell omnidirecionais.
-                </p>
-
-                <div className="space-y-2 font-mono text-xs">
-                  <div className="flex justify-between p-2 rounded bg-cyber-card border border-cyber-cardBorder/40">
-                    <span className="text-slate-400">Vida na Arena:</span>
-                    <span className="text-cyber-neonPurple font-bold">
-                      {Math.round(25000 * selectedArenaBossRarity.multiplier)} HP
+                <div className="space-y-3 font-mono text-xs mb-4">
+                  <div className="p-2.5 rounded bg-cyber-card border border-cyber-cardBorder/40">
+                    <span className="text-slate-400 block mb-0.5">ARQUÉTIPO & GEOMETRIA:</span>
+                    <span className="text-white font-bold block">
+                      {selectedArenaBoss.desc} ({selectedArenaBoss.sides} Lados Sagrados)
                     </span>
                   </div>
-                  <div className="flex justify-between p-2 rounded bg-cyber-card border border-cyber-cardBorder/40">
-                    <span className="text-slate-400">Padrão de Ataque:</span>
-                    <span className="text-white font-bold">Hexágono Laser + Satélites</span>
+
+                  <div className="p-2.5 rounded bg-cyber-card border border-cyber-cardBorder/40">
+                    <span className="text-slate-400 block mb-0.5">MECÂNICAS ESPECÍFICAS DE COMBATE:</span>
+                    <span className="text-slate-300 font-outfit text-xs block leading-relaxed">
+                      {selectedArenaBoss.mechanics}
+                    </span>
+                  </div>
+
+                  <div className="p-2.5 rounded bg-amber-950/30 border border-amber-500/40">
+                    <span className="text-amber-400 font-bold block mb-0.5">RECOMPENSA EXCLUSIVA GARANTIDA:</span>
+                    <span className="text-amber-100 font-outfit text-xs block">
+                      {selectedArenaBoss.relicDrop}
+                    </span>
                   </div>
                 </div>
               </div>
             </div>
           )}
 
-          {/* TAB 5: DRONE */}
+          {/* TAB 5: DRONES DE COMBATE */}
           {activeTab === 'drone' && (
             <div>
               <div className="mb-6">
                 <label className="block text-xs font-mono text-emerald-400 font-bold uppercase mb-1.5">
-                  Escolha o Drone da Forja Suprema (16 Modelos):
+                  Escolha o Drone de Combate ({DRONES_DATA.length} Modelos):
                 </label>
                 <select
                   value={droneId}
                   onChange={(e) => setDroneId(e.target.value)}
                   className="w-full bg-cyber-card border border-cyber-cardBorder rounded-xl px-3 py-2 text-sm text-white font-mono focus:outline-none focus:border-emerald-400"
                 >
-                  {dronesList.map((d) => (
+                  {DRONES_DATA.map((d) => (
                     <option key={d.id} value={d.id}>
-                      {d.name} [{d.badge}]
+                      {d.namePt} [{d.role}]
                     </option>
                   ))}
                 </select>
@@ -654,46 +646,55 @@ export const CodexStudio: React.FC = () => {
                   className="font-mono text-xs font-bold px-2.5 py-1 rounded inline-block mb-2"
                   style={{ backgroundColor: `${selectedDrone.color}22`, color: selectedDrone.color }}
                 >
-                  {selectedDrone.badge} // FORJA SUPREMA
+                  DRONE DE COMBATE // {selectedDrone.role.toUpperCase()}
                 </span>
 
-                <h4 className="font-orbitron font-bold text-xl text-white mb-2">
-                  {selectedDrone.name}
+                <h4 className="font-orbitron font-bold text-xl text-white mb-1">
+                  {selectedDrone.namePt}
                 </h4>
-
-                <p className="font-outfit text-xs text-slate-300 leading-relaxed mb-4">
-                  {selectedDrone.desc}
+                <p className="font-mono text-xs text-cyber-cyan mb-3">
+                  {selectedDrone.nameEn}
                 </p>
 
-                {selectedDrone.technicalSpecs && (
-                  <div className="space-y-2 font-mono text-xs">
-                    {selectedDrone.technicalSpecs.map((spec, i) => (
-                      <div key={i} className="flex justify-between p-2 rounded bg-cyber-card border border-cyber-cardBorder/40">
-                        <span className="text-slate-400">{spec.label}:</span>
-                        <span className="text-white font-bold">{spec.value}</span>
-                      </div>
-                    ))}
+                <div className="space-y-3 font-mono text-xs mb-4">
+                  <div className="p-2.5 rounded bg-cyber-card border border-cyber-cardBorder/40">
+                    <span className="text-slate-400 block mb-0.5 font-bold">O QUE O DRONE FAZ EM COMBATE:</span>
+                    <p className="font-outfit text-xs text-slate-200 leading-relaxed">
+                      {selectedDrone.combatAction}
+                    </p>
                   </div>
-                )}
+
+                  <div className="p-2.5 rounded bg-emerald-950/30 border border-emerald-500/40">
+                    <span className="text-emerald-400 block mb-0.5 font-bold">BÔNUS CONCEDIDO AO JOGADOR:</span>
+                    <p className="font-outfit text-xs text-emerald-100 leading-relaxed">
+                      {selectedDrone.playerBonus}
+                    </p>
+                  </div>
+
+                  <div className="flex justify-between p-2 rounded bg-cyber-card border border-cyber-cardBorder/40 text-[11px]">
+                    <span className="text-slate-400">Implementação no Motor:</span>
+                    <span className="text-white font-mono">{selectedDrone.codeRef}</span>
+                  </div>
+                </div>
               </div>
             </div>
           )}
 
-          {/* TAB 6: CLASSE & MUNIÇÃO */}
-          {activeTab === 'class' && (
+          {/* TAB 6: PROJÉTEIS DE COMBATE */}
+          {activeTab === 'projectiles' && (
             <div>
               <div className="mb-6">
                 <label className="block text-xs font-mono text-blue-400 font-bold uppercase mb-1.5">
-                  Escolha o Arquétipo de Classe (Imagem Exibe a Munição):
+                  Escolha o Projétil / Munição ({PROJECTILES_DATA.length} Tipos de Balística):
                 </label>
                 <select
-                  value={classId}
-                  onChange={(e) => setClassId(e.target.value)}
+                  value={projectileId}
+                  onChange={(e) => setProjectileId(e.target.value)}
                   className="w-full bg-cyber-card border border-cyber-cardBorder rounded-xl px-3 py-2 text-sm text-white font-mono focus:outline-none focus:border-blue-400"
                 >
-                  {CLASSES_DATA.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      Classe: {c.name}
+                  {PROJECTILES_DATA.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.namePt} ({p.className})
                     </option>
                   ))}
                 </select>
@@ -703,115 +704,44 @@ export const CodexStudio: React.FC = () => {
               <div className="pt-4 border-t border-cyber-cardBorder/60">
                 <span
                   className="font-mono text-xs font-bold px-2.5 py-1 rounded inline-block mb-2"
-                  style={{ backgroundColor: `${selectedClass.color}22`, color: selectedClass.color }}
+                  style={{ backgroundColor: `${selectedProjectile.color}22`, color: selectedProjectile.color }}
                 >
-                  {selectedClass.munitionName.toUpperCase()}
+                  MUNIÇÃO PROCEDURAL // {selectedProjectile.className.toUpperCase()}
                 </span>
 
                 <h4 className="font-orbitron font-bold text-xl text-white mb-1">
-                  {selectedClass.name}
+                  {selectedProjectile.namePt}
                 </h4>
                 <p className="font-mono text-xs text-cyber-cyan mb-3">
-                  Arma Padrão: {selectedClass.weaponName}
+                  {selectedProjectile.weaponName}
                 </p>
 
-                <p className="font-outfit text-xs text-slate-300 leading-relaxed mb-4">
-                  {selectedClass.desc}
-                </p>
-
-                <div className="font-mono text-xs mb-3">
-                  <span className="block text-slate-400 mb-1.5 uppercase font-bold text-[10px]">Atributos Primários:</span>
-                  <div className="grid grid-cols-3 gap-2">
-                    <div className="p-2 rounded bg-cyber-card border border-cyber-cardBorder/40 text-center">
-                      <span className="text-[10px] text-slate-500 block">STR</span>
-                      <span className="font-bold text-white">{selectedClass.attributes.str}</span>
-                    </div>
-                    <div className="p-2 rounded bg-cyber-card border border-cyber-cardBorder/40 text-center">
-                      <span className="text-[10px] text-slate-500 block">DEX</span>
-                      <span className="font-bold text-white">{selectedClass.attributes.dex}</span>
-                    </div>
-                    <div className="p-2 rounded bg-cyber-card border border-cyber-cardBorder/40 text-center">
-                      <span className="text-[10px] text-slate-500 block">CON</span>
-                      <span className="font-bold text-white">{selectedClass.attributes.con}</span>
-                    </div>
-                    <div className="p-2 rounded bg-cyber-card border border-cyber-cardBorder/40 text-center">
-                      <span className="text-[10px] text-slate-500 block">INT</span>
-                      <span className="font-bold text-white">{selectedClass.attributes.int}</span>
-                    </div>
-                    <div className="p-2 rounded bg-cyber-card border border-cyber-cardBorder/40 text-center">
-                      <span className="text-[10px] text-slate-500 block">WIT</span>
-                      <span className="font-bold text-white">{selectedClass.attributes.wit}</span>
-                    </div>
-                    <div className="p-2 rounded bg-cyber-card border border-cyber-cardBorder/40 text-center">
-                      <span className="text-[10px] text-slate-500 block">MEN</span>
-                      <span className="font-bold text-white">{selectedClass.attributes.men}</span>
-                    </div>
+                <div className="space-y-3 font-mono text-xs mb-4">
+                  <div className="p-2.5 rounded bg-cyber-card border border-cyber-cardBorder/40">
+                    <span className="text-slate-400 block mb-0.5 font-bold">O QUE O PROJÉTIL FAZ (VISUAL & BALÍSTICA):</span>
+                    <p className="font-outfit text-xs text-slate-200 leading-relaxed">
+                      {selectedProjectile.projectileBehavior}
+                    </p>
                   </div>
-                </div>
 
-                <div className="p-2.5 rounded bg-blue-950/40 border border-blue-500/30 font-mono text-[11px] text-blue-200">
-                  A munição exibida ao lado possui trajetória e física balística única calculada em tempo real no motor de jogo.
-                </div>
-              </div>
-            </div>
-          )}
+                  <div className="p-2.5 rounded bg-blue-950/30 border border-blue-500/40">
+                    <span className="text-blue-300 block mb-0.5 font-bold">DANO & EFEITOS DE STATUS:</span>
+                    <p className="font-outfit text-xs text-blue-100 leading-relaxed">
+                      {selectedProjectile.damageAndEffects}
+                    </p>
+                  </div>
 
-          {/* TAB 7: EXPRESSÕES (20 MATRIZES SENSORIAIS HUD - EXATAMENTE COMO NA FOTO 2) */}
-          {activeTab === 'expression' && (
-            <div>
-              <div className="mb-6">
-                <label className="block text-xs font-mono text-amber-400 font-bold uppercase mb-1.5">
-                  Escolha a Expressão Emocional HUD (20 Estados):
-                </label>
-                <select
-                  value={expressionId}
-                  onChange={(e) => setExpressionId(e.target.value)}
-                  className="w-full bg-cyber-card border border-cyber-cardBorder rounded-xl px-3 py-2 text-sm text-white font-mono focus:outline-none focus:border-amber-400"
-                >
-                  {CYBER_EXPRESSIONS.map((expr) => (
-                    <option key={expr.id} value={expr.id}>
-                      {expr.namePt} ({expr.descPt})
-                    </option>
-                  ))}
-                </select>
-              </div>
+                  <div className="p-2.5 rounded bg-emerald-950/30 border border-emerald-500/40">
+                    <span className="text-[#00ffaa] block mb-0.5 font-bold">BÔNUS CONCEDIDOS PELA CLASSE:</span>
+                    <p className="font-outfit text-xs text-emerald-100 leading-relaxed">
+                      {selectedProjectile.classBonuses}
+                    </p>
+                  </div>
 
-              {/* Exact In-Game Expression Card Layout as in Photo 2 */}
-              <div className="pt-6 border-t border-cyber-cardBorder/60 bg-[#07071a] p-6 rounded-2xl border border-[#1b2a4a]">
-                <h3 className="font-orbitron font-extrabold text-3xl text-cyber-cyan uppercase tracking-wider mb-5">
-                  {selectedExpression.namePt}
-                </h3>
-
-                <div className="mb-5">
-                  <span className="font-mono text-xs text-slate-400 uppercase tracking-wider block mb-1">
-                    SINERGIA DE BUILD DESIGNADA:
-                  </span>
-                  <span className="font-orbitron font-bold text-lg text-[#ffd700]">
-                    {selectedExpression.synergyPt}
-                  </span>
-                </div>
-
-                <div className="mb-5">
-                  <span className="font-mono text-xs text-slate-400 uppercase tracking-wider block mb-1">
-                    BÔNUS DE ATRIBUTOS E HABILIDADES:
-                  </span>
-                  <span className="font-orbitron font-bold text-lg text-[#00ffaa]">
-                    {selectedExpression.descPt}
-                  </span>
-                </div>
-
-                <div>
-                  <span className="font-mono text-xs text-cyber-cyan uppercase tracking-wider block mb-1.5 font-bold">
-                    ESTRUTURA DE VETORES & EXPRESSÃO EMOCIONAL:
-                  </span>
-                  <p className="font-outfit text-sm text-slate-300 leading-relaxed">
-                    {selectedExpression.lore}
-                  </p>
-                </div>
-
-                <div className="mt-5 pt-3 border-t border-cyber-cardBorder/40 flex items-center justify-between font-mono text-xs text-slate-400">
-                  <span>Sensor Óptico:</span>
-                  <span className="text-cyber-cyan font-bold">MATRIZ SENSORIAL HUD</span>
+                  <div className="flex justify-between p-2 rounded bg-cyber-card border border-cyber-cardBorder/40 text-[11px]">
+                    <span className="text-slate-400">Implementação no Motor:</span>
+                    <span className="text-white font-mono">{selectedProjectile.codeRef}</span>
+                  </div>
                 </div>
               </div>
             </div>
